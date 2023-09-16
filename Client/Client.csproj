@@ -13,12 +13,15 @@
       https://nuget.samboy.dev/v3/index.json
     </RestoreAdditionalProjectSources>
     <RootNamespace>Archipelago.MonsterSanctuary.Client</RootNamespace>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Archipelago.MultiClient.Net" Version="5.0.6" />
     <PackageReference Include="BepInEx.Analyzers" Version="1.*" PrivateAssets="all" />
     <PackageReference Include="BepInEx.Core" Version="5.4.19" />
     <PackageReference Include="BepInEx.PluginInfoProps" Version="2.*" />
+    <PackageReference Include="Json.Net.Unity3D" Version="9.0.1" />
     <PackageReference Include="UnityEngine.Modules" Version="2018.4.30" IncludeAssets="compile" />
   </ItemGroup>
   
@@ -36,6 +39,6 @@
   </ItemGroup>
   
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="copy /Y &quot;$(TargetDir)$(SolutionName).$(ProjectName).dll&quot; &quot;C:\Program Files (x86)\Steam\steamapps\common\Monster Sanctuary\BepInEx\plugins\$(SolutionName).$(ProjectName).dll&quot;" />
+    <Exec Command="copy /Y &quot;$(TargetDir)$(SolutionName).$(ProjectName).dll&quot; &quot;C:\Program Files (x86)\Steam\steamapps\common\Monster Sanctuary\BepInEx\plugins\Archipelago.MonsterSanctuary\$(SolutionName).$(ProjectName).dll&quot;" />
   </Target>
 </Project>
