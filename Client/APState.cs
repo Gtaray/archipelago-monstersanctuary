@@ -26,6 +26,7 @@ namespace Archipelago.MonsterSanctuary.Client
         public static ArchipelagoUI UI;
 
         public static ConnectionState State = ConnectionState.Disconnected;
+        public static bool Isconnected = State == ConnectionState.Connected;
 
         public static ArchipelagoConnectionInfo ConnectionInfo = new ArchipelagoConnectionInfo();
         public static ArchipelagoSession Session;
@@ -122,25 +123,54 @@ namespace Archipelago.MonsterSanctuary.Client
         public static string CheckLocation(string location)
         {
             var id = APState.Session.Locations.GetLocationIdFromName("Monster Sanctuary", location);
-            return APState.CheckLocation(id);
+            var items = APState.CheckLocation(id);
+            return items.Count() == 1 ? items[0] : null;
         }
 
-        public static string CheckLocation(long location)
+        public static string[] CheckLocation(IEnumerable<string> locations)
         {
-            if (location <= 0)
+            return CheckLocation(locations.ToArray());
+        }
+
+        public static string[] CheckLocation(params string[] locations)
+        {
+            var ids = new List<long>();
+            foreach (var location in locations)
+            {
+                var id = APState.Session.Locations.GetLocationIdFromName("Monster Sanctuary", location);
+                // 970500 is the starting point for all location ids
+                if (id < 970500)
+                {
+                    Debug.LogError($"Tried to get id for location '{location}' but it returned id '{id}'");
+                    continue;
+                }                    
+                ids.Add(id);
+            }
+
+            return APState.CheckLocation(ids.ToArray());
+        }
+
+        public static string[] CheckLocation(params long[] locations)
+        {
+            if (locations.Count() <= 0)
             {
                 return null;
             }
 
             Task.Run(() => {
-                Session.Locations.CompleteLocationChecksAsync(location);
+                Session.Locations.CompleteLocationChecksAsync(locations);
             }).ConfigureAwait(false);
 
-            var info = Session.Locations.ScoutLocationsAsync(location).GetAwaiter().GetResult();
-            var itemname = Session.Items.GetItemName(info.Locations[0].Item);
+            var info = Session.Locations.ScoutLocationsAsync(locations).GetAwaiter().GetResult();
 
-            return itemname;
-            
+            var itemNames = new List<string>();
+            foreach (var location in info.Locations)
+            {
+                itemNames.Add(Session.Items.GetItemName(location.Item));
+            }
+
+            return itemNames.ToArray();
+
         }
     }
 }

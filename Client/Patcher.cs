@@ -3,17 +3,19 @@ using BepInEx.Logging;
 using HarmonyLib;
 using JetBrains.Annotations;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics.Eventing.Reader;
 using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
+using System.Threading;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
 namespace Archipelago.MonsterSanctuary.Client
 {
     [BepInPlugin(MyPluginInfo.PLUGIN_GUID, MyPluginInfo.PLUGIN_NAME, MyPluginInfo.PLUGIN_VERSION)]
-    public class Patcher : BaseUnityPlugin
+    public partial class Patcher : BaseUnityPlugin
     {
         private static ManualLogSource _log;
 
@@ -118,52 +120,6 @@ namespace Archipelago.MonsterSanctuary.Client
             }
         }
 
-        //[HarmonyPatch(typeof(MonsterEncounter), "Start")]
-        //private class MonsterEncounter_Start
-        //{
-        //    [UsedImplicitly]
-        //    private static void Postfix(ref MonsterEncounter __instance)
-        //    {
-        //        _log.LogWarning($"Encounter ID: {__instance.ID}");
-
-        //        if (__instance.DeterminedEnemies == null )
-        //        {
-        //            return;
-        //        }
-
-        //        foreach (var enemy in __instance.DeterminedEnemies)
-        //        {
-        //            _log.LogWarning($"LocationData(\"{GameController.Instance.CurrentSceneName}\", {__instance.ID}, \"{enemy.Name}\", MonsterSanctuaryLocationCategory.MONSTER, {__instance.DeterminedEnemies.IndexOf(enemy)})");
-        //        }
-        //    }
-        //}
-
-        //[HarmonyPatch(typeof(MonsterEncounter), "StartCombat")]
-        //private class MonsterEncounter_StartCombat
-        //{
-        //    [UsedImplicitly]
-        //    private static void Postfix(ref MonsterEncounter __instance)
-        //    {
-        //        if (__instance != null)
-        //        {
-        //            _log.LogWarning($"Enemies");
-        //            foreach (var enemy in __instance.DeterminedEnemies)
-        //            {
-        //                _log.LogWarning($"{enemy.Name}: {enemy.ID}");
-        //            }
-        //        }
-
-        //        if (CombatController.Instance != null) 
-        //        {
-        //            _log.LogWarning($"Player Monsters");
-        //            foreach (var monster in CombatController.Instance.PlayerMonsters)
-        //            {
-        //                _log.LogWarning($"{monster.Name}: {monster.ID}");
-        //            }
-        //        }
-        //    }
-        //}
-
         [HarmonyPatch(typeof(Chest), "OpenChest")]
         private class Chest_OpenChest
         {
@@ -182,6 +138,9 @@ namespace Archipelago.MonsterSanctuary.Client
             [UsedImplicitly]
             private static void Prefix(ref Chest __instance)
             {
+                if (!APState.Isconnected)
+                    return;
+
                 string locName = $"{GameController.Instance.CurrentSceneName}_{__instance.ID}";
                 var itemName = APState.CheckLocation(locName);
 
@@ -227,7 +186,9 @@ namespace Archipelago.MonsterSanctuary.Client
             [UsedImplicitly]
             private static bool Prefix(bool showMessage, ref GrantItemsAction __instance)
             {
-                _log.LogWarning("GrantItem()");
+                if (!APState.Isconnected)
+                    return true;
+
                 string locName = $"{GameController.Instance.CurrentSceneName}_{__instance.ID}";
                 var itemName = APState.CheckLocation(locName);
 

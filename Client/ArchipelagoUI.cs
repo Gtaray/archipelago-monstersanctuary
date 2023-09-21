@@ -9,8 +9,45 @@ namespace Archipelago.MonsterSanctuary.Client
 {
     public class ArchipelagoUI : MonoBehaviour
     {
+        string RoomName = "";
+        // key is chest id, string is item contained
+        public Dictionary<int, string> Chests = new Dictionary<int, string>();
+        // key is the encounter id, tuple is monster id and monster name
+        public Dictionary<int, string> Monsters = new Dictionary<int, string>();
+        public List<string> Connections = new List<string>();
+        public Dictionary<int, string> Gifts = new Dictionary<int, string>();
+
+        public void ClearData()
+        {
+            Chests.Clear();
+            Monsters.Clear();
+            Connections.Clear();
+            Gifts.Clear();
+        }
+
+        public void AddChest(int id, string item)
+        {
+            Chests.Add(id, item);
+        }
+
+        public void AddMonster(int encounterID, string monsterName)
+        {
+            Monsters.Add(encounterID, monsterName);
+        }
+
+        public void AddConnection(string connection)
+        {
+            Connections.Add(connection);
+        }
+
+        public void AddGift(int id, string item)
+        {
+            Gifts.Add(id, item);
+        }
+
         void OnGUI()
         {
+            int y = 0;
             string ap_ver = "Archipelago v" + APState.AP_VERSION[0] + "." + APState.AP_VERSION[1] + "." + APState.AP_VERSION[2];
 
             if (APState.Session != null)
@@ -29,6 +66,9 @@ namespace Archipelago.MonsterSanctuary.Client
                 GUI.Label(new Rect(16, 16, 300, 20), ap_ver + " Status: Not Connected");
             }
 
+            y = 36;
+
+            // Login details
             if ((APState.Session == null || !APState.Authenticated) && APState.State == APState.ConnectionState.Disconnected)
             {
                 GUI.Label(new Rect(16, 36, 150, 20), "Host: ");
@@ -54,7 +94,82 @@ namespace Archipelago.MonsterSanctuary.Client
                 {
                     APState.Connect();
                 }
+
+                y += 80; // Height of each of the 3 elements
             }
+
+            if (GameController.Instance == null || string.IsNullOrEmpty(GameController.Instance.CurrentSceneName))
+            {
+                return;
+            }
+
+# if DEBUG
+            var scene = GameController.Instance.CurrentSceneName;
+            if (RoomName != scene)
+            {
+                ClearData();
+                RoomName = scene;
+            }
+
+
+            if (!string.IsNullOrEmpty(GameController.Instance.CurrentSceneName))
+            {
+                GUI.Label(new Rect(16, y, 100, 20), "Room Name:");
+                GUI.Label(new Rect(16 + 100 + 8, y, 300, 20), GameController.Instance.CurrentSceneName);
+                y += 20;
+            }
+
+            if (Connections.Count() > 0)
+            {
+                GUI.Label(new Rect(16, y, 200, 20), "CONNECTIONS");
+                y += 20;
+
+                foreach (var connection in Connections)
+                {
+                    GUI.Label(new Rect(16, y, 200, 20), connection);
+                    y += 20;
+                }
+            }
+
+            if (Chests.Count() > 0)
+            {
+                GUI.Label(new Rect(16, y, 60, 20), "CHESTS");
+                y += 20;
+
+                foreach (var chestdata in Chests)
+                {
+                    GUI.Label(new Rect(16, y, 100, 20), $"Chest ID {chestdata.Key}:");
+                    GUI.Label(new Rect(16 + 100 + 8, y, 150, 20), chestdata.Value);
+                    y += 20;
+                }
+            }
+
+            if (Gifts.Count() > 0)
+            {
+                GUI.Label(new Rect(16, y, 60, 20), "GIFTS");
+                y += 20;
+
+                foreach (var giftdata in Gifts)
+                {
+                    GUI.Label(new Rect(16, y, 100, 20), $"Gift ID {giftdata.Key}:");
+                    GUI.Label(new Rect(16 + 100 + 8, y, 150, 20), giftdata.Value);
+                    y += 20;
+                }
+            }
+
+            if (Monsters.Count() > 0)
+            {
+                GUI.Label(new Rect(16, y, 200, 20), "ENCOUNTERS");
+                y += 20;
+
+                foreach (var encounterdata in Monsters)
+                {
+                    GUI.Label(new Rect(16, y, 100, 20), $"Encounter ID {encounterdata.Key}:");
+                    GUI.Label(new Rect(16 + 100 + 8, y, 300, 20), encounterdata.Value);
+                    y += 20;
+                }
+            }
+#endif
         }
     }
 }
