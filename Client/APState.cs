@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using UnityEngine;
 using Archipelago.MultiClient.Net.MessageLog.Messages;
 using Archipelago.MultiClient.Net.Helpers;
+using System.Xml.Linq;
 
 namespace Archipelago.MonsterSanctuary.Client
 {
@@ -26,7 +27,7 @@ namespace Archipelago.MonsterSanctuary.Client
         public static ArchipelagoUI UI;
 
         public static ConnectionState State = ConnectionState.Disconnected;
-        public static bool Isconnected = State == ConnectionState.Connected;
+        public static bool IsConnected => State == ConnectionState.Connected;
 
         public static ArchipelagoConnectionInfo ConnectionInfo = new ArchipelagoConnectionInfo();
         public static ArchipelagoSession Session;
@@ -75,12 +76,41 @@ namespace Archipelago.MonsterSanctuary.Client
                 Authenticated = true;
                 State = ConnectionState.Connected;
                 Debug.Log("SlotData: " + JsonConvert.SerializeObject(loginSuccess.SlotData));
+
+                SlotData.ExpMultiplier = int.Parse(loginSuccess.SlotData["exp_multiplier"].ToString());
+                SlotData.AlwaysGetEgg = bool.Parse(loginSuccess.SlotData["monsters_always_drop_egg"].ToString());
+                switch(loginSuccess.SlotData["monster_shift_rule"].ToString())
+                {
+                    case ("never"):
+                        SlotData.MonsterShiftRule = ShiftFlag.Never;
+                        break;
+                    case ("after_sun_palace"):
+                        SlotData.MonsterShiftRule = ShiftFlag.Normal;
+                        break;
+                    case ("any_time"):
+                        SlotData.MonsterShiftRule = ShiftFlag.Any;
+                        break;
+                }
             }
             else if (loginResult is LoginFailure loginFailure)
             {
                 Authenticated = false;
                 Debug.LogError(String.Join("\n", loginFailure.Errors));
                 Session = null;
+            }
+
+            // Pre-load all monster locations so we don't have to get them later
+            Dictionary<long, string> ids = new Dictionary<long, string>();
+            foreach (var location in Patcher.MonsterLocations)
+            {
+                var id = Session.Locations.GetLocationIdFromName("Monster Sanctuary", location);
+                ids.Add(id, location);
+            }
+            var info = Session.Locations.ScoutLocationsAsync(ids.Keys.ToArray()).GetAwaiter().GetResult();
+
+            foreach (var location in info.Locations)
+            {
+                Patcher.AddMonster(ids[location.Location], Session.Items.GetItemName(location.Item));
             }
 
             return loginResult.Successful;
@@ -146,7 +176,6 @@ namespace Archipelago.MonsterSanctuary.Client
                 }                    
                 ids.Add(id);
             }
-
             return APState.CheckLocation(ids.ToArray());
         }
 

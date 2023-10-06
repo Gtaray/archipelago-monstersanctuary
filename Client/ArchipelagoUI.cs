@@ -27,11 +27,13 @@ namespace Archipelago.MonsterSanctuary.Client
 
         public void AddChest(int id, string item)
         {
+            if (Chests.ContainsKey(id)) return;
             Chests.Add(id, item);
         }
 
         public void AddMonster(int encounterID, string monsterName)
         {
+            if (Monsters.ContainsKey(encounterID)) return;
             Monsters.Add(encounterID, monsterName);
         }
 
@@ -42,6 +44,7 @@ namespace Archipelago.MonsterSanctuary.Client
 
         public void AddGift(int id, string item)
         {
+            if (Gifts.ContainsKey(id)) return;
             Gifts.Add(id, item);
         }
 

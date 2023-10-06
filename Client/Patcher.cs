@@ -2,22 +2,37 @@
 using BepInEx.Logging;
 using HarmonyLib;
 using JetBrains.Annotations;
+using Newtonsoft.Json;
 using System;
+using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics.Eventing.Reader;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
-using System.Threading;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 namespace Archipelago.MonsterSanctuary.Client
 {
     [BepInPlugin(MyPluginInfo.PLUGIN_GUID, MyPluginInfo.PLUGIN_NAME, MyPluginInfo.PLUGIN_VERSION)]
     public partial class Patcher : BaseUnityPlugin
     {
+        public static List<string> MonsterLocations = new List<string>();
+
         private static ManualLogSource _log;
+        private static Dictionary<string, string> _subsections = new Dictionary<string, string>();
+
+        private static string GetMappedLocation(string location)
+        {
+            if (_subsections.ContainsKey(location))
+                return _subsections[location];
+            return location;
+        }
+
+        private static List<string> GetMappedLocations(List<string> locations)
+        {
+            return locations.Select(l => GetMappedLocation(l)).ToList();
+        }
 
         private void Awake()
         {
@@ -25,78 +40,49 @@ namespace Archipelago.MonsterSanctuary.Client
 
             // Plugin startup logic
             new Harmony(MyPluginInfo.PLUGIN_GUID).PatchAll(Assembly.GetExecutingAssembly());
-        }
 
-        public static int GetGoldQuantity(string itemName)
-        {
-            int gold = 0;
-            var match = Regex.Match(itemName, "^(\\d+) G");
-            if (match.Success)
+            // Load the subsections data into the dictionary
+            var assembly = Assembly.GetExecutingAssembly();
+            var subsections = "Archipelago.MonsterSanctuary.Client.data.subsections.json";
+
+            using (Stream stream = assembly.GetManifestResourceStream(subsections))
+            using (StreamReader reader = new StreamReader(stream))
             {
-                var strGold = match.Groups[1].Value;
-
-                // Null check because unit tests call this
-                if (_log != null)
-                    _log.LogWarning("Found gold: " + strGold);
-
-                gold = int.Parse(strGold);
-
+                string json = reader.ReadToEnd();
+                _subsections = JsonConvert.DeserializeObject<Dictionary<string, string>>(json);
+                _log.LogInfo($"Loaded {_subsections.Count()} subsections");
             }
 
-            return gold;
-        }
+            // Load champion data into the dictionary
+            var champions = "Archipelago.MonsterSanctuary.Client.data.npcs.json";
 
-        public static int GetQuantityOfItem(ref string name)
-        {
-            int quantity = 1;
-            var match = Regex.Match(name, "^(\\d+)x");
-
-            // Quantity is found
-            if (match.Success)
+            using (Stream stream = assembly.GetManifestResourceStream(champions))
+            using (StreamReader reader = new StreamReader(stream))
             {
-                var strQuantity = match.Groups[1].Value;
-
-                if (_log != null)
-                    _log.LogWarning("Found quantity group: " + strQuantity);
-
-                quantity = int.TryParse(strQuantity, out quantity) ? quantity : 1;
-                name = Regex.Replace(name, "^\\d+x", "");
+                string json = reader.ReadToEnd();
+                _champions = JsonConvert.DeserializeObject<Dictionary<string, string>>(json);
+                _log.LogInfo($"Loaded {_champions.Count()} npcs");
             }
 
-            name = name.Trim();
-            return quantity;
-        }
+            // Load monster data into the dictionary. This maps the human-readable names that AP uses to the form that Monster Sanctuary uses
+            var monsters = "Archipelago.MonsterSanctuary.Client.data.monsters.json";
 
-        static BaseItem GetItemByName(string name)
-        {
-            // Trim "#x" from the name
-            return GameController.Instance.WorldData.Referenceables
-                    .Where(x => x?.gameObject.GetComponent<BaseItem>() != null)
-                    .Select(x => x.gameObject.GetComponent<BaseItem>())
-                    .SingleOrDefault(i => string.Equals(i.GetName(), name, StringComparison.OrdinalIgnoreCase));
-        }
-
-        static void GiveItem(BaseItem item, int quantity = 1, PopupController.PopupDelegate callback = null, bool showMsg = true)
-        {
-            if (showMsg)
-                UIController.Instance.PopupController.ShowReceiveItem(item, quantity, true, callback);
-
-            _log.LogInfo($"Acquired {item.Name}");
-            PlayerController.Instance.Inventory.AddItem(item, quantity);
-        }
-
-        static void GiveGold(int amount, bool showMsg = true)
-        {
-            if (showMsg)
+            using (Stream stream = assembly.GetManifestResourceStream(monsters))
+            using (StreamReader reader = new StreamReader(stream))
             {
-                UIController.Instance.PopupController.ShowMessage(
-                    Utils.LOCA("Treasure", ELoca.UI),
-                    string.Format(Utils.LOCA("Obtained {0}", ELoca.UI), GameDefines.FormatTextAsGold(amount + " G", false))
-                );
+                string json = reader.ReadToEnd();
+                _monsters = JsonConvert.DeserializeObject<Dictionary<string, string>>(json);
+                _log.LogInfo($"Loaded {_monsters.Count()} monster names");
             }
 
-            _log.LogInfo($"Acquired {amount} gold");
-            PlayerController.Instance.Gold += amount;
+            // Load monster data into the dictionary. This maps the human-readable names that AP uses to the form that Monster Sanctuary uses
+            using (Stream stream = assembly.GetManifestResourceStream("Archipelago.MonsterSanctuary.Client.data.monster_locations.json"))
+            using (StreamReader reader = new StreamReader(stream))
+            {
+                string json = reader.ReadToEnd();
+                MonsterLocations = JsonConvert.DeserializeObject<List<string>>(json);
+                _log.LogInfo($"Loaded {MonsterLocations.Count()} monster locations");
+            }
         }
 
         [HarmonyPatch(typeof(MainMenu))]
@@ -120,123 +106,86 @@ namespace Archipelago.MonsterSanctuary.Client
             }
         }
 
-        [HarmonyPatch(typeof(Chest), "OpenChest")]
-        private class Chest_OpenChest
-        {
-            private static void PrintReferenceItems()
-            {
-                var items = GameController.Instance.WorldData.Referenceables
-                    .Where(x => x?.gameObject.GetComponent<BaseItem>() != null)
-                    .Select(x => x.gameObject.GetComponent<BaseItem>());
-
-                foreach (var item in items)
-                {
-                    _log.LogInfo(item + ": " + item.Name);
-                }
-            }
-
-            [UsedImplicitly]
-            private static void Prefix(ref Chest __instance)
-            {
-                if (!APState.Isconnected)
-                    return;
-
-                string locName = $"{GameController.Instance.CurrentSceneName}_{__instance.ID}";
-                var itemName = APState.CheckLocation(locName);
-
-                // Set this to null since we'll handle giving the item
-                // We do this up here so that if an error occurs, we get no items
-                // and it's obvious that something went wrong
-                __instance.Item = null;
-
-                // Handle if you send someone else and item and show a message box for that.
-                if (itemName == null) 
-                {
-                    _log.LogError("Item name was not found for this location.");
-                    return;
-                }
-
-                var gold = GetGoldQuantity(itemName);
-                if (gold > 0)
-                {
-                    __instance.Gold = gold;
-                    return;
-                }
-
-                var quantity = GetQuantityOfItem(ref itemName);
-                var newItem = GetItemByName(itemName);
-
-                if (newItem == null)
-                {
-                    // This shouldn't happen. Might need a smarter way to solve this.
-                    _log.LogError("No item reference was found with the matching name.");
-                    return;
-                }
-
-                _log.LogInfo("New Item: " + newItem.Name);
-
-                GiveItem(newItem, quantity);
-            }
-        }
-
-        [HarmonyPatch(typeof(GrantItemsAction), "GrantItem")]
-        private class GrantItemsAction_GrantItem
-        {
-            // This needs to also handle NPCs that give the player eggs, and randomize which egg is given
-            [UsedImplicitly]
-            private static bool Prefix(bool showMessage, ref GrantItemsAction __instance)
-            {
-                if (!APState.Isconnected)
-                    return true;
-
-                string locName = $"{GameController.Instance.CurrentSceneName}_{__instance.ID}";
-                var itemName = APState.CheckLocation(locName);
-
-                // Handle if you send someone else and item and show a message box for that.
-                if (itemName == null)
-                {
-                    _log.LogError("Item name was not found for this location.");
-                    return false;
-                }
-
-                var gold = GetGoldQuantity(itemName);
-                if (gold > 0)
-                {
-                    GiveGold(gold, showMessage);
-                    return false;
-                }
-
-                var quantity = GetQuantityOfItem(ref itemName);
-                var newItem = GetItemByName(itemName);
-
-                if (newItem == null)
-                {
-                    // This shouldn't happen. Might need a smarter way to solve this.
-                    _log.LogError("No item reference was found with the matching name.");
-                    return false;
-                }
-
-                _log.LogInfo("New Item: " + newItem.Name);
-
-                GiveItem(newItem, quantity, new PopupController.PopupDelegate(__instance.Finish), showMessage);
-
-                // because we can't set __instance.Item to null like we could with chests,
-                // we need to outright prevent the original from running
-                return false;
-            }
-        }
-
         [HarmonyPatch(typeof(Monster), "GetExpReward")]
         private class Monster_GetExpReward
         {
             [UsedImplicitly]
             private static void Postfix(ref int __result)
             {
-                //if (_expMultiplier.Value <= 0)
-                //{
-                //    return;
-                //}
-                __result = __result * 10;
+                __result = __result * SlotData.ExpMultiplier;
+            }
+        }
+
+        /// <summary>
+        /// After an encounter, this will add monster eggs to the rare rewards list
+        /// which are then given to the player. Controlled by SlotData.AlwaysGetEgg
+        /// </summary>
+        [HarmonyPatch(typeof(CombatController), "GrantReward")]
+        private class CombatController_GrantRewards
+        {
+            [UsedImplicitly]
+            private static void Prefix(CombatController __instance)
+            {
+                if(__instance.CurrentEncounter.EncounterType == EEncounterType.InfinityArena 
+                    || GameModeManager.Instance.BraveryMode
+                    || __instance.CurrentEncounter.IsChampionChallenge
+                    || !SlotData.AlwaysGetEgg)
+                {
+                    return;
+                }
+
+                var items = new List<InventoryItem>();
+                foreach (Monster enemy in __instance.Enemies)
+                {
+                    // Get the rare egg reward for this enemy
+                    var egg = enemy.RewardsRare
+                        .Select(i => i.GetComponent<BaseItem>())
+                        .FirstOrDefault(i => i is Egg);
+
+                    __instance.AddRewardItem(items, egg, 1, (int)enemy.Shift);
+                }
+
+                var rareField = Traverse.Create(__instance).Field("rareRewards");
+                var rareRewards = rareField.GetValue<List<InventoryItem>>();
+                rareRewards.AddRange(items);
+                rareField.SetValue(rareRewards);
+            }
+        }
+
+        /// <summary>
+        /// When giving a reward, this ensures that only one egg of a given monster is ever added
+        /// </summary>
+        [HarmonyPatch(typeof(CombatController), "AddRewardItem")]
+        private class CombatController_AddRewardItem
+        {
+            [UsedImplicitly]
+            private static bool Prefix(List<InventoryItem> items, BaseItem item, int quantity, int variation)
+            {
+
+                foreach (InventoryItem inventoryItem in items) 
+                {
+                    // Only ever add one copy of an egg
+                    if (inventoryItem.Item == item && item is Egg)
+                        return false;
+                }
+
+                return true;
+            }
+        }
+
+        [HarmonyPatch(typeof(ProgressManager), "GetBool")]
+        private class ProgressManager_GetBool
+        {
+            [UsedImplicitly]
+            private static void Postfix(ref bool __result, ProgressManager __instance, string name)
+            {
+                if (name == "SanctuaryShifted")
+                {
+                    if (SlotData.MonsterShiftRule == ShiftFlag.Any)
+                        __result = true;
+                    else if (SlotData.MonsterShiftRule == ShiftFlag.Never)
+                        __result = false;
+                }
             }
         }
     }

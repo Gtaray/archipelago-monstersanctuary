@@ -2,12 +2,9 @@
 using JetBrains.Annotations;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using UnityEngine;
 
 namespace Archipelago.MonsterSanctuary.Client
@@ -16,28 +13,41 @@ namespace Archipelago.MonsterSanctuary.Client
     {
         // This dictionary is required to map game room names to AP location ids
         // because champion monsters have a visual element that isn't attached to an encounter id
-        static Dictionary<string, string> Champions = new Dictionary<string, string>()
-        {
-            { "MountainPath_West6_MechGolem", "MountainPath_West6_3_0" },
-            { "MountainPath_Center7_Monk", "MountainPath_Center7_1_0" },
-        };
+        private static Dictionary<string, string> _champions = new Dictionary<string, string>();
 
-        static Dictionary<string, Tuple<GameObject, Monster>> Monsters = new Dictionary<string, Tuple<GameObject, Monster>>();
+        // Maps monster names from AP to Monster Sanctuary.
+        // Only needed for monsters whose names have spaces or special characters
+        private static Dictionary<string, string> _monsters = new Dictionary<string, string>();
+
+        private static Dictionary<string, Tuple<GameObject, Monster>> MonstersCache = new Dictionary<string, Tuple<GameObject, Monster>>();
 
         public static void AddMonster(string locationId, string monsterName)
         {
             var gameObject = GetMonsterByName(monsterName);
+            if (gameObject == null)
+            {
+                return;
+            }
             var monster = gameObject.GetComponent<Monster>();
-
-            if (Monsters.ContainsKey(locationId))
+            if (MonstersCache.ContainsKey(locationId))
                 return;
 
-            Monsters.Add(locationId, new Tuple<GameObject, Monster>(gameObject, monster));
-            _log.LogInfo($"Adding monster to cache: {locationId}, {monsterName}");
+            MonstersCache.Add(locationId, new Tuple<GameObject, Monster>(gameObject, monster));
+            // _log.LogInfo($"Adding monster to cache: {locationId}, {monsterName}");
         }
 
         private static GameObject GetMonsterByName(string name)
         {
+            // AP fills empty monster slots with this item. We don't care about it here,
+            // and the game will never query for it, so we can safely ignore them
+            if (name == "Empty Slot")
+                return null;
+
+            if (_monsters.ContainsKey(name))
+            {
+                name = _monsters[name];
+            }
+
             return GameController.Instance.WorldData.Referenceables
                     .Where(x => x?.gameObject.GetComponent<Monster>() != null)
                     .Select(x => x.gameObject)
@@ -46,7 +56,8 @@ namespace Archipelago.MonsterSanctuary.Client
 
         private static GameObject GetReplacementMonster(string locationId)
         {
-            if (!Monsters.ContainsKey(locationId))
+            locationId = GetMappedLocation(locationId);
+            if (!MonstersCache.ContainsKey(locationId))
             {
                 string monster = APState.CheckLocation(locationId);
 
@@ -59,7 +70,7 @@ namespace Archipelago.MonsterSanctuary.Client
                 AddMonster(locationId, monster);
             }
 
-            return Monsters[locationId].Item1;
+            return MonstersCache[locationId].Item1;
         }
 
         #region Patches
@@ -73,7 +84,7 @@ namespace Archipelago.MonsterSanctuary.Client
             [UsedImplicitly]
             private static bool Prefix(ref List<Monster> __result, CombatController __instance, MonsterEncounter encounter, bool isChampion)
             {
-                if (!APState.Isconnected)
+                if (!APState.IsConnected)
                     return true;
 
                 List<Monster> list = new List<Monster>();
@@ -88,12 +99,14 @@ namespace Archipelago.MonsterSanctuary.Client
                         break;
                     }
                     
+                    // START NEW CODE
                     GameObject monsterPrefab = GetReplacementMonster($"{GameController.Instance.CurrentSceneName}_{encounter.ID}_{i}");
                     i++;
                     // Super gross, but we have to do this to access the protected method
                     var setup = (GameObject)(__instance.GetType().GetMethod("SetupEncounterConfigEnemy", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(__instance, new object[] { encounter, monsterPrefab }));
                     Monster component = setup.GetComponent<Monster>();
-                    // Monster component = __instance.SetupEncounterConfigEnemy(encounter, monsterPrefab).GetComponent<Monster>();
+                    // END NEW CODE
+
                     list.Add(component);
                     if (isChampion)
                     {
@@ -179,13 +192,13 @@ namespace Archipelago.MonsterSanctuary.Client
             [UsedImplicitly]
             private static void Prefix(CombatController __instance)
             {
-                if (!APState.Isconnected)
+                if (!APState.IsConnected)
                     return;
 
                 // We only want to operate on champion encounters
                 if (__instance.CurrentEncounter.IsChampion)
                 {
-                    APState.CheckLocation($"{GameController.Instance.CurrentSceneName}_Champion");
+                    APState.CheckLocation(GetMappedLocation($"{GameController.Instance.CurrentSceneName}_Champion"));
                 }
             }
         }
@@ -202,7 +215,7 @@ namespace Archipelago.MonsterSanctuary.Client
             [UsedImplicitly]
             private static bool Prefix(RandomizerMonsterReplacer __instance)
             {
-                if (!APState.Isconnected)
+                if (!APState.IsConnected)
                     return true;
 
                 if (GameController.Instance == null)
@@ -214,10 +227,10 @@ namespace Archipelago.MonsterSanctuary.Client
                 Monster component = __instance.OriginalMonster.GetComponent<Monster>();
                 Monster monster = null;
 
-                if (Champions.ContainsKey(champion_id))
+                if (_champions.ContainsKey(champion_id))
                 {
-                    monster = GetReplacementMonster(Champions[champion_id]).GetComponent<Monster>();
-                    _log.LogInfo("Champion monster found, replaced with " + monster);
+                    monster = GetReplacementMonster(_champions[champion_id]).GetComponent<Monster>();
+                    _log.LogInfo("NPC monster found, replaced with " + monster);
                 }
 
                 if (monster == null)
@@ -301,59 +314,81 @@ namespace Archipelago.MonsterSanctuary.Client
         /// This does a location check for the mons in the encounter, and adds those mons to the cache dictionary
         /// Which is used by another function to actually do the replacement
         /// </summary>
-        [HarmonyPatch(typeof(MonsterEncounter), "Start")]
-        private static class MonsterEncounter_Start
-        {
-            private static void Prefix(MonsterEncounter __instance)
-            {
-                if (__instance == null)
-                {
-                    return;
-                }
+        //[HarmonyPatch(typeof(MonsterEncounter), "Start")]
+        //private static class MonsterEncounter_Start
+        //{
+        //    private static void Prefix(MonsterEncounter __instance)
+        //    {
+        //        if (__instance == null)
+        //        {
+        //            return;
+        //        }
 
-                if (__instance.PredefinedMonsters == null)
-                {
-                    _log.LogWarning("Monsterencounter '" + __instance + ".PredefinedMonsters' was null");
-                    return;
-                }
+        //        if (__instance.PredefinedMonsters == null)
+        //        {
+        //            _log.LogWarning("Monsterencounter '" + __instance + ".PredefinedMonsters' was null");
+        //            return;
+        //        }
 
-                if (__instance.PredefinedMonsters.Monster == null)
-                {
-                    _log.LogWarning("Monsterencounter '" + __instance + ".PredefinedMonsters.Monster' was null");
-                    return;
-                }
+        //        if (__instance.PredefinedMonsters.Monster == null)
+        //        {
+        //            _log.LogWarning("Monsterencounter '" + __instance + ".PredefinedMonsters.Monster' was null");
+        //            return;
+        //        }
+        //        if (!APState.IsConnected)
+        //            return;
 
-                if (!APState.Isconnected)
-                    return;
+        //        if (GameController.Instance == null)
+        //            _log.LogWarning("GameController.Instance was null");
+        //        if (GameController.Instance.CurrentSceneName == null)
+        //            _log.LogWarning("Current Scene Name was null");
 
-                if (GameController.Instance == null)
-                    _log.LogWarning("GameController.Instance was null");
-                if (GameController.Instance.CurrentSceneName == null)
-                    _log.LogWarning("Current Scene Name was null");
+        //        // get a list of all of the location names for __instance encounter
+        //        string locName = $"{GameController.Instance.CurrentSceneName}_{__instance.ID}";
+        //        List<string> monsterIds = new List<string>();
+        //        for (int id = 0; id < __instance.PredefinedMonsters.Monster.Length; id++)
+        //        {
+        //            monsterIds.Add($"{locName}_{id}");
+        //        }
 
-                // get a list of all of the location names for __instance encounter
-                string locName = $"{GameController.Instance.CurrentSceneName}_{__instance.ID}";
-                List<string> monsterIds = new List<string>();
-                for (int id = 0; id < __instance.PredefinedMonsters.Monster.Length; id++)
-                {
-                    monsterIds.Add($"{locName}_{id}");
-                }
+        //        // Check all of the monster 'locations' in __instance encounter
+        //        var monsterNames = APState.CheckLocation(GetMappedLocations(monsterIds));
 
-                // Check all of the monster 'locations' in __instance encounter
-                var monsterNames = APState.CheckLocation(monsterIds);
+        //        if (monsterNames == null)
+        //        {
+        //            return;
+        //        }
 
-                if (monsterNames == null)
-                {
-                    return;
-                }
+        //        // Store monsters so that we don't have to make calls to AP every time the encounter loads
+        //        for (int i = 0; i < monsterNames.Length; i++)
+        //        {
+        //            AddMonster(monsterIds[i], monsterNames[i]);
+        //        }
+        //    }
+        //}
 
-                // Store monsters so that we don't have to make calls to AP every time the encounter loads
-                for (int i = 0; i < monsterNames.Length; i++)
-                {
-                    AddMonster(monsterIds[i], monsterNames[i]);
-                }
-            }
-        }
+        /// <summary>
+        /// I was running into issues where monsters would spawn in without their encounter
+        /// and this was breaking their AI. So here we're just double checking that after being spawned in
+        /// they have their encounter set. I suspect the reason for this is some async weirdness when checking
+        /// locations, but I don't know for sure.
+        /// </summary>
+        //[HarmonyPatch(typeof(MonsterEncounter), "SetupEnemies")]
+        //private static class MonsterEncounter_SetupEnemies
+        //{
+        //    private static void Postfix(MonsterEncounter __instance)
+        //    {
+        //        for (int i = 0; i < __instance.DeterminedEnemies.Count; i++)
+        //        {
+        //            Monster monster = __instance.DeterminedEnemies[i];
+        //            if (monster.Encounter == null)
+        //            {
+        //                _log.LogWarning($"Encounter was null on {monster.Name}");
+        //                monster.Encounter = __instance;
+        //            }
+        //        }
+        //    }
+        //}
         #endregion
     }
 }

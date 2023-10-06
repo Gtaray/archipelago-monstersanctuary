@@ -17,6 +17,23 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="data\monsters.json" />
+    <None Remove="data\monster_locations.json" />
+    <None Remove="data\npcs.json" />
+    <None Remove="data\subsections.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="data\monsters.json" />
+    <EmbeddedResource Include="data\monster_locations.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="data\npcs.json" />
+    <EmbeddedResource Include="data\subsections.json" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Archipelago.MultiClient.Net" Version="5.0.6" />
     <PackageReference Include="BepInEx.Analyzers" Version="1.*" PrivateAssets="all" />
     <PackageReference Include="BepInEx.Core" Version="5.4.19" />
