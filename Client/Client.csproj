@@ -17,6 +17,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="data\champion_locations.json" />
     <None Remove="data\monsters.json" />
     <None Remove="data\monster_locations.json" />
     <None Remove="data\npcs.json" />
@@ -24,6 +25,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="data\champion_locations.json" />
     <EmbeddedResource Include="data\monsters.json" />
     <EmbeddedResource Include="data\monster_locations.json" />
   </ItemGroup>

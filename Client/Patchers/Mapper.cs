@@ -24,13 +24,13 @@ namespace Archipelago.MonsterSanctuary.Client
 
                 if (__instance.PredefinedMonsters == null)
                 {
-                    _log.LogWarning("Monsterencounter '" + __instance + ".PredefinedMonsters' was null");
+                    Logger.LogWarning("Monsterencounter '" + __instance + ".PredefinedMonsters' was null");
                     return;
                 }
 
                 if (__instance.PredefinedMonsters.Monster == null)
                 {
-                    _log.LogWarning("Monsterencounter '" + __instance + ".PredefinedMonsters.Monster' was null");
+                    Logger.LogWarning("Monsterencounter '" + __instance + ".PredefinedMonsters.Monster' was null");
                     return;
                 }
 

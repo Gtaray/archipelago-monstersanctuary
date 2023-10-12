@@ -64,7 +64,7 @@ namespace Archipelago.MonsterSanctuary.Client
             {
                 if (__instance.ChangeType == GameController.SceneChangeType.Teleport && scene.name == "MountainPath_North1")
                 {
-                    _log.LogDebug("Teleporting to Beginning of Game");
+                    Logger.LogDebug("Teleporting to Beginning of Game");
                     GameObject.FindWithTag("MapSettings").GetComponent<MapSettings>().UpdateMinimap();
 
                     PlayerController.Instance.gameObject.SetActive(true);

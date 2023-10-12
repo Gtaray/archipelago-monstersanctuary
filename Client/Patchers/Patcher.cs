@@ -1,4 +1,5 @@
-﻿using BepInEx;
+﻿using Archipelago.MultiClient.Net.Helpers;
+using BepInEx;
 using BepInEx.Logging;
 using HarmonyLib;
 using JetBrains.Annotations;
@@ -17,72 +18,16 @@ namespace Archipelago.MonsterSanctuary.Client
     [BepInPlugin(MyPluginInfo.PLUGIN_GUID, MyPluginInfo.PLUGIN_NAME, MyPluginInfo.PLUGIN_VERSION)]
     public partial class Patcher : BaseUnityPlugin
     {
-        public static List<string> MonsterLocations = new List<string>();
-
-        private static ManualLogSource _log;
-        private static Dictionary<string, string> _subsections = new Dictionary<string, string>();
-
-        private static string GetMappedLocation(string location)
-        {
-            if (_subsections.ContainsKey(location))
-                return _subsections[location];
-            return location;
-        }
-
-        private static List<string> GetMappedLocations(List<string> locations)
-        {
-            return locations.Select(l => GetMappedLocation(l)).ToList();
-        }
+        public static ManualLogSource Logger;
 
         private void Awake()
         {
-            _log = Logger;
+            Logger = base.Logger;
+
+            GameData.Load();
 
             // Plugin startup logic
             new Harmony(MyPluginInfo.PLUGIN_GUID).PatchAll(Assembly.GetExecutingAssembly());
-
-            // Load the subsections data into the dictionary
-            var assembly = Assembly.GetExecutingAssembly();
-            var subsections = "Archipelago.MonsterSanctuary.Client.data.subsections.json";
-
-            using (Stream stream = assembly.GetManifestResourceStream(subsections))
-            using (StreamReader reader = new StreamReader(stream))
-            {
-                string json = reader.ReadToEnd();
-                _subsections = JsonConvert.DeserializeObject<Dictionary<string, string>>(json);
-                _log.LogInfo($"Loaded {_subsections.Count()} subsections");
-            }
-
-            // Load champion data into the dictionary
-            var champions = "Archipelago.MonsterSanctuary.Client.data.npcs.json";
-
-            using (Stream stream = assembly.GetManifestResourceStream(champions))
-            using (StreamReader reader = new StreamReader(stream))
-            {
-                string json = reader.ReadToEnd();
-                _champions = JsonConvert.DeserializeObject<Dictionary<string, string>>(json);
-                _log.LogInfo($"Loaded {_champions.Count()} npcs");
-            }
-
-            // Load monster data into the dictionary. This maps the human-readable names that AP uses to the form that Monster Sanctuary uses
-            var monsters = "Archipelago.MonsterSanctuary.Client.data.monsters.json";
-
-            using (Stream stream = assembly.GetManifestResourceStream(monsters))
-            using (StreamReader reader = new StreamReader(stream))
-            {
-                string json = reader.ReadToEnd();
-                _monsters = JsonConvert.DeserializeObject<Dictionary<string, string>>(json);
-                _log.LogInfo($"Loaded {_monsters.Count()} monster names");
-            }
-
-            // Load monster data into the dictionary. This maps the human-readable names that AP uses to the form that Monster Sanctuary uses
-            using (Stream stream = assembly.GetManifestResourceStream("Archipelago.MonsterSanctuary.Client.data.monster_locations.json"))
-            using (StreamReader reader = new StreamReader(stream))
-            {
-                string json = reader.ReadToEnd();
-                MonsterLocations = JsonConvert.DeserializeObject<List<string>>(json);
-                _log.LogInfo($"Loaded {MonsterLocations.Count()} monster locations");
-            }
         }
 
         [HarmonyPatch(typeof(MainMenu))]
@@ -92,7 +37,7 @@ namespace Archipelago.MonsterSanctuary.Client
             [HarmonyPostfix]
             public static void CreateArchipelagoUI()
             {
-                _log.LogInfo("Creating Archipelago UI Component");
+                Logger.LogInfo("Creating Archipelago UI Component");
                 var guiObject = new GameObject();
                 APState.UI = guiObject.AddComponent<ArchipelagoUI>();
                 GameObject.DontDestroyOnLoad(guiObject);
@@ -142,7 +87,8 @@ namespace Archipelago.MonsterSanctuary.Client
                         .Select(i => i.GetComponent<BaseItem>())
                         .FirstOrDefault(i => i is Egg);
 
-                    __instance.AddRewardItem(items, egg, 1, (int)enemy.Shift);
+                    if (egg != null)
+                        __instance.AddRewardItem(items, egg, 1, (int)enemy.Shift);
                 }
 
                 var rareField = Traverse.Create(__instance).Field("rareRewards");

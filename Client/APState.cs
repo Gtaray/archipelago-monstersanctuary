@@ -32,6 +32,7 @@ namespace Archipelago.MonsterSanctuary.Client
         public static ArchipelagoConnectionInfo ConnectionInfo = new ArchipelagoConnectionInfo();
         public static ArchipelagoSession Session;
         public static bool Authenticated;
+        public static HashSet<long> CheckedLocations = new HashSet<long>();
 
         public static bool Connect()
         {
@@ -45,7 +46,7 @@ namespace Archipelago.MonsterSanctuary.Client
                 return false;
             }
 
-            Debug.Log($"Connecting to {ConnectionInfo.host_name} as {ConnectionInfo.slot_name}...");
+            Patcher.Logger.LogInfo($"Connecting to {ConnectionInfo.host_name} as {ConnectionInfo.slot_name}...");
 
             // Start the archipelago session.
             Session = ArchipelagoSessionFactory.CreateSession(ConnectionInfo.host_name);
@@ -61,7 +62,7 @@ namespace Archipelago.MonsterSanctuary.Client
             }
             else
             {
-                Debug.LogError("Could not write most recent connect info to file.");
+                Patcher.Logger.LogError("Could not write most recent connect info to file.");
             }
 
             LoginResult loginResult = Session.TryConnectAndLogin(
@@ -75,42 +76,26 @@ namespace Archipelago.MonsterSanctuary.Client
             {
                 Authenticated = true;
                 State = ConnectionState.Connected;
-                Debug.Log("SlotData: " + JsonConvert.SerializeObject(loginSuccess.SlotData));
-
-                SlotData.ExpMultiplier = int.Parse(loginSuccess.SlotData["exp_multiplier"].ToString());
-                SlotData.AlwaysGetEgg = bool.Parse(loginSuccess.SlotData["monsters_always_drop_egg"].ToString());
-                switch(loginSuccess.SlotData["monster_shift_rule"].ToString())
-                {
-                    case ("never"):
-                        SlotData.MonsterShiftRule = ShiftFlag.Never;
-                        break;
-                    case ("after_sun_palace"):
-                        SlotData.MonsterShiftRule = ShiftFlag.Normal;
-                        break;
-                    case ("any_time"):
-                        SlotData.MonsterShiftRule = ShiftFlag.Any;
-                        break;
-                }
+                LoadSlotData(loginSuccess.SlotData);
             }
             else if (loginResult is LoginFailure loginFailure)
             {
                 Authenticated = false;
-                Debug.LogError(String.Join("\n", loginFailure.Errors));
+                Patcher.Logger.LogError(String.Join("\n", loginFailure.Errors));
                 Session = null;
             }
 
-            // Pre-load all monster locations so we don't have to get them later
-            Dictionary<long, string> ids = new Dictionary<long, string>();
-            foreach (var location in Patcher.MonsterLocations)
-            {
-                var id = Session.Locations.GetLocationIdFromName("Monster Sanctuary", location);
-                ids.Add(id, location);
-            }
-            var info = Session.Locations.ScoutLocationsAsync(ids.Keys.ToArray()).GetAwaiter().GetResult();
+            LoadMonsterLocationData();
 
-            foreach (var location in info.Locations)
+            Session.Items.ItemReceived += (receivedItemsHelper) =>
             {
-                Patcher.AddMonster(ids[location.Location], Session.Items.GetItemName(location.Item));
+                ReceiveItem(receivedItemsHelper);
+            };
+
+            // If the player opened chests while not connected, this get those items upon connection
+            if (CheckedLocations != null)
+            {
+                Session.Locations.CompleteLocationChecks(CheckedLocations.ToArray());
             }
 
             return loginResult.Successful;
@@ -120,7 +105,6 @@ namespace Archipelago.MonsterSanctuary.Client
         {
             Debug.LogWarning("Packet Received: " + packet.ToString());
         }
-
         static void Session_SocketClosed(string reason)
         {
             Debug.LogError("Connection to Archipelago lost: " + reason);
@@ -150,56 +134,85 @@ namespace Archipelago.MonsterSanctuary.Client
             Session = null;
         }
 
-        public static string CheckLocation(string location)
+        public static void LoadSlotData(Dictionary<string, object> slotData)
         {
-            var id = APState.Session.Locations.GetLocationIdFromName("Monster Sanctuary", location);
-            var items = APState.CheckLocation(id);
-            return items.Count() == 1 ? items[0] : null;
-        }
-
-        public static string[] CheckLocation(IEnumerable<string> locations)
-        {
-            return CheckLocation(locations.ToArray());
-        }
-
-        public static string[] CheckLocation(params string[] locations)
-        {
-            var ids = new List<long>();
-            foreach (var location in locations)
-            {
-                var id = APState.Session.Locations.GetLocationIdFromName("Monster Sanctuary", location);
-                // 970500 is the starting point for all location ids
-                if (id < 970500)
+            Debug.Log("SlotData: " + JsonConvert.SerializeObject(slotData));
+            SlotData.ExpMultiplier = int.Parse(slotData["exp_multiplier"].ToString());
+                SlotData.AlwaysGetEgg = bool.Parse(slotData["monsters_always_drop_egg"].ToString());
+                switch(slotData["monster_shift_rule"].ToString())
                 {
-                    Debug.LogError($"Tried to get id for location '{location}' but it returned id '{id}'");
-                    continue;
-                }                    
-                ids.Add(id);
-            }
-            return APState.CheckLocation(ids.ToArray());
+                    case ("never"):
+                        SlotData.MonsterShiftRule = ShiftFlag.Never;
+                        break;
+                    case ("after_sun_palace"):
+                        SlotData.MonsterShiftRule = ShiftFlag.Normal;
+                        break;
+                    case ("any_time"):
+                        SlotData.MonsterShiftRule = ShiftFlag.Any;
+                        break;
+                }
         }
 
-        public static string[] CheckLocation(params long[] locations)
+        public static void LoadMonsterLocationData()
         {
-            if (locations.Count() <= 0)
+            // Pre-load all monster locations so we don't have to get them later
+            Dictionary<long, string> ids = new Dictionary<long, string>();
+            foreach (var location in GameData.MonsterLocations)
             {
-                return null;
+                var id = Session.Locations.GetLocationIdFromName("Monster Sanctuary", location);
+                if (ids.ContainsKey(id))
+                    Patcher.Logger.LogWarning("Duplicate location: " + location);
+                ids.Add(id, location);
             }
+            var info = Session.Locations.ScoutLocationsAsync(ids.Keys.ToArray()).GetAwaiter().GetResult();
 
-            Task.Run(() => {
-                Session.Locations.CompleteLocationChecksAsync(locations);
-            }).ConfigureAwait(false);
-
-            var info = Session.Locations.ScoutLocationsAsync(locations).GetAwaiter().GetResult();
-
-            var itemNames = new List<string>();
             foreach (var location in info.Locations)
             {
-                itemNames.Add(Session.Items.GetItemName(location.Item));
+                GameData.AddMonster(ids[location.Location], Session.Items.GetItemName(location.Item));
+            }
+        }
+        
+        public static void ReceiveItem(ReceivedItemsHelper helper)
+        {
+            Patcher.Logger.LogInfo("ItemReceived()");
+            var item = helper.DequeueItem();
+            var name = helper.GetItemName(item.Item);
+            Patcher.Logger.LogInfo("Item Name: " + name);
+            Patcher.ReceiveItem(name, item.Location);
+        }
+
+        public static long CheckLocation(string location)
+        {
+            var id = APState.Session.Locations.GetLocationIdFromName("Monster Sanctuary", location);
+            if (id < 0)
+            {
+                Patcher.Logger.LogError($"Location ID for '{location}' was -1");
+                return -1;
             }
 
-            return itemNames.ToArray();
+            APState.CheckLocation(id);
 
+            return id;
+        }
+
+        public static void CheckLocation(long locationId)
+        {
+            if (CheckedLocations.Add(locationId))
+            {
+                Patcher.Logger.LogInfo($"CheckLocation({locationId})");
+                var locationsToCheck = CheckedLocations.Except(Session.Locations.AllLocationsChecked);
+                Patcher.Logger.LogInfo("# of Locations Checked: " + locationsToCheck.Count());
+                foreach (var location in locationsToCheck)
+                {
+                    Patcher.Logger.LogInfo("Location: " + location);
+                }
+
+                Task.Run(() =>
+                {
+                    Session.Locations.CompleteLocationChecksAsync(
+                        locationsToCheck.ToArray());
+                }).ConfigureAwait(false);
+            }
         }
     }
 }
