@@ -169,7 +169,6 @@ namespace Archipelago.MonsterSanctuary.Client
             }
 
             Monster monster = monsterObject.GetComponent<Monster>();
-            Patcher.Logger.LogInfo("Monster: " + monster);
 
             if (monster == null)
             {
@@ -188,7 +187,6 @@ namespace Archipelago.MonsterSanctuary.Client
         /// <returns></returns>
         public static GameObject GetReplacementMonster(string locationId)
         {
-            Patcher.Logger.LogInfo("GetReplacementMonster");
             locationId = GetMappedLocation(locationId);
 
             if (MonstersCache.ContainsKey(locationId))
@@ -198,6 +196,19 @@ namespace Archipelago.MonsterSanctuary.Client
 
             Patcher.Logger.LogWarning($"Location '{locationId}' is not in the monster cache");
             return null;
+        }
+
+        /// <summary>
+        ///  Given the scene name for a champion encounter, return the original champion from that location
+        /// </summary>
+        /// <param name="region"></param>
+        /// <returns></returns>
+        public static GameObject GetReverseChampionReplacement(string region)
+        {
+            var kvp = ChampionLocations.FirstOrDefault(kvp => kvp.Value.Contains(region));
+            if (kvp.Key == null)
+                return null;
+            return GetMonsterByName(kvp.Key);
         }
 
         /// <summary>

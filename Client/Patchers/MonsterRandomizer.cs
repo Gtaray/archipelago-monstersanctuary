@@ -24,16 +24,12 @@ namespace Archipelago.MonsterSanctuary.Client
             private static void Postfix(ref bool __result, ProgressManager __instance, Monster champion)
             {
                 string monsterName = champion.GetName();
-                Logger.LogInfo($"WasChampionKilled({monsterName})");
-
                 var monster = GameData.GetReplacementChampion(monsterName);
 
                 for (int i = 0; i < __instance.ChampionScores.Count; i++)
                 {
                     if (__instance.ChampionScores[i].ChampionId == monster.ID)
                     {
-                        Logger.LogInfo(__instance.ChampionScores[i]);
-                        Logger.LogInfo(__instance.ChampionScores[i].ChampionId);
                         __result = true;
                         return;
                     }
@@ -42,6 +38,30 @@ namespace Archipelago.MonsterSanctuary.Client
                 // If we got down here, then we didn't find any scores for the randomized champ
                 // which means we haven't fought it yet.
                 __result = false;
+            }
+
+            [HarmonyPatch(typeof(SkillManager), "GetChampionPassive")]
+            private class SkillManager_GetChampionPassive
+            {
+                [UsedImplicitly]
+                private static void Postfix(ref PassiveChampion __result, SkillManager __instance, bool recursive)
+                {
+                    if (recursive)
+                        return;
+                    if (GameController.Instance == null)
+                        return;
+                    if (GameController.Instance.CurrentSceneName == null)
+                        return;
+
+                    var go = GameData.GetReverseChampionReplacement(GameController.Instance.CurrentSceneName);
+                    if (go == null)
+                        return;
+
+                    var monster = go.GetComponent<Monster>();
+                    __result = go
+                        .GetComponent<SkillManager>()
+                        .GetChampionPassive(true, monster.Index);
+                }
             }
 
             /// <summary>
@@ -59,15 +79,14 @@ namespace Archipelago.MonsterSanctuary.Client
 
                     Logger.LogInfo("SetupEncounterConfigEnemies()");
 
+                    encounter.VariableLevel = true; // We force this to true so that super champions aren't locked to level 42
                     MonsterEncounter.EncounterConfig encounterConfig = encounter.DetermineEnemy();
-                    Logger.LogInfo("Determined enemy count: " + encounterConfig.Monster.Count());
 
                     // Replace the monsters in encounterConfig. We do this outside of the foreach loop below because if a 1 monster champion fight is replaced with a 3 monster champion fight
                     // it breaks things really bad (there's only one monster in encounterConfig.Monster, so only the first replacement is ever applied).
                     List<GameObject> replacementMonsters = new List<GameObject>();
                     for (int i = 0; i < 3; i++)
                     {
-                        Logger.LogInfo($"Getting monster for location {GameController.Instance.CurrentSceneName}_{encounter.ID}_{i}");
                         GameObject monsterPrefab = GameData.GetReplacementMonster($"{GameController.Instance.CurrentSceneName}_{encounter.ID}_{i}");
                         if (monsterPrefab != null)
                         {
@@ -86,7 +105,6 @@ namespace Archipelago.MonsterSanctuary.Client
                     int num2 = 0;
                     foreach (GameObject gameObject in encounterConfig.Monster)
                     {
-                        Logger.LogInfo("Monster: " + gameObject.name);
                         if (num2 >= num)
                         {
                             break;
@@ -101,7 +119,6 @@ namespace Archipelago.MonsterSanctuary.Client
                         list.Add(component);
                         if (isChampion)
                         {
-                            Logger.LogInfo("This is a Champion");
                             component.SkillManager.LearnChampionSkills(encounter, encounterConfig.Monster.Length == 1 || num2 == 1);
                         }
                         num2++;
@@ -115,8 +132,14 @@ namespace Archipelago.MonsterSanctuary.Client
                             EncounterShiftData encounterShiftData;
                             if (ProgressManager.Instance.GetRecentEncounter(GameController.Instance.CurrentSceneName, encounter.ID, out encounterShiftData))
                             {
-                                list[0].SetShift((EShift)encounterShiftData.Monster1Shift);
-                                list[1].SetShift((EShift)encounterShiftData.Monster2Shift);
+                                if (list.Count > 0)
+                                {
+                                    list[0].SetShift((EShift)encounterShiftData.Monster1Shift);
+                                }
+                                if (list.Count > 1)
+                                {
+                                    list[1].SetShift((EShift)encounterShiftData.Monster2Shift);
+                                }
                                 if (list.Count > 2)
                                 {
                                     list[2].SetShift((EShift)encounterShiftData.Monster3Shift);
@@ -132,7 +155,12 @@ namespace Archipelago.MonsterSanctuary.Client
                                     list[index].SetShift(shift);
                                     ProgressManager.Instance.SetBool("LastMonsterShifted", !@bool, true);
                                 }
-                                ProgressManager.Instance.AddRecentEncounter(GameController.Instance.CurrentSceneName, encounter.ID, list[0].Shift, list[1].Shift, (list.Count > 2) ? list[2].Shift : EShift.Normal);
+                                ProgressManager.Instance.AddRecentEncounter(
+                                    GameController.Instance.CurrentSceneName, 
+                                    encounter.ID,
+                                    (list.Count > 0) ? list[0].Shift : EShift.Normal,
+                                    (list.Count > 1) ? list[1].Shift : EShift.Normal, 
+                                    (list.Count > 2) ? list[2].Shift : EShift.Normal);
                             }
                         }
 
@@ -207,7 +235,6 @@ namespace Archipelago.MonsterSanctuary.Client
                 [UsedImplicitly]
                 private static bool Prefix(RandomizerMonsterReplacer __instance)
                 {
-                    Logger.LogInfo("RandomizerMonsterReplacer.Awake()");
                     if (!APState.IsConnected)
                     {
                         Logger.LogInfo("Not connected");
@@ -224,12 +251,10 @@ namespace Archipelago.MonsterSanctuary.Client
                     Monster component = __instance.OriginalMonster.GetComponent<Monster>();
                     Monster monster = null;
 
-                    Logger.LogInfo("Champion id: " + champion_id);
 
                     if (GameData.NPCs.ContainsKey(champion_id))
                     {
                         monster = GameData.GetReplacementMonster(GameData.NPCs[champion_id]).GetComponent<Monster>();
-                        Logger.LogInfo("NPC monster found, replaced with " + monster);
                     }
                     else
                     {

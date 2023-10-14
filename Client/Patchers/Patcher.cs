@@ -11,6 +11,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
+using Team17.Online;
 using UnityEngine;
 
 namespace Archipelago.MonsterSanctuary.Client
@@ -127,7 +128,10 @@ namespace Archipelago.MonsterSanctuary.Client
             {
                 if (name == "SanctuaryShifted")
                 {
-                    if (SlotData.MonsterShiftRule == ShiftFlag.Any)
+                    // Hacky hack to prevent starter monsters from being shifted
+                    if (PlayerController.Instance.Monsters.Active.Count <= 1)
+                        __result = false;
+                    else if (SlotData.MonsterShiftRule == ShiftFlag.Any)
                         __result = true;
                     else if (SlotData.MonsterShiftRule == ShiftFlag.Never)
                         __result = false;

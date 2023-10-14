@@ -12,6 +12,7 @@ using UnityEngine;
 using Archipelago.MultiClient.Net.MessageLog.Messages;
 using Archipelago.MultiClient.Net.Helpers;
 using System.Xml.Linq;
+using Archipelago.MultiClient.Net.Packets;
 
 namespace Archipelago.MonsterSanctuary.Client
 {
@@ -33,6 +34,8 @@ namespace Archipelago.MonsterSanctuary.Client
         public static ArchipelagoSession Session;
         public static bool Authenticated;
         public static HashSet<long> CheckedLocations = new HashSet<long>();
+
+        public static float ItemDequeueTimeout;
 
         public static bool Connect()
         {
@@ -160,8 +163,16 @@ namespace Archipelago.MonsterSanctuary.Client
             foreach (var location in GameData.MonsterLocations)
             {
                 var id = Session.Locations.GetLocationIdFromName("Monster Sanctuary", location);
+                if (id < 0)
+                {
+                    Patcher.Logger.LogWarning($"Could not find monster at {location}");
+                    continue;
+                }
                 if (ids.ContainsKey(id))
+                {
                     Patcher.Logger.LogWarning("Duplicate location: " + location);
+                    continue;
+                }
                 ids.Add(id, location);
             }
             var info = Session.Locations.ScoutLocationsAsync(ids.Keys.ToArray()).GetAwaiter().GetResult();
@@ -174,11 +185,18 @@ namespace Archipelago.MonsterSanctuary.Client
         
         public static void ReceiveItem(ReceivedItemsHelper helper)
         {
-            Patcher.Logger.LogInfo("ItemReceived()");
             var item = helper.DequeueItem();
             var name = helper.GetItemName(item.Item);
-            Patcher.Logger.LogInfo("Item Name: " + name);
-            Patcher.ReceiveItem(name, item.Location);
+            var action = Session.ConnectionInfo.Slot == item.Player
+                ? ItemTransferType.Aquired // We found our own item
+                : ItemTransferType.Received; // Someone else found our item
+
+            // We don't care about these, they're just flags
+            if (name == "Champion Defeated")
+                return;
+
+            Patcher.Logger.LogInfo("Item Received: " + name + ", (" + item.Location + ")");
+            Patcher.QueueItemTransfer(item.Item, item.Player, item.Location, action);
         }
 
         public static long CheckLocation(string location)
@@ -201,17 +219,22 @@ namespace Archipelago.MonsterSanctuary.Client
             {
                 Patcher.Logger.LogInfo($"CheckLocation({locationId})");
                 var locationsToCheck = CheckedLocations.Except(Session.Locations.AllLocationsChecked);
-                Patcher.Logger.LogInfo("# of Locations Checked: " + locationsToCheck.Count());
-                foreach (var location in locationsToCheck)
-                {
-                    Patcher.Logger.LogInfo("Location: " + location);
-                }
 
                 Task.Run(() =>
                 {
                     Session.Locations.CompleteLocationChecksAsync(
                         locationsToCheck.ToArray());
                 }).ConfigureAwait(false);
+
+                var packet = Session.Locations.ScoutLocationsAsync(true, locationsToCheck.ToArray()).Result;
+                foreach (var location in packet.Locations)
+                {
+                    if (Session.ConnectionInfo.Slot == location.Player)
+                        continue;
+
+                    Patcher.Logger.LogInfo("Item Sent: " + Session.Items.GetItemName(location.Item));
+                    Patcher.QueueItemTransfer(location.Item, location.Player, location.Location, ItemTransferType.Sent);
+                }
             }
         }
     }
