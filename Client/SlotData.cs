@@ -12,10 +12,12 @@ namespace Archipelago.MonsterSanctuary.Client
         Normal = 1, // Monsters only shift after sun palace
         Any = 2     // Monsters can be shifted any time
     }
+
     public class SlotData
     {
         public static int ExpMultiplier { get; set; } = 1;
         public static bool AlwaysGetEgg { get; set; } = false;
         public static ShiftFlag MonsterShiftRule { get; set; } = ShiftFlag.Normal;
+        public static bool SkipIntro { get; set; } = false;
     }
 }

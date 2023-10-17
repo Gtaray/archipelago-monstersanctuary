@@ -1,12 +1,18 @@
 ﻿using Archipelago.MultiClient.Net.Models;
 using HarmonyLib;
 using JetBrains.Annotations;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Diagnostics.Eventing.Reader;
+using System.IO;
 using System.Linq;
 using System.Runtime.Remoting.Messaging;
+using System.Text;
 using System.Text.RegularExpressions;
+using UnityEngine;
+using UnityEngine.SceneManagement;
 using static PopupController;
 
 namespace Archipelago.MonsterSanctuary.Client
@@ -14,6 +20,32 @@ namespace Archipelago.MonsterSanctuary.Client
     public partial class Patcher
     {
         private static ConcurrentDictionary<long, GrantItemsAction> _giftActions = new();
+
+        #region Persistence
+        private const string ITEM_CACHE_FILENAME = "archipelago_items.json";
+        private static HashSet<long> _itemCache = new HashSet<long>();
+
+        private static void SaveItemsReceived()
+        {
+            string rawPath = Environment.CurrentDirectory;
+            if (rawPath != null)
+            {
+                var bytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(_itemCache));
+                File.WriteAllBytes(Path.Combine(rawPath, ITEM_CACHE_FILENAME), bytes);
+            }
+        }
+
+        private static void LoadItemsReceived()
+        {
+            if (File.Exists(ITEM_CACHE_FILENAME))
+            {
+                var reader = File.OpenText(ITEM_CACHE_FILENAME);
+                var content = reader.ReadToEnd();
+                reader.Close();
+                _itemCache = JsonConvert.DeserializeObject<HashSet<long>>(content);
+            }
+        }
+        #endregion
 
         #region Queue Fucntions
         // Because both items sent and received use the same pop up system to inform the player
@@ -23,6 +55,10 @@ namespace Archipelago.MonsterSanctuary.Client
 
         public static void QueueItemTransfer(long itemId, int playerId, long locationId, ItemTransferType action)
         {
+            // Do not queue a new item if we've already received that item.
+            if (_itemCache.Contains(locationId))
+                return;
+
             var transfer = new ItemTransfer()
             {
                 ItemID = itemId,
@@ -38,6 +74,19 @@ namespace Archipelago.MonsterSanctuary.Client
         #endregion
 
         #region Pathces
+        [HarmonyPatch(typeof(GameController), "LoadStartingArea")]
+        private class GameController_LoadStartingArea
+        {
+            [UsedImplicitly]
+            private static void Prefix()
+            {
+                // Clear the item persistence cache when a new file is created
+                Logger.LogWarning("New Save. Deleting item cache");
+                _itemCache.Clear();
+                SaveItemsReceived();
+            }
+        }
+
         [HarmonyPatch(typeof(Chest), "OpenChest")]
         private class Chest_OpenChest
         {
@@ -106,7 +155,6 @@ namespace Archipelago.MonsterSanctuary.Client
                             nextItem.ItemName, 
                             nextItem.PlayerName, 
                             callback);
-                        return;
                     } 
                     else 
                     {
@@ -116,11 +164,17 @@ namespace Archipelago.MonsterSanctuary.Client
                             nextItem.Action == ItemTransferType.Aquired,
                             callback);
                     }
+
+                    _itemCache.Add(nextItem.LocationID);
+                    SaveItemsReceived();
                 }
             }
 
             private static bool CanGiveItem()
             {
+                // If we're in the intro, then don't send items
+                if (!ProgressManager.Instance.GetBool("FinishedIntro"))
+                    return false;
                 return GameStateManager.Instance.IsExploring();
             }
         }

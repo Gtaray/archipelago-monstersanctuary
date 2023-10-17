@@ -35,8 +35,6 @@ namespace Archipelago.MonsterSanctuary.Client
         public static bool Authenticated;
         public static HashSet<long> CheckedLocations = new HashSet<long>();
 
-        public static float ItemDequeueTimeout;
-
         public static bool Connect()
         {
             if (Authenticated)
@@ -57,6 +55,7 @@ namespace Archipelago.MonsterSanctuary.Client
             Session.Socket.ErrorReceived += Session_ErrorReceived;
             Session.Socket.SocketClosed += Session_SocketClosed;
             Session.Socket.PacketReceived += Session_PacketReceived;
+            Session.Items.ItemReceived += ReceiveItem;
 
             string rawPath = Environment.CurrentDirectory;
             if (rawPath != null)
@@ -79,7 +78,7 @@ namespace Archipelago.MonsterSanctuary.Client
             {
                 Authenticated = true;
                 State = ConnectionState.Connected;
-                LoadSlotData(loginSuccess.SlotData);
+                LoadSlotDataUpdated(loginSuccess.SlotData);
             }
             else if (loginResult is LoginFailure loginFailure)
             {
@@ -89,11 +88,6 @@ namespace Archipelago.MonsterSanctuary.Client
             }
 
             LoadMonsterLocationData();
-
-            Session.Items.ItemReceived += (receivedItemsHelper) =>
-            {
-                ReceiveItem(receivedItemsHelper);
-            };
 
             // If the player opened chests while not connected, this get those items upon connection
             if (CheckedLocations != null)
@@ -154,6 +148,29 @@ namespace Archipelago.MonsterSanctuary.Client
                         SlotData.MonsterShiftRule = ShiftFlag.Any;
                         break;
                 }
+
+            SlotData.SkipIntro = bool.Parse(slotData["skip_intro"].ToString());
+        }
+
+        public static void LoadSlotDataUpdated(Dictionary<string, object> slotData)
+        {
+            Debug.Log("SlotData: " + JsonConvert.SerializeObject(slotData));
+            SlotData.ExpMultiplier = int.Parse(slotData["exp_multiplier"].ToString());
+            SlotData.AlwaysGetEgg = int.Parse(slotData["monsters_always_drop_egg"].ToString()) == 1;
+            switch (int.Parse(slotData["monster_shift_rule"].ToString()))
+            {
+                case (0):
+                    SlotData.MonsterShiftRule = ShiftFlag.Never;
+                    break;
+                case (1):
+                    SlotData.MonsterShiftRule = ShiftFlag.Normal;
+                    break;
+                case (2):
+                    SlotData.MonsterShiftRule = ShiftFlag.Any;
+                    break;
+            }
+
+            SlotData.SkipIntro = int.Parse(slotData["skip_intro"].ToString()) == 1;
         }
 
         public static void LoadMonsterLocationData()
@@ -226,15 +243,20 @@ namespace Archipelago.MonsterSanctuary.Client
                         locationsToCheck.ToArray());
                 }).ConfigureAwait(false);
 
-                var packet = Session.Locations.ScoutLocationsAsync(true, locationsToCheck.ToArray()).Result;
-                foreach (var location in packet.Locations)
-                {
-                    if (Session.ConnectionInfo.Slot == location.Player)
-                        continue;
+                Task.Run(() => ScoutLocation(locationsToCheck.ToArray()));
+            }
+        }
 
-                    Patcher.Logger.LogInfo("Item Sent: " + Session.Items.GetItemName(location.Item));
-                    Patcher.QueueItemTransfer(location.Item, location.Player, location.Location, ItemTransferType.Sent);
-                }
+        private static async Task ScoutLocation(long[] locationsToCheck)
+        {
+            var packet = await Session.Locations.ScoutLocationsAsync(false, locationsToCheck);
+            foreach (var location in packet.Locations)
+            {
+                if (Session.ConnectionInfo.Slot == location.Player)
+                    continue;
+
+                Patcher.Logger.LogInfo("Item Sent: " + Session.Items.GetItemName(location.Item));
+                Patcher.QueueItemTransfer(location.Item, location.Player, location.Location, ItemTransferType.Sent);
             }
         }
     }

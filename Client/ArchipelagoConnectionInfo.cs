@@ -8,7 +8,8 @@ namespace Archipelago.MonsterSanctuary.Client
     {
         public string host_name;
         public string slot_name;
-        public string password; 
+        public string password;
+        public int item_index;
 
         public bool Valid => !(string.IsNullOrEmpty(host_name) || string.IsNullOrEmpty(slot_name));
     }

@@ -40,27 +40,23 @@ namespace Archipelago.MonsterSanctuary.Client
                 __result = false;
             }
 
-            [HarmonyPatch(typeof(SkillManager), "GetChampionPassive")]
-            private class SkillManager_GetChampionPassive
+            [HarmonyPatch(typeof(GameModeManager), "GetReverseReplacement")]
+            private class GameModeManager_GetReverseReplacement
             {
                 [UsedImplicitly]
-                private static void Postfix(ref PassiveChampion __result, SkillManager __instance, bool recursive)
+                private static bool Prefix(ref Monster __result, Monster monster)
                 {
-                    if (recursive)
-                        return;
-                    if (GameController.Instance == null)
-                        return;
-                    if (GameController.Instance.CurrentSceneName == null)
-                        return;
+                    string loc = $"{GameController.Instance.CurrentSceneName}_{monster.Encounter?.ID}_{monster.Index}";
 
-                    var go = GameData.GetReverseChampionReplacement(GameController.Instance.CurrentSceneName);
-                    if (go == null)
-                        return;
+                    // If the monster we're checking for does not have an encounter, then we 
+                    // default to the original function
+                    if (!GameData.MonsterLocations.Contains(loc))
+                        return true;
 
-                    var monster = go.GetComponent<Monster>();
-                    __result = go
-                        .GetComponent<SkillManager>()
-                        .GetChampionPassive(true, monster.Index);
+                    // If this monster is randomized, then we simply return the new monster and treat
+                    // it as if it were the original
+                    __result = monster;
+                    return false;
                 }
             }
 
@@ -79,7 +75,8 @@ namespace Archipelago.MonsterSanctuary.Client
 
                     Logger.LogInfo("SetupEncounterConfigEnemies()");
 
-                    encounter.VariableLevel = true; // We force this to true so that super champions aren't locked to level 42
+                    if (isChampion)
+                        encounter.VariableLevel = true; // We force this to true so that super champions aren't locked to level 42
                     MonsterEncounter.EncounterConfig encounterConfig = encounter.DetermineEnemy();
 
                     // Replace the monsters in encounterConfig. We do this outside of the foreach loop below because if a 1 monster champion fight is replaced with a 3 monster champion fight

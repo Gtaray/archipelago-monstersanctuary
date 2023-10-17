@@ -29,6 +29,8 @@ namespace Archipelago.MonsterSanctuary.Client
 
             // Plugin startup logic
             new Harmony(MyPluginInfo.PLUGIN_GUID).PatchAll(Assembly.GetExecutingAssembly());
+
+            LoadItemsReceived();
         }
 
         [HarmonyPatch(typeof(MainMenu))]
