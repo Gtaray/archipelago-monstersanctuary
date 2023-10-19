@@ -37,6 +37,9 @@ namespace Archipelago.MonsterSanctuary.Client
         // with randomized monsters
         public static Dictionary<string, string> ChampionLocations = new Dictionary<string, string>();
 
+        // The number of chest/gift locations in each area
+        public static Dictionary<string, int> NumberOfChecks = new Dictionary<string, int>();
+
         public static void Load()
         {
             // Load the subsections data into the dictionary
@@ -90,6 +93,16 @@ namespace Archipelago.MonsterSanctuary.Client
                 ChampionLocations = JsonConvert.DeserializeObject<Dictionary<string, string>>(json);
                 Patcher.Logger.LogInfo($"Loaded {ChampionLocations.Count()} champion locations");
             }
+
+            // Loads chest/gift counts for each region
+            using (Stream stream = assembly.GetManifestResourceStream(
+                "Archipelago.MonsterSanctuary.Client.data.number_of_checks.json"))
+            using (StreamReader reader = new StreamReader(stream))
+            {
+                string json = reader.ReadToEnd();
+                NumberOfChecks = JsonConvert.DeserializeObject<Dictionary<string, int>>(json);
+                Patcher.Logger.LogInfo($"Loaded {NumberOfChecks.Sum(kvp => kvp.Value)} chest/gift locations");
+            }
         }
         
         /// <summary>
@@ -99,7 +112,6 @@ namespace Archipelago.MonsterSanctuary.Client
         /// <param name="monsterName"></param>
         public static void AddMonster(string locationId, string monsterName)
         {
-            Patcher.Logger.LogInfo($"AddMonster({locationId}, {monsterName})");
             var gameObject = GetMonsterByName(monsterName);
             if (gameObject == null)
             {

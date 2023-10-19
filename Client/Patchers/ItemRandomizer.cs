@@ -14,6 +14,7 @@ using System.Text.RegularExpressions;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using static PopupController;
+using static System.Collections.Specialized.BitVector32;
 
 namespace Archipelago.MonsterSanctuary.Client
 {
@@ -66,6 +67,7 @@ namespace Archipelago.MonsterSanctuary.Client
                 PlayerID = playerId,
                 PlayerName = APState.Session.Players.GetPlayerName(playerId),
                 LocationID = locationId,
+                LocationName = APState.Session.Locations.GetLocationNameFromId(locationId),
                 Action = action
             };
 
@@ -75,7 +77,7 @@ namespace Archipelago.MonsterSanctuary.Client
 
         #region Pathces
         [HarmonyPatch(typeof(GameController), "LoadStartingArea")]
-        private class GameController_LoadStartingArea
+        private class GameController_ClearItemCacheOnNewGame
         {
             [UsedImplicitly]
             private static void Prefix()
@@ -97,7 +99,9 @@ namespace Archipelago.MonsterSanctuary.Client
                     return;
 
                 string locName = $"{GameController.Instance.CurrentSceneName}_{__instance.ID}";
-                APState.CheckLocation(GameData.GetMappedLocation(locName));
+                var locationId = APState.CheckLocation(GameData.GetMappedLocation(locName));
+                if (locationId < 0)
+                    return;
 
                 __instance.Item = null;
                 __instance.Gold = 0;
@@ -116,6 +120,8 @@ namespace Archipelago.MonsterSanctuary.Client
 
                 string locName = $"{GameController.Instance.CurrentSceneName}_{__instance.ID}";
                 var locationId = APState.CheckLocation(GameData.GetMappedLocation(locName));
+                if (locationId < 0)
+                    return true;
 
                 _giftActions.TryAdd(locationId, __instance);
 
@@ -167,6 +173,8 @@ namespace Archipelago.MonsterSanctuary.Client
 
                     _itemCache.Add(nextItem.LocationID);
                     SaveItemsReceived();
+
+                    AddAndUpdateChecksRemaining(nextItem.LocationName);
                 }
             }
 

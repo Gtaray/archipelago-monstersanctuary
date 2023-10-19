@@ -21,5 +21,6 @@ namespace Archipelago.MonsterSanctuary.Client
         public long ItemID { get; set; }
         public int PlayerID { get; set; }
         public long LocationID { get; set; }
+        public string LocationName { get; set; }
     }
 }

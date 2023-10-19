@@ -21,6 +21,7 @@
     <None Remove="data\monsters.json" />
     <None Remove="data\monster_locations.json" />
     <None Remove="data\npcs.json" />
+    <None Remove="data\number_of_checks.json" />
     <None Remove="data\subsections.json" />
   </ItemGroup>
 
@@ -32,6 +33,7 @@
 
   <ItemGroup>
     <EmbeddedResource Include="data\npcs.json" />
+    <EmbeddedResource Include="data\number_of_checks.json" />
     <EmbeddedResource Include="data\subsections.json" />
   </ItemGroup>
 

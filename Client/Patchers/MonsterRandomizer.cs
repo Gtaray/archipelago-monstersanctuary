@@ -73,7 +73,6 @@ namespace Archipelago.MonsterSanctuary.Client
                     if (!APState.IsConnected)
                         return true;
 
-                    Logger.LogInfo("SetupEncounterConfigEnemies()");
 
                     if (isChampion)
                         encounter.VariableLevel = true; // We force this to true so that super champions aren't locked to level 42
@@ -122,7 +121,7 @@ namespace Archipelago.MonsterSanctuary.Client
                     }
 
                     // Eventually want this to include rando settings so things can be shifted any time
-                    if (ProgressManager.Instance.GetBool("SanctuaryShifted"))
+                    if (SlotData.MonsterShiftRule != ShiftFlag.Never && (ProgressManager.Instance.GetBool("SanctuaryShifted") || SlotData.MonsterShiftRule == ShiftFlag.Any))
                     {
                         if (!isChampion && encounter.IsNormalEncounter)
                         {
@@ -234,7 +233,6 @@ namespace Archipelago.MonsterSanctuary.Client
                 {
                     if (!APState.IsConnected)
                     {
-                        Logger.LogInfo("Not connected");
                         return true;
                     }
 

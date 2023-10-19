@@ -31,6 +31,7 @@ namespace Archipelago.MonsterSanctuary.Client
             new Harmony(MyPluginInfo.PLUGIN_GUID).PatchAll(Assembly.GetExecutingAssembly());
 
             LoadItemsReceived();
+            LoadChecksRemaining();
         }
 
         [HarmonyPatch(typeof(MainMenu))]
@@ -40,7 +41,6 @@ namespace Archipelago.MonsterSanctuary.Client
             [HarmonyPostfix]
             public static void CreateArchipelagoUI()
             {
-                Logger.LogInfo("Creating Archipelago UI Component");
                 var guiObject = new GameObject();
                 APState.UI = guiObject.AddComponent<ArchipelagoUI>();
                 GameObject.DontDestroyOnLoad(guiObject);
@@ -60,7 +60,12 @@ namespace Archipelago.MonsterSanctuary.Client
             [UsedImplicitly]
             private static void Postfix(ref int __result)
             {
-                __result = __result * SlotData.ExpMultiplier;
+                // Only multiply reward if we're in combat
+                // This should prevent the game from using this multiplier when scaling enemies.
+                if (GameStateManager.Instance.IsCombat())
+                {
+                    __result = __result * SlotData.ExpMultiplier;
+                }
             }
         }
 
@@ -119,25 +124,6 @@ namespace Archipelago.MonsterSanctuary.Client
                 }
 
                 return true;
-            }
-        }
-
-        [HarmonyPatch(typeof(ProgressManager), "GetBool")]
-        private class ProgressManager_GetBool
-        {
-            [UsedImplicitly]
-            private static void Postfix(ref bool __result, ProgressManager __instance, string name)
-            {
-                if (name == "SanctuaryShifted")
-                {
-                    // Hacky hack to prevent starter monsters from being shifted
-                    if (PlayerController.Instance.Monsters.Active.Count <= 1)
-                        __result = false;
-                    else if (SlotData.MonsterShiftRule == ShiftFlag.Any)
-                        __result = true;
-                    else if (SlotData.MonsterShiftRule == ShiftFlag.Never)
-                        __result = false;
-                }
             }
         }
     }

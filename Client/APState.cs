@@ -234,7 +234,6 @@ namespace Archipelago.MonsterSanctuary.Client
         {
             if (CheckedLocations.Add(locationId))
             {
-                Patcher.Logger.LogInfo($"CheckLocation({locationId})");
                 var locationsToCheck = CheckedLocations.Except(Session.Locations.AllLocationsChecked);
 
                 Task.Run(() =>
