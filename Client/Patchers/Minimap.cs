@@ -82,7 +82,7 @@ namespace Archipelago.MonsterSanctuary.Client
                 var keytext = __instance.gameObject.transform.Find("KeyAmount");
                 var chesttext = GameObject.Instantiate(keytext);
                 chesttext.name = "ChestAmount";
-                chesttext.transform.localPosition = new Vector3(-13, 21, 0);
+                chesttext.transform.localPosition = new Vector3(-13, 21, -0.5f);
                 chesttext.transform.SetParent(__instance.gameObject.transform);
             }
         }
@@ -93,7 +93,7 @@ namespace Archipelago.MonsterSanctuary.Client
             private static void Postfix(MinimapView __instance)
             {
                 var chesttext = __instance.gameObject.transform.Find("ChestAmount");
-                chesttext.transform.localPosition = new Vector3(-13, 21, 0);
+                chesttext.transform.localPosition = new Vector3(-13, 21, -0.5f);
             }
         }
 
@@ -103,7 +103,7 @@ namespace Archipelago.MonsterSanctuary.Client
             private static void Postfix(MinimapView __instance)
             {
                 var chesttext = __instance.gameObject.transform.Find("ChestAmount");
-                chesttext.transform.localPosition = new Vector3(-13, 21, 0);
+                chesttext.transform.localPosition = new Vector3(-13, 21, -0.5f);
             }
         }
 

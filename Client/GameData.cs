@@ -40,6 +40,9 @@ namespace Archipelago.MonsterSanctuary.Client
         // The number of chest/gift locations in each area
         public static Dictionary<string, int> NumberOfChecks = new Dictionary<string, int>();
 
+        // Script Nodes that are skipped with plot less
+        public static Dictionary<string, List<int>> PlotlessScriptNodes = new();
+
         public static void Load()
         {
             // Load the subsections data into the dictionary
@@ -102,6 +105,15 @@ namespace Archipelago.MonsterSanctuary.Client
                 string json = reader.ReadToEnd();
                 NumberOfChecks = JsonConvert.DeserializeObject<Dictionary<string, int>>(json);
                 Patcher.Logger.LogInfo($"Loaded {NumberOfChecks.Sum(kvp => kvp.Value)} chest/gift locations");
+            }
+
+            // Loads script nodes that are skipped with plotless
+            using (Stream stream = assembly.GetManifestResourceStream(
+                "Archipelago.MonsterSanctuary.Client.data.script_nodes.json"))
+            using (StreamReader reader = new StreamReader(stream))
+            {
+                string json = reader.ReadToEnd();
+                PlotlessScriptNodes = JsonConvert.DeserializeObject<Dictionary<string, List<int>>>(json);
             }
         }
         

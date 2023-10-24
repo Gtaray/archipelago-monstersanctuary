@@ -60,10 +60,20 @@ namespace Archipelago.MonsterSanctuary.Client
             if (_itemCache.Contains(locationId))
                 return;
 
+            var itemName = APState.Session.Items.GetItemName(itemId);
+
+            // We don't care about these, they're just flags
+            if (itemName == "Champion Defeated")
+                return;
+
+            // Don't queue an item if the queue already contains that item id.
+            if (_itemQueue.Any(i => i.ItemID == itemId))
+                return;
+
             var transfer = new ItemTransfer()
             {
                 ItemID = itemId,
-                ItemName = APState.Session.Items.GetItemName(itemId),
+                ItemName = itemName,
                 PlayerID = playerId,
                 PlayerName = APState.Session.Players.GetPlayerName(playerId),
                 LocationID = locationId,
@@ -141,7 +151,17 @@ namespace Archipelago.MonsterSanctuary.Client
                     return;
 
                 if (_itemQueue.Count() == 0)
+                {
+                    // if the item queue is empty and we have gift actions that need solving
+                    // we simply complete them so we can move on
+                    if (_giftActions.Count() > 0)
+                    {
+                        var kvp = _giftActions.First();
+                        kvp.Value.Finish();
+                        _giftActions.TryRemove(kvp.Key, out var action);
+                    }
                     return;
+                }
 
                 if (_itemQueue.TryDequeue(out ItemTransfer nextItem))
                 {
@@ -175,6 +195,13 @@ namespace Archipelago.MonsterSanctuary.Client
                     SaveItemsReceived();
 
                     AddAndUpdateChecksRemaining(nextItem.LocationName);
+
+                    // If we're reached the end of the item queue,
+                    // resync with the server to make sure we've gotten everything
+                    if (_itemQueue.Count() == 0)
+                    {
+                        APState.Resync();
+                    }
                 }
             }
 

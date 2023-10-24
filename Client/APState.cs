@@ -13,6 +13,9 @@ using Archipelago.MultiClient.Net.MessageLog.Messages;
 using Archipelago.MultiClient.Net.Helpers;
 using System.Xml.Linq;
 using Archipelago.MultiClient.Net.Packets;
+using Archipelago.MultiClient.Net.Models;
+using static System.Collections.Specialized.BitVector32;
+using static MonoMod.Cil.RuntimeILReferenceBag.FastDelegateInvokers;
 
 namespace Archipelago.MonsterSanctuary.Client
 {
@@ -77,22 +80,25 @@ namespace Archipelago.MonsterSanctuary.Client
             if (loginResult is LoginSuccessful loginSuccess)
             {
                 Authenticated = true;
+                
                 State = ConnectionState.Connected;
-                LoadSlotDataUpdated(loginSuccess.SlotData);
+                SlotData.LoadSlotDataUpdated(loginSuccess.SlotData);
+                
+                LoadMonsterLocationData();
+
+                // If the player opened chests while not connected, this get those items upon connection
+                if (CheckedLocations != null)
+                {
+                    Session.Locations.CompleteLocationChecks(CheckedLocations.ToArray());
+                }
+
+                Resync();
             }
             else if (loginResult is LoginFailure loginFailure)
             {
                 Authenticated = false;
                 Patcher.Logger.LogError(String.Join("\n", loginFailure.Errors));
                 Session = null;
-            }
-
-            LoadMonsterLocationData();
-
-            // If the player opened chests while not connected, this get those items upon connection
-            if (CheckedLocations != null)
-            {
-                Session.Locations.CompleteLocationChecks(CheckedLocations.ToArray());
             }
 
             return loginResult.Successful;
@@ -127,50 +133,19 @@ namespace Archipelago.MonsterSanctuary.Client
             {
                 Task.Run(() => { Session.Socket.DisconnectAsync(); }).Wait();
             }
-
             Session = null;
         }
 
-        public static void LoadSlotData(Dictionary<string, object> slotData)
+        public static void Resync()
         {
-            Debug.Log("SlotData: " + JsonConvert.SerializeObject(slotData));
-            SlotData.ExpMultiplier = int.Parse(slotData["exp_multiplier"].ToString());
-                SlotData.AlwaysGetEgg = bool.Parse(slotData["monsters_always_drop_egg"].ToString());
-                switch(slotData["monster_shift_rule"].ToString())
-                {
-                    case ("never"):
-                        SlotData.MonsterShiftRule = ShiftFlag.Never;
-                        break;
-                    case ("after_sun_palace"):
-                        SlotData.MonsterShiftRule = ShiftFlag.Normal;
-                        break;
-                    case ("any_time"):
-                        SlotData.MonsterShiftRule = ShiftFlag.Any;
-                        break;
-                }
-
-            SlotData.SkipIntro = bool.Parse(slotData["skip_intro"].ToString());
-        }
-
-        public static void LoadSlotDataUpdated(Dictionary<string, object> slotData)
-        {
-            Debug.Log("SlotData: " + JsonConvert.SerializeObject(slotData));
-            SlotData.ExpMultiplier = int.Parse(slotData["exp_multiplier"].ToString());
-            SlotData.AlwaysGetEgg = int.Parse(slotData["monsters_always_drop_egg"].ToString()) == 1;
-            switch (int.Parse(slotData["monster_shift_rule"].ToString()))
+            Patcher.Logger.LogInfo("Resyncing Items");
+            foreach (NetworkItem item in Session.Items.AllItemsReceived)
             {
-                case (0):
-                    SlotData.MonsterShiftRule = ShiftFlag.Never;
-                    break;
-                case (1):
-                    SlotData.MonsterShiftRule = ShiftFlag.Normal;
-                    break;
-                case (2):
-                    SlotData.MonsterShiftRule = ShiftFlag.Any;
-                    break;
+                var action = Session.ConnectionInfo.Slot == item.Player
+                    ? ItemTransferType.Aquired // We found our own item
+                    : ItemTransferType.Received; // Someone else found our item
+                Patcher.QueueItemTransfer(item.Item, item.Player, item.Location, action);
             }
-
-            SlotData.SkipIntro = int.Parse(slotData["skip_intro"].ToString()) == 1;
         }
 
         public static void LoadMonsterLocationData()
@@ -207,10 +182,6 @@ namespace Archipelago.MonsterSanctuary.Client
             var action = Session.ConnectionInfo.Slot == item.Player
                 ? ItemTransferType.Aquired // We found our own item
                 : ItemTransferType.Received; // Someone else found our item
-
-            // We don't care about these, they're just flags
-            if (name == "Champion Defeated")
-                return;
 
             Patcher.Logger.LogInfo("Item Received: " + name + ", (" + item.Location + ")");
             Patcher.QueueItemTransfer(item.Item, item.Player, item.Location, action);

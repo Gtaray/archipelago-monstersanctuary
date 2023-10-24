@@ -34,6 +34,41 @@ namespace Archipelago.MonsterSanctuary.Client
                 SceneManager.LoadScene(__instance.CurrentSceneName, LoadSceneMode.Additive);
                 PlayerController.Instance.TimerAvailable = true;
 
+                if (SlotData.SkipPlot)
+                {
+                    ProgressManager.Instance.SetBool("enableMonsterJournal", true);
+                    ProgressManager.Instance.SetBool("KeeperStrongholdTalkEvent", true);
+                    ProgressManager.Instance.SetBool("TriggerOnce3200011", true); // Familiar talks when you enter the stronghold
+
+                    ProgressManager.Instance.SetBool("FirstWillEncounter", true);
+                    ProgressManager.Instance.SetBool("LeonardFightsBlob", true);
+                    ProgressManager.Instance.SetBool("FirstAlchemistEncounter", true);
+                    ProgressManager.Instance.SetBool("MinitaurChampion", true);
+                    ProgressManager.Instance.SetBool("TalkedToWillInLibrary", true);
+                    //ProgressManager.Instance.SetBool("CompletedDuelTraining", true); // Don't set this flag because we still want to be able to go fight him for the item
+                    ProgressManager.Instance.SetBool("CongratulationsDuelTraining", true);
+
+                    ProgressManager.Instance.SetBool("JuliaDungeonEncounter", true);
+                    ProgressManager.Instance.SetBool("JuliaWentToWoods", true);
+                    ProgressManager.Instance.SetBool("WillDungeonEncounter", true);
+                    ProgressManager.Instance.SetBool("WillDungeonEncounter2", true);
+                    ProgressManager.Instance.SetBool("WillDungeonEncounter3", true);
+                    // ProgressManager.Instance.SetBool("AlchemistDungeonEncounter", true); // These two are related to the encounter in the dungeon with the alchemist, and al so have an item
+                    // ProgressManager.Instance.SetBool("AlchemistDungeonEvent", true);
+                    ProgressManager.Instance.SetBool("WillDungeonEncounter4", true);
+                    ProgressManager.Instance.SetBool("WillResearch", true);
+                    ProgressManager.Instance.SetBool("DungeonRoomExplanationEvent", true);
+                    ProgressManager.Instance.SetBool("WillResearchInformation", true);
+
+                    ProgressManager.Instance.SetBool("SnowyPeaksOldBuran", true);
+                    ProgressManager.Instance.SetBool("SnowyPeaksLakeWarning", true);
+                    ProgressManager.Instance.SetBool("OracleEvent", true);
+                    ProgressManager.Instance.SetBool("OracleTalkedTo", true);
+
+                    ProgressManager.Instance.SetBool("CaretakerEvent1", true);
+                    ProgressManager.Instance.SetBool("CaretakerEvent2", true);
+                }
+
                 return false;
             }
         }
@@ -54,6 +89,7 @@ namespace Archipelago.MonsterSanctuary.Client
                 ProgressManager.Instance.SetBool("TriggerOnce495", true, true); // Skip post familiar naming dialog
                 ProgressManager.Instance.SetBool("TriggerOnce68", true, true); // Skip dialog after hatching first egg
                 ProgressManager.Instance.SetBool("TriggerOnce143", true, true); // Skip post second fight dialog
+                ProgressManager.Instance.SetBool("TriggerOnce1009", true, true); // Skip post second fight dialog
                 var method = __instance.GetType().GetMethod("Skip", BindingFlags.NonPublic | BindingFlags.Instance);
                 method.Invoke(__instance, null);
 
@@ -70,6 +106,97 @@ namespace Archipelago.MonsterSanctuary.Client
             }
         }
 
+        private static bool SkipAction(ScriptNode scriptNode)
+        {
+            if (!APState.IsConnected)
+                return true;
+            if (!SlotData.SkipPlot)
+                return true;
+
+            Logger.LogWarning("Room in dict? " + GameData.PlotlessScriptNodes.ContainsKey(GameController.Instance.CurrentSceneName));
+            if (!GameData.PlotlessScriptNodes.ContainsKey(GameController.Instance.CurrentSceneName))
+                return true;
+
+            Logger.LogWarning("Skipping script node '" + scriptNode.ID + "'? " + GameData.PlotlessScriptNodes[GameController.Instance.CurrentSceneName].Contains(scriptNode.ID));
+            bool skip = GameData.PlotlessScriptNodes[GameController.Instance.CurrentSceneName].Contains(scriptNode.ID);
+            if (skip)
+                scriptNode.Finish();
+
+            return !skip;
+        }
+
+        [HarmonyPatch(typeof(DialogueAction), "StartNode")]
+        private class DialogueAction_StartNode
+        {
+            private static bool Prefix(DialogueAction __instance)
+            {
+                return SkipAction(__instance);
+            }
+        }
+
+        [HarmonyPatch(typeof(PositionFollowerAction), "StartNode")]
+        private class PositionFollowerAction_StartNode
+        {
+            private static bool Prefix(PositionFollowerAction __instance)
+            {
+                return SkipAction(__instance);
+            }
+        }
+
+        [HarmonyPatch(typeof(MovePlayerAction), "StartNode")]
+        private class MovePlayerAction_StartNode
+        {
+            private static bool Prefix(MovePlayerAction __instance)
+            {
+                return SkipAction(__instance);
+            }
+        }
+
+        [HarmonyPatch(typeof(UpgradeAction), "StartNode")]
+        private class UpgradeAction_StartNode
+        {
+            private static bool Prefix(UpgradeAction __instance)
+            {
+                return SkipAction(__instance);
+            }
+        }
+
+        [HarmonyPatch(typeof(SetVisibleAction), "StartNode")]
+        private class SetVisibleAction_StartNode
+        {
+            private static bool Prefix(UpgradeAction __instance)
+            {
+                return SkipAction(__instance);
+            }
+        }
+
+        [HarmonyPatch(typeof(MoveAction), "StartNode")]
+        private class MoveAction_StartNode
+        {
+            private static bool Prefix(UpgradeAction __instance)
+            {
+                return SkipAction(__instance);
+            }
+        }
+
+        [HarmonyPatch(typeof(SetDirectionAction), "StartNode")]
+        private class SetDirectionAction_StartNode
+        {
+            private static bool Prefix(UpgradeAction __instance)
+            {
+                return SkipAction(__instance);
+            }
+        }
+
+        [HarmonyPatch(typeof(WaitAction), "StartNode")]
+        private class WaitAction_StartNode
+        {
+            private static bool Prefix(UpgradeAction __instance)
+            {
+                return SkipAction(__instance);
+            }
+        }
+
         [HarmonyPatch(typeof(TouchTrigger), "Touch")]
         private class TouchTrigger_Touch
         {
@@ -83,6 +210,17 @@ namespace Archipelago.MonsterSanctuary.Client
                 {
                     // Skipping intro should disable the touch trigger in the first room
                     return !SlotData.SkipIntro;
+                }
+
+                if (GameController.Instance.CurrentSceneName == "MountainPath_North5"
+                    && __instance.ID == 86)
+                {
+                    return !SlotData.SkipPlot;
+                }
+                if (GameController.Instance.CurrentSceneName == "KeeperStronghold_KeepersTower"
+                    && __instance.ID == 578)
+                {
+                    return !SlotData.SkipPlot;
                 }
 
                 return true;
