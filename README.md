@@ -82,6 +82,10 @@ This connection info is saved and will re-populate when you run the game in the 
 - `exp_multiplier`:
 	- Multiplier for experienced gained.
 	- Range from 1 to 5
+ - `skip_intro`:
+	- Skip the cut scenes, dialog, and tutorial fight at the beginning of the game.
+ 	- 0: No
+  	- 1: Yes
 - `goal`:
 	- Victory condition for the game
 	- 0: Defeat Mard Lord
