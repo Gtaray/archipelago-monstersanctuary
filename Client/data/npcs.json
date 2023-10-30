@@ -1,6 +1,6 @@
 // In cases where there is a monster NPC on screen that isn't an encounter, but we still want to replace their sprite with a randomized version.
 {
-  "MountainPath_North5_ManticorbNPC": "MountainPath_North2_2_0",
+  "MountainPath_North5_ManticorbNPC": "MountainPath_NorthHidden_2_0",
   "MountainPath_West6_MechGolem": "MountainPath_West6_3_0",
   "MountainPath_Center7_Monk": "MountainPath_Center7_1_0",
   "SunPalace_North3_Kanko": "SunPalace_North3_3_0"

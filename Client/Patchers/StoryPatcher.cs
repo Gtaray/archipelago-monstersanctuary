@@ -34,41 +34,6 @@ namespace Archipelago.MonsterSanctuary.Client
                 SceneManager.LoadScene(__instance.CurrentSceneName, LoadSceneMode.Additive);
                 PlayerController.Instance.TimerAvailable = true;
 
-                if (SlotData.SkipPlot)
-                {
-                    ProgressManager.Instance.SetBool("enableMonsterJournal", true);
-                    ProgressManager.Instance.SetBool("KeeperStrongholdTalkEvent", true);
-                    ProgressManager.Instance.SetBool("TriggerOnce3200011", true); // Familiar talks when you enter the stronghold
-
-                    ProgressManager.Instance.SetBool("FirstWillEncounter", true);
-                    ProgressManager.Instance.SetBool("LeonardFightsBlob", true);
-                    ProgressManager.Instance.SetBool("FirstAlchemistEncounter", true);
-                    ProgressManager.Instance.SetBool("MinitaurChampion", true);
-                    ProgressManager.Instance.SetBool("TalkedToWillInLibrary", true);
-                    //ProgressManager.Instance.SetBool("CompletedDuelTraining", true); // Don't set this flag because we still want to be able to go fight him for the item
-                    ProgressManager.Instance.SetBool("CongratulationsDuelTraining", true);
-
-                    ProgressManager.Instance.SetBool("JuliaDungeonEncounter", true);
-                    ProgressManager.Instance.SetBool("JuliaWentToWoods", true);
-                    ProgressManager.Instance.SetBool("WillDungeonEncounter", true);
-                    ProgressManager.Instance.SetBool("WillDungeonEncounter2", true);
-                    ProgressManager.Instance.SetBool("WillDungeonEncounter3", true);
-                    // ProgressManager.Instance.SetBool("AlchemistDungeonEncounter", true); // These two are related to the encounter in the dungeon with the alchemist, and al so have an item
-                    // ProgressManager.Instance.SetBool("AlchemistDungeonEvent", true);
-                    ProgressManager.Instance.SetBool("WillDungeonEncounter4", true);
-                    ProgressManager.Instance.SetBool("WillResearch", true);
-                    ProgressManager.Instance.SetBool("DungeonRoomExplanationEvent", true);
-                    ProgressManager.Instance.SetBool("WillResearchInformation", true);
-
-                    ProgressManager.Instance.SetBool("SnowyPeaksOldBuran", true);
-                    ProgressManager.Instance.SetBool("SnowyPeaksLakeWarning", true);
-                    ProgressManager.Instance.SetBool("OracleEvent", true);
-                    ProgressManager.Instance.SetBool("OracleTalkedTo", true);
-
-                    ProgressManager.Instance.SetBool("CaretakerEvent1", true);
-                    ProgressManager.Instance.SetBool("CaretakerEvent2", true);
-                }
-
                 return false;
             }
         }
@@ -97,6 +62,19 @@ namespace Archipelago.MonsterSanctuary.Client
             }
         }
 
+        [HarmonyPatch(typeof(ProgressManager), "GetBool")]
+        private class ProgressManager_GetBool
+        {
+            private static void Postfix(ref bool __result, string name)
+            {
+                if (GameData.Plotless.Contains(name) && __result == false)
+                {
+                    ProgressManager.Instance.SetBool(name, true);
+                    __result = true;
+                }
+            }
+        }
+
         [HarmonyPatch(typeof(ProgressManager), "SetBool")]
         private class ProgressManager_SetBool
         {
@@ -108,21 +86,22 @@ namespace Archipelago.MonsterSanctuary.Client
 
         private static bool SkipAction(ScriptNode scriptNode)
         {
-            if (!APState.IsConnected)
-                return true;
-            if (!SlotData.SkipPlot)
-                return true;
+            return true;
+            //if (!APState.IsConnected)
+            //    return true;
+            //if (!SlotData.SkipPlot)
+            //    return true;
 
-            Logger.LogWarning("Room in dict? " + GameData.PlotlessScriptNodes.ContainsKey(GameController.Instance.CurrentSceneName));
-            if (!GameData.PlotlessScriptNodes.ContainsKey(GameController.Instance.CurrentSceneName))
-                return true;
+            //Logger.LogWarning("Room in dict? " + GameData.PlotlessScriptNodes.ContainsKey(GameController.Instance.CurrentSceneName));
+            //if (!GameData.PlotlessScriptNodes.ContainsKey(GameController.Instance.CurrentSceneName))
+            //    return true;
 
-            Logger.LogWarning("Skipping script node '" + scriptNode.ID + "'? " + GameData.PlotlessScriptNodes[GameController.Instance.CurrentSceneName].Contains(scriptNode.ID));
-            bool skip = GameData.PlotlessScriptNodes[GameController.Instance.CurrentSceneName].Contains(scriptNode.ID);
-            if (skip)
-                scriptNode.Finish();
+            //Logger.LogWarning("Skipping script node '" + scriptNode.ID + "'? " + GameData.PlotlessScriptNodes[GameController.Instance.CurrentSceneName].Contains(scriptNode.ID));
+            //bool skip = GameData.PlotlessScriptNodes[GameController.Instance.CurrentSceneName].Contains(scriptNode.ID);
+            //if (skip)
+            //    scriptNode.Finish();
 
-            return !skip;
+            //return !skip;
         }
 
         [HarmonyPatch(typeof(DialogueAction), "StartNode")]

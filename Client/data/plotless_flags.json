@@ -1,0 +1,65 @@
+[
+  "enableMonsterJournal",
+  "KeeperStrongholdTalkEvent",
+  "TriggerOnce3200011", // Familiar talks when you enter the stronghold
+
+  "FirstWillEncounter",
+  "LeonardFightsBlob",
+  "FirstAlchemistEncounter",
+  "MinitaurChampion",
+  "TalkedToWillInLibrary",
+  //"CompletedDuelTraining", // Might need to remove this so that the duel can still happen for the item check
+  "CongratulationsDuelTraining",
+  "EricToBlueCave",
+
+  "JuliaDungeonEncounter",
+  "JuliaWentToWoods",
+  "WillDungeonEvent",
+  "WillDungeonEncounter",
+  "WillDungeonEncounter2",
+  "WillDungeonEvent2",
+  "WillDungeonEncounter3",
+  "WillDungeonEvent3",
+  //"AlchemistDungeonEncounter", // Occurs after battle with alchemist in dungeon
+  //"AlchemistDungeonEvent", // Occurs after battle with alchemist in dungeon. Item check here
+  "WillDungeonEncounter4",
+  "WillResearch",
+  "DungeonRoomExplanationEvent",
+  "WillResearchInformation",
+  "JailAlchemistInformation",
+
+  "SnowyPeaksOldBuran",
+  "SnowyPeaksLakeWarning",
+
+  "CaretakerEvent1",
+  "CaretakerEvent2",
+  "CaretakerEventTrigger",
+  "CaretakerEventTriggerCompleted",
+  "CaretakerEvent4",
+
+  "OstanesJailed",
+
+  "GoblinKingDefeated",
+  "HorizonBeachLeonardEvent",
+  "HorizonBeachTreasureHunt",
+  "HorizonPitLeonardEvent",
+  "HorizonPitHelpLeonard",
+  "HorizonBeachLeonardSaved",
+  "HorizonBeachJuliaMaw",
+  "HorizonBeachMawEvent",
+  "HorizonBeachMawOpened",
+  "TreasureCaveEntranceActivated",
+  "TreasureCaveEntranceActivatedCompleted",
+
+  "MagmaRunestoneSeen",
+  "MagmaTalkedToWill",
+  "TriggerOnce28600039",
+  "MagmaWillLeft",
+
+  "UnderworldBeginsEvent",
+  "UnderworldJuliaEvent",
+  "UnderworldLeonardLostEvent",
+
+  "MysticalWorkshopAlchemistEvent1",
+  "MysticalWorkshopAlchemistEvent2"
+]

@@ -41,7 +41,7 @@ namespace Archipelago.MonsterSanctuary.Client
         public static Dictionary<string, int> NumberOfChecks = new Dictionary<string, int>();
 
         // Script Nodes that are skipped with plot less
-        public static Dictionary<string, List<int>> PlotlessScriptNodes = new();
+        public static List<string> Plotless = new();
 
         public static void Load()
         {
@@ -109,11 +109,11 @@ namespace Archipelago.MonsterSanctuary.Client
 
             // Loads script nodes that are skipped with plotless
             using (Stream stream = assembly.GetManifestResourceStream(
-                "Archipelago.MonsterSanctuary.Client.data.script_nodes.json"))
+                "Archipelago.MonsterSanctuary.Client.data.plotless_flags.json"))
             using (StreamReader reader = new StreamReader(stream))
             {
                 string json = reader.ReadToEnd();
-                PlotlessScriptNodes = JsonConvert.DeserializeObject<Dictionary<string, List<int>>>(json);
+                Plotless = JsonConvert.DeserializeObject<List<string>>(json);
             }
         }
         
