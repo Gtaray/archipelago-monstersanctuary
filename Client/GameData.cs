@@ -16,7 +16,7 @@ namespace Archipelago.MonsterSanctuary.Client
         // List of monster locations, so we know which locations to cache when we connect
         public static List<string> MonsterLocations = new List<string>();
 
-        // Pre-loaded collection of monsters, so taht we don' thave to worry about async
+        // Pre-loaded collection of monsters, so that we don't have to worry about async
         // stuff breaking AI/spawning rules during gameplay
         public static Dictionary<string, Tuple<GameObject, Monster>> MonstersCache = new Dictionary<string, Tuple<GameObject, Monster>>();
 
@@ -42,6 +42,9 @@ namespace Archipelago.MonsterSanctuary.Client
 
         // Script Nodes that are skipped with plot less
         public static List<string> Plotless = new();
+
+        // Locked Doors
+        public static List<string> LockedDoors = new();
 
         public static void Load()
         {
@@ -115,6 +118,15 @@ namespace Archipelago.MonsterSanctuary.Client
                 string json = reader.ReadToEnd();
                 Plotless = JsonConvert.DeserializeObject<List<string>>(json);
             }
+
+            // Loads script nodes that are skipped with plotless
+            using (Stream stream = assembly.GetManifestResourceStream(
+                "Archipelago.MonsterSanctuary.Client.data.minimal_locked_doors.json"))
+            using (StreamReader reader = new StreamReader(stream))
+            {
+                string json = reader.ReadToEnd();
+                LockedDoors = JsonConvert.DeserializeObject<List<string>>(json);
+            }
         }
         
         /// <summary>
@@ -176,7 +188,7 @@ namespace Archipelago.MonsterSanctuary.Client
             // If for some reason the location is not found, just bail
             if (location == null)
             {
-                Patcher.Logger.LogError($"Champion location for {championName} was not found.");
+                // Patcher.Logger.LogError($"Champion location for {championName} was not found.");
                 return null;
             }
 
@@ -188,7 +200,7 @@ namespace Archipelago.MonsterSanctuary.Client
 
             if (monsterObject == null)
             {
-                Patcher.Logger.LogError($"Could not get replacement monster for {championName} at {location}");
+                // Patcher.Logger.LogError($"Could not get replacement monster for {championName} at {location}");
                 return null;
             }
 
@@ -196,7 +208,7 @@ namespace Archipelago.MonsterSanctuary.Client
 
             if (monster == null)
             {
-                Patcher.Logger.LogError($"Monster component for {championName} was not found.");
+                // Patcher.Logger.LogError($"Monster component for {championName} was not found.");
                 return null;
             }
 
@@ -218,7 +230,7 @@ namespace Archipelago.MonsterSanctuary.Client
                 return MonstersCache[locationId].Item1;
             }
 
-            Patcher.Logger.LogWarning($"Location '{locationId}' is not in the monster cache");
+            // Patcher.Logger.LogWarning($"Location '{locationId}' is not in the monster cache");
             return null;
         }
 

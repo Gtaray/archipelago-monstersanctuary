@@ -62,6 +62,27 @@ namespace Archipelago.MonsterSanctuary.Client
             }
         }
 
+        //[HarmonyPatch(typeof(KeepersIntro), "Start")]
+        //private class KeepersIntro_Update
+        //{
+        //    private static void Prefix(ref KeepersIntro __instance)
+        //    {
+        //        SlotData.SpectralFamiliar = 0; // Debugging
+
+        //        Patcher.Logger.LogWarning(SlotData.SpectralFamiliar);
+        //        if (SlotData.SpectralFamiliar < 0)
+        //            return;
+
+        //        GameObject familiarPrefab = __instance.FamiliarButtons[SlotData.SpectralFamiliar].FamiliarPrefab;
+        //        Patcher.Logger.LogInfo("Starter: " + familiarPrefab.name);
+
+        //        PlayerController.Instance.Monsters.AddMonsterByPrefab(familiarPrefab, EShift.Normal);
+        //        PlayerController.Instance.Follower.Monster = PlayerController.Instance.Monsters.Familiar;
+        //        ProgressManager.Instance.SetBool("FamiliarChoiceCompleted");
+        //        __instance.IntroScript.ClearImpulses();
+        //    }
+        //}
+
         [HarmonyPatch(typeof(ProgressManager), "GetBool")]
         private class ProgressManager_GetBool
         {
@@ -75,14 +96,14 @@ namespace Archipelago.MonsterSanctuary.Client
             }
         }
 
-        [HarmonyPatch(typeof(ProgressManager), "SetBool")]
-        private class ProgressManager_SetBool
-        {
-            private static void Prefix(string name, bool value)
-            {
-                Logger.LogInfo($"SetBool(): {name} => {value}");
-            }
-        }
+        //[HarmonyPatch(typeof(ProgressManager), "SetBool")]
+        //private class ProgressManager_SetBool
+        //{
+        //    private static void Prefix(string name, bool value)
+        //    {
+        //        Logger.LogInfo($"SetBool(): {name} => {value}");
+        //    }
+        //}
 
         private static bool SkipAction(ScriptNode scriptNode)
         {

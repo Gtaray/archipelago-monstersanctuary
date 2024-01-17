@@ -82,9 +82,7 @@ namespace Archipelago.MonsterSanctuary.Client
                 Authenticated = true;
                 
                 State = ConnectionState.Connected;
-                SlotData.LoadSlotDataUpdated(loginSuccess.SlotData);
-                
-                LoadMonsterLocationData();
+                SlotData.LoadSlotData(loginSuccess.SlotData);
 
                 // If the player opened chests while not connected, this get those items upon connection
                 if (CheckedLocations != null)
@@ -145,33 +143,6 @@ namespace Archipelago.MonsterSanctuary.Client
                     ? ItemTransferType.Aquired // We found our own item
                     : ItemTransferType.Received; // Someone else found our item
                 Patcher.QueueItemTransfer(item.Item, item.Player, item.Location, action);
-            }
-        }
-
-        public static void LoadMonsterLocationData()
-        {
-            // Pre-load all monster locations so we don't have to get them later
-            Dictionary<long, string> ids = new Dictionary<long, string>();
-            foreach (var location in GameData.MonsterLocations)
-            {
-                var id = Session.Locations.GetLocationIdFromName("Monster Sanctuary", location);
-                if (id < 0)
-                {
-                    Patcher.Logger.LogWarning($"Could not find monster at {location}");
-                    continue;
-                }
-                if (ids.ContainsKey(id))
-                {
-                    Patcher.Logger.LogWarning("Duplicate location: " + location);
-                    continue;
-                }
-                ids.Add(id, location);
-            }
-            var info = Session.Locations.ScoutLocationsAsync(ids.Keys.ToArray()).GetAwaiter().GetResult();
-
-            foreach (var location in info.Locations)
-            {
-                GameData.AddMonster(ids[location.Location], Session.Items.GetItemName(location.Item));
             }
         }
         

@@ -23,7 +23,7 @@ namespace Archipelago.MonsterSanctuary.Client
         private static ConcurrentDictionary<long, GrantItemsAction> _giftActions = new();
 
         #region Persistence
-        private const string ITEM_CACHE_FILENAME = "archipelago_items.json";
+        private const string ITEM_CACHE_FILENAME = "archipelago_items_received.json";
         private static HashSet<long> _itemCache = new HashSet<long>();
 
         private static void SaveItemsReceived()
@@ -194,7 +194,9 @@ namespace Archipelago.MonsterSanctuary.Client
                     _itemCache.Add(nextItem.LocationID);
                     SaveItemsReceived();
 
-                    AddAndUpdateChecksRemaining(nextItem.LocationName);
+                    // Only add to the locations checked counter if this is not a monster location
+                    if (!GameData.MonsterLocations.Contains(nextItem.LocationName))
+                        AddAndUpdateChecksRemaining(nextItem.LocationName);
 
                     // If we're reached the end of the item queue,
                     // resync with the server to make sure we've gotten everything

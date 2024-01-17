@@ -18,6 +18,7 @@
 
   <ItemGroup>
     <None Remove="data\champion_locations.json" />
+    <None Remove="data\minimal_locked_doors.json" />
     <None Remove="data\monsters.json" />
     <None Remove="data\monster_locations.json" />
     <None Remove="data\npcs.json" />
@@ -29,6 +30,7 @@
 
   <ItemGroup>
     <EmbeddedResource Include="data\champion_locations.json" />
+    <EmbeddedResource Include="data\minimal_locked_doors.json" />
     <EmbeddedResource Include="data\monsters.json" />
     <EmbeddedResource Include="data\monster_locations.json" />
   </ItemGroup>

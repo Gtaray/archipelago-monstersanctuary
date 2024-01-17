@@ -88,7 +88,8 @@ namespace Archipelago.MonsterSanctuary.Client
             [UsedImplicitly]
             private static bool Prefix(ref Monster __result, ref Monster monster)
             {
-                string loc = $"{GameController.Instance.CurrentSceneName}_{monster.Encounter?.ID}_{monster.Index}";
+                string loc = GameData.GetMappedLocation($"{GameController.Instance.CurrentSceneName}_{monster.Encounter?.ID}_{monster.Index}");
+                
 
                 // If the monster we're checking for does not have an encounter, then we 
                 // default to the original function
@@ -259,14 +260,6 @@ namespace Archipelago.MonsterSanctuary.Client
                 if (__instance.CurrentEncounter.IsKeeperBattle)
                     return;
 
-                for (int i = 0; i < 3; i++)
-                {
-                    string loc = $"{GameController.Instance.CurrentSceneName}_{__instance.CurrentEncounter.ID}_{i}";
-                    if (GameData.Subsections.ContainsKey(loc))
-                        loc = GameData.Subsections[loc];
-                    APState.CheckLocation(loc);
-                }
-
                 // We only want to operate on champion encounters
                 if (__instance.CurrentEncounter.IsChampion)
                 {
@@ -298,14 +291,14 @@ namespace Archipelago.MonsterSanctuary.Client
                     return true;
                 }
 
-                string champion_id = $"{GameController.Instance.CurrentSceneName}_{__instance.name}";
+                string monster_id = $"{GameController.Instance.CurrentSceneName}_{__instance.name}";
                 Monster component = __instance.OriginalMonster.GetComponent<Monster>();
                 Monster monster = null;
 
 
-                if (GameData.NPCs.ContainsKey(champion_id))
+                if (GameData.NPCs.ContainsKey(monster_id))
                 {
-                    monster = GameData.GetReplacementMonster(GameData.NPCs[champion_id]).GetComponent<Monster>();
+                    monster = GameData.GetReplacementMonster(GameData.NPCs[monster_id]).GetComponent<Monster>();
                 }
                 else
                 {

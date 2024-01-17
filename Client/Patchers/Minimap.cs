@@ -14,7 +14,7 @@ namespace Archipelago.MonsterSanctuary.Client
 {
     public partial class Patcher
     {
-        private const string CHECKS_REMAINING_FILENAME = "archipelago_checks.json";
+        private const string CHECKS_REMAINING_FILENAME = "archipelago_locations_checked.json";
         private static Dictionary<string, int> _checks_remaining = new Dictionary<string, int>();
 
         public static void AddAndUpdateChecksRemaining(string locationName)

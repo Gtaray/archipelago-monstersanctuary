@@ -29,6 +29,10 @@ namespace Archipelago.MonsterSanctuary.Client
 
         public static void WriteToFile(ArchipelagoConnectionInfo connInfo, string path)
         {
+            if (!File.Exists(path))
+            {
+                File.Create(path);
+            }
             var bytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(connInfo));
             File.WriteAllBytes(path, bytes);
         }
