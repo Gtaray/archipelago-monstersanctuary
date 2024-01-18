@@ -41,8 +41,7 @@ This connection info is saved and will re-populate when you run the game in the 
 - `improved_mobility_limit`
 	- Restrict placement of monsters with improved mobility abilities (improved flying, improved swimming, dual mobility, and lofty mount)
  	- 0: Do not restrict placement of these monsters
-  	- 1: Monsters with these abilities will not show up in the Mountain Path, Blue Caves, Stronghold Dungeon, or Snowy Peaks.
-  	- 2: Monsters with these abilities will only show up in the Underworld, Mystical Workshop, Forgotten World, and Abandoned Tower.
+  	- 1: Monsters with these abilities will not show up in the Mountain Path, Blue Caves, Stronghold Dungeon, Snowy Peaks, Sun Palace, or Ancient Woods.
 - `remove_locked_doors`
 	- Removes locked doors
  	- 0: Do not remove any locked doors
