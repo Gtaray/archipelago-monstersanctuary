@@ -255,6 +255,8 @@ namespace Archipelago.MonsterSanctuary.Client
             }
 
             GiveItem(newItem, player, self, quantity, confirmCallback);
+
+            UIController.Instance.Minimap.UpdateMinimap();
         }        
 
         #region Give Items
@@ -270,7 +272,6 @@ namespace Archipelago.MonsterSanctuary.Client
                     callback);
 
                 PlayerController.Instance.Inventory.AddItem(item, quantity, 0);
-                UIController.Instance.Minimap.UpdateKeys();
             }
         }
 

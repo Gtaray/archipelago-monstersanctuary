@@ -46,6 +46,9 @@ namespace Archipelago.MonsterSanctuary.Client
         // Locked Doors
         public static List<string> LockedDoors = new();
 
+        // Map Pin Locations
+        public static Dictionary<string, List<long>> MapPins = new();
+
         public static void Load()
         {
             // Load the subsections data into the dictionary
@@ -129,6 +132,27 @@ namespace Archipelago.MonsterSanctuary.Client
             }
         }
         
+        public static void LoadMinimap()
+        {
+            using (Stream stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(
+                "Archipelago.MonsterSanctuary.Client.data.map_pins.json"))
+            using (StreamReader reader = new StreamReader(stream))
+            {
+                string json = reader.ReadToEnd();
+                var pins = JsonConvert.DeserializeObject<Dictionary<string, List<string>>>(json);
+
+                foreach (var pin in pins)
+                {
+                    MapPins[pin.Key] = new List<long>();
+                    foreach (var location in pin.Value)
+                    {
+                        MapPins[pin.Key].Add(APState.Session.Locations.GetLocationIdFromName("Monster Sanctuary", location));
+                    }
+                }
+                Patcher.Logger.LogInfo($"Loaded {MapPins.Count()} map pins");
+            }
+        }
+
         /// <summary>
         /// Adds a monster to the monster cache
         /// </summary>
@@ -267,6 +291,21 @@ namespace Archipelago.MonsterSanctuary.Client
         public static List<string> GetMappedLocations(List<string> locations)
         {
             return locations.Select(l => GetMappedLocation(l)).ToList();
+        }
+
+        public static void RemoveLocationFromMapPins(long locationId)
+        {
+            Patcher.Logger.LogInfo("RemoveLocationFromMapPins()");
+            foreach (var kvp in MapPins) 
+            {
+                if (kvp.Value.Contains(locationId))
+                {
+                    kvp.Value.Remove(locationId);
+                    return;
+                }
+            }
+
+            Patcher.Logger.LogWarning("Couldn't find location in map pins");
         }
     }
 }

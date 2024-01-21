@@ -9,6 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace Archipelago.MonsterSanctuary.Client
 {
@@ -159,5 +160,37 @@ namespace Archipelago.MonsterSanctuary.Client
                 //var mountainpath_bg = GameObject.Instantiate(apbg);
             }
         }
+
+        [HarmonyPatch(typeof(MinimapTileView), "DisplayTile")]
+        private class MinimapTileView_DisplayTile
+        {
+            [UsedImplicitly]
+            private static void Prefix(MinimapTileView __instance, MinimapEntry entry, int posX, int posY)
+            {
+                string key = $"{entry.MapData.SceneName}_{posX}_{posY}";
+
+                // If there are no checks at this spot, bail
+                if (!GameData.MapPins.ContainsKey(key))
+                    return;
+
+                var tileIndex = entry.GetIndex(posX, posY);
+                if (tileIndex == -1)
+                {
+                    return;
+                }
+
+                if (GameData.MapPins[key].Count() == 0)
+                {
+                    entry.DeleteMinimapMarker(tileIndex);
+                    return;
+                }
+
+                string name = GameData.MapPins[key].Count() == 1
+                    ? "1 Check"
+                    : $"{GameData.MapPins[key].Count()} Checks";
+
+                entry.SetMinimapMarker(tileIndex, 3, name);
+            }
+        }        
     }
 }

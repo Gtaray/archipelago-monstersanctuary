@@ -27,7 +27,7 @@ namespace Archipelago.MonsterSanctuary.Client
             Connected
         }
 
-        public static int[] AP_VERSION = new int[] { 0, 4, 2 };
+        public static int[] AP_VERSION = new int[] { 0, 4, 4 };
         public static ArchipelagoUI UI;
 
         public static ConnectionState State = ConnectionState.Disconnected;
@@ -83,6 +83,7 @@ namespace Archipelago.MonsterSanctuary.Client
                 
                 State = ConnectionState.Connected;
                 SlotData.LoadSlotData(loginSuccess.SlotData);
+                GameData.LoadMinimap();
 
                 // If the player opened chests while not connected, this get those items upon connection
                 if (CheckedLocations != null)
@@ -185,6 +186,9 @@ namespace Archipelago.MonsterSanctuary.Client
                 }).ConfigureAwait(false);
 
                 Task.Run(() => ScoutLocation(locationsToCheck.ToArray()));
+
+                GameData.RemoveLocationFromMapPins(locationId);
+                UIController.Instance.Minimap.UpdateMinimap();
             }
         }
 

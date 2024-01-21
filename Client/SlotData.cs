@@ -37,7 +37,6 @@ namespace Archipelago.MonsterSanctuary.Client
         public static void LoadSlotData(Dictionary<string, object> slotData)
         {
             Patcher.Logger.LogInfo("SlotData: " + JsonConvert.SerializeObject(slotData));
-            SpectralFamiliar = int.Parse(slotData["starting_familiar"].ToString());
             ExpMultiplier = int.Parse(slotData["exp_multiplier"].ToString());
             AlwaysGetEgg = int.Parse(slotData["monsters_always_drop_egg"].ToString()) == 1;
             switch (int.Parse(slotData["monster_shift_rule"].ToString()))
@@ -55,7 +54,6 @@ namespace Archipelago.MonsterSanctuary.Client
 
             SkipIntro = int.Parse(slotData["skip_intro"].ToString()) == 1;
             SkipPlot = int.Parse(slotData["skip_plot"].ToString()) == 1;
-            SkipKeeperBattles = int.Parse(slotData["skip_battles"].ToString()) == 1;
 
             switch (int.Parse(slotData["remove_locked_doors"].ToString()))
             {

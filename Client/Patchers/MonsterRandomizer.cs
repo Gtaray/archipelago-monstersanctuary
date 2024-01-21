@@ -23,6 +23,9 @@ namespace Archipelago.MonsterSanctuary.Client
         {
             private static void Postfix(ref bool __result, ProgressManager __instance, Monster champion)
             {
+                if (!APState.IsConnected)
+                    return;
+
                 string monsterName = champion.GetName();
                 var monster = GameData.GetReplacementChampion(monsterName);
 
