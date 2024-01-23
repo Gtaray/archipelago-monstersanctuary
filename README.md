@@ -32,24 +32,34 @@ Once you start the game with the client mod, you'll see connection info in the t
 This connection info is saved and will re-populate when you run the game in the future.
 
 ## Randomizer Options
-- `randomize_champions`: 
-	- Randomization rules for champions
-	- 0: Champions are not randomized and remain vanilla
-	- 1: The list of champion encounters is the same, but it is shuffled around
-	- 2: Champions are entirely randomized
+- `randomize_monsters`: 
+	- Randomization rules for monsters
+	- 0: Monsters are not randomized
+	- 1: Monsters are entirely randomized, with every monster replaced with any other monster
+	- 2: Monsters of the same specie are all randomized to another monster specie (this is how the built-in randomizer works)
+ 	- 3: Within a given encounter, all monsters of the same specie are randomized to another specie. Each encounter is randomized entirely separately.
+- `improved_mobility_limit`
+	- Restrict placement of monsters with improved mobility abilities (improved flying, improved swimming, dual mobility, and lofty mount)
+ 	- 0: Do not restrict placement of these monsters
+  	- 1: Monsters with these abilities will not show up in the Mountain Path, Blue Caves, Stronghold Dungeon, Snowy Peaks, Sun Palace, or Ancient Woods.
+- `remove_locked_doors`
+	- Removes locked doors
+ 	- 0: Do not remove any locked doors
+  	- 1: Remove extraneous locked doors such that each area only has one place where keys are used
+  	- 2: Remove all locked doors
+- `local_area_keys`
+	- Controls where area keys can be placed
+ 	- 0: Area keys can show up anywhere in any world (following normal logic rules)
+  	- 1: Area keys will only show up in the Monster Sanctuary player's world, and they will only appear in their own area
+- `add_gift_eggs_to_pool`
+	- Adds eggs you would normally receive from NPCs to the item pool so their location is randomized. Gift monsters are: Koi, Skorch, Shockhopper, and Bard
+ 	- 0: Gift monsters are received in their normal location (though the monster you receive may be different depending on monster randomization rules)
+  	- 1: Gift monster eggs are added to the item pool and can appear anywhere (following normal logic rules)
 - `monster_shift_rule`:
 	- When do shifted monsters start appearing in the wild?
 	- 0: Never
 	- 1: After Sun Palace
 	- 2: At any time
-- `champions_in_wild`:
-	- Can champion monsters be encountered in the wild?
-	- 0: No
-	- 1: Yes
-- `evolutions_in_wild`:
-	- Can evolved monsters be encountered in the wild?
-	- 0: No
-	- 1: Yes
 - `monsters_always_drop_egg`:
 	- Determines whether monster encounters will always drop an egg
 	- 0: No, normal rules for egg drop chances apply
@@ -84,6 +94,10 @@ This connection info is saved and will re-populate when you run the game in the 
 	- Range from 1 to 5
  - `skip_intro`:
 	- Skip the cut scenes, dialog, and tutorial fight at the beginning of the game.
+ 	- 0: No
+  	- 1: Yes
+- `skip_plot`
+	- Disable all flags and checks that require progressing the game's story. This allows entering areas before you would normally be able to
  	- 0: No
   	- 1: Yes
 - `goal`:
