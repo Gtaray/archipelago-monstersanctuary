@@ -88,7 +88,7 @@ namespace Archipelago.MonsterSanctuary.Client
         {
             private static void Postfix(ref bool __result, string name)
             {
-                if (GameData.Plotless.Contains(name) && __result == false)
+                if (APState.IsConnected && SlotData.SkipPlot && GameData.Plotless.Contains(name) && __result == false)
                 {
                     ProgressManager.Instance.SetBool(name, true);
                     __result = true;
