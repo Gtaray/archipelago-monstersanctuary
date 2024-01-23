@@ -22,7 +22,7 @@ namespace Archipelago.MonsterSanctuary.Client
 
         // Maps the location that this mod generates to a subsection of a region within AP
         // This way the mod doesn't have to know about the logical sub-regions within AP
-        public static Dictionary<string, string> Subsections = new Dictionary<string, string>();
+        public static Dictionary<string, string> ItemChecks = new Dictionary<string, string>();
 
         // This dictionary is required to map game room names to AP location ids
         // because champion monsters have a visual element that isn't attached to an encounter id
@@ -55,12 +55,12 @@ namespace Archipelago.MonsterSanctuary.Client
             var assembly = Assembly.GetExecutingAssembly();
             
             using (Stream stream = assembly.GetManifestResourceStream(
-                "Archipelago.MonsterSanctuary.Client.data.subsections.json"))
+                "Archipelago.MonsterSanctuary.Client.data.locations.json"))
             using (StreamReader reader = new StreamReader(stream))
             {
                 string json = reader.ReadToEnd();
-                Subsections = JsonConvert.DeserializeObject<Dictionary<string, string>>(json);
-                Patcher.Logger.LogInfo($"Loaded {Subsections.Count()} subsections");
+                ItemChecks = JsonConvert.DeserializeObject<Dictionary<string, string>>(json);
+                Patcher.Logger.LogInfo($"Loaded {ItemChecks.Count()} item checks");
             }
 
             // Load champion data into the dictionary
@@ -278,8 +278,8 @@ namespace Archipelago.MonsterSanctuary.Client
         /// <returns></returns>
         public static string GetMappedLocation(string location)
         {
-            if (Subsections.ContainsKey(location))
-                return Subsections[location];
+            if (ItemChecks.ContainsKey(location))
+                return ItemChecks[location];
             return location;
         }
 
