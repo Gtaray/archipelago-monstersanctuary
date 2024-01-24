@@ -13,9 +13,6 @@ namespace Archipelago.MonsterSanctuary.Client
 {
     public class GameData
     {
-        // List of monster locations, so we know which locations to cache when we connect
-        public static List<string> MonsterLocations = new List<string>();
-
         // Pre-loaded collection of monsters, so that we don't have to worry about async
         // stuff breaking AI/spawning rules during gameplay
         public static Dictionary<string, Tuple<GameObject, Monster>> MonstersCache = new Dictionary<string, Tuple<GameObject, Monster>>();
@@ -30,7 +27,7 @@ namespace Archipelago.MonsterSanctuary.Client
 
         // Maps monster names from AP to Monster Sanctuary.
         // Only needed for monsters whose names have spaces or special characters
-        public static Dictionary<string, string> Monsters = new Dictionary<string, string>();
+        public static Dictionary<string, string> MonsterNames = new Dictionary<string, string>();
 
         // Maps a champion name to their default location.
         // This is used to track which champions have been defeated, since the default method doesn't work
@@ -63,6 +60,16 @@ namespace Archipelago.MonsterSanctuary.Client
                 Patcher.Logger.LogInfo($"Loaded {ItemChecks.Count()} item checks");
             }
 
+            // Load monster data into the dictionary. This maps the human-readable names that AP uses to the form that Monster Sanctuary uses
+            using (Stream stream = assembly.GetManifestResourceStream(
+                "Archipelago.MonsterSanctuary.Client.data.monster_names.json"))
+            using (StreamReader reader = new StreamReader(stream))
+            {
+                string json = reader.ReadToEnd();
+                MonsterNames = JsonConvert.DeserializeObject<Dictionary<string, string>>(json);
+                Patcher.Logger.LogInfo($"Loaded {MonsterNames.Count()} monster names");
+            }
+
             // Load champion data into the dictionary
             using (Stream stream = assembly.GetManifestResourceStream(
                 "Archipelago.MonsterSanctuary.Client.data.npcs.json"))
@@ -71,26 +78,6 @@ namespace Archipelago.MonsterSanctuary.Client
                 string json = reader.ReadToEnd();
                 NPCs = JsonConvert.DeserializeObject<Dictionary<string, string>>(json);
                 Patcher.Logger.LogInfo($"Loaded {NPCs.Count()} npcs");
-            }
-
-            // Load monster data into the dictionary. This maps the human-readable names that AP uses to the form that Monster Sanctuary uses
-            using (Stream stream = assembly.GetManifestResourceStream(
-                "Archipelago.MonsterSanctuary.Client.data.monsters.json"))
-            using (StreamReader reader = new StreamReader(stream))
-            {
-                string json = reader.ReadToEnd();
-                Monsters = JsonConvert.DeserializeObject<Dictionary<string, string>>(json);
-                Patcher.Logger.LogInfo($"Loaded {Monsters.Count()} monster names");
-            }
-
-            // Load monster data into the dictionary. This maps the human-readable names that AP uses to the form that Monster Sanctuary uses
-            using (Stream stream = assembly.GetManifestResourceStream(
-                "Archipelago.MonsterSanctuary.Client.data.monster_locations.json"))
-            using (StreamReader reader = new StreamReader(stream))
-            {
-                string json = reader.ReadToEnd();
-                MonsterLocations = JsonConvert.DeserializeObject<List<string>>(json);
-                Patcher.Logger.LogInfo($"Loaded {MonsterLocations.Count()} monster locations");
             }
 
             // Loads champion locations into a dictionary. Used to track champions and their default location ids
@@ -146,7 +133,11 @@ namespace Archipelago.MonsterSanctuary.Client
                     MapPins[pin.Key] = new List<long>();
                     foreach (var location in pin.Value)
                     {
-                        MapPins[pin.Key].Add(APState.Session.Locations.GetLocationIdFromName("Monster Sanctuary", location));
+                        long id = APState.Session.Locations.GetLocationIdFromName("Monster Sanctuary", GameData.GetMappedLocation(location));
+
+                        // Do not add map pins for location that have been checked
+                        if (!Patcher.HasLocationBeenChecked(id))
+                            MapPins[pin.Key].Add(id);
                     }
                 }
                 Patcher.Logger.LogInfo($"Loaded {MapPins.Count()} map pins");
@@ -163,6 +154,7 @@ namespace Archipelago.MonsterSanctuary.Client
             var gameObject = GetMonsterByName(monsterName);
             if (gameObject == null)
             {
+                Patcher.Logger.LogError("Failed to add monster. Monster was not found. Monster=" + monsterName);
                 return;
             }
             var monster = gameObject.GetComponent<Monster>();
@@ -180,16 +172,11 @@ namespace Archipelago.MonsterSanctuary.Client
         /// </summary>
         /// <param name="name"></param>
         /// <returns></returns>
-        private static GameObject GetMonsterByName(string name)
+        public static GameObject GetMonsterByName(string name)
         {
-            // AP fills empty monster slots with this item. We don't care about it here,
-            // and the game will never query for it, so we can safely ignore them
-            if (name == "Empty Slot")
-                return null;
-
-            if (Monsters.ContainsKey(name))
+            if (MonsterNames.ContainsKey(name))
             {
-                name = Monsters[name];
+                name = MonsterNames[name];
             }
 
             return GameController.Instance.WorldData.Referenceables
@@ -218,9 +205,9 @@ namespace Archipelago.MonsterSanctuary.Client
 
             // Because champion monsters could exist in either slot 1 (for figths with 3 monsters)
             // or in slot 0 (for fights with 1 monster), we need to check which one this is
-            GameObject monsterObject = GetReplacementMonster(location + "_0");
+            GameObject monsterObject = GetReplacementMonster(location + "_1");
             if (monsterObject == null)
-                monsterObject = GetReplacementMonster(location + "_1");
+                monsterObject = GetReplacementMonster(location + "_0");
 
             if (monsterObject == null)
             {
@@ -254,7 +241,7 @@ namespace Archipelago.MonsterSanctuary.Client
                 return MonstersCache[locationId].Item1;
             }
 
-            // Patcher.Logger.LogWarning($"Location '{locationId}' is not in the monster cache");
+            Patcher.Logger.LogWarning($"Location '{locationId}' is not in the monster cache");
             return null;
         }
 
@@ -295,7 +282,6 @@ namespace Archipelago.MonsterSanctuary.Client
 
         public static void RemoveLocationFromMapPins(long locationId)
         {
-            Patcher.Logger.LogInfo("RemoveLocationFromMapPins()");
             foreach (var kvp in MapPins) 
             {
                 if (kvp.Value.Contains(locationId))
@@ -305,7 +291,7 @@ namespace Archipelago.MonsterSanctuary.Client
                 }
             }
 
-            Patcher.Logger.LogWarning("Couldn't find location in map pins");
+            Patcher.Logger.LogWarning($"Couldn't find {locationId} in map pins");
         }
     }
 }

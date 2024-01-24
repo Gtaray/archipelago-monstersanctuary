@@ -12,7 +12,6 @@ namespace Archipelago.MonsterSanctuary.Client
 {
     public partial class Patcher
     {
-        #region Patches
         /// <summary>
         /// This is specifically used to handle champion spawning, because of the way that we're handling monster replacement
         /// There is an issue where defeating a champion at one location will prevent the champion at its vanilla location from spawning
@@ -45,8 +44,8 @@ namespace Archipelago.MonsterSanctuary.Client
         }
 
         [HarmonyPatch(typeof(SkillManager), "GetChampionPassive")]
-        private class SkillManager_GetChampionPassive 
-        { 
+        private class SkillManager_GetChampionPassive
+        {
             private static bool Prefix(ref SkillManager __instance, ref PassiveChampion __result, ref bool recursive, ref int monsterIndex)
             {
                 if (!APState.IsConnected)
@@ -91,12 +90,12 @@ namespace Archipelago.MonsterSanctuary.Client
             [UsedImplicitly]
             private static bool Prefix(ref Monster __result, ref Monster monster)
             {
-                string loc = GameData.GetMappedLocation($"{GameController.Instance.CurrentSceneName}_{monster.Encounter?.ID}_{monster.Index}");
-                
+                string loc = $"{GameController.Instance.CurrentSceneName}_{monster.Encounter?.ID}_{monster.Index}";
+
 
                 // If the monster we're checking for does not have an encounter, then we 
                 // default to the original function
-                if (!GameData.MonsterLocations.Contains(loc))
+                if (!GameData.MonstersCache.ContainsKey(loc))
                 {
                     Logger.LogInfo("No monster location found for for " + loc);
                     return true;
@@ -303,6 +302,10 @@ namespace Archipelago.MonsterSanctuary.Client
                 {
                     monster = GameData.GetReplacementMonster(GameData.NPCs[monster_id]).GetComponent<Monster>();
                 }
+                else if (__instance.name == "SkorchNPC" && !string.IsNullOrEmpty(SlotData.Bex_Monster))
+                {
+                    monster = GameData.GetMonsterByName(SlotData.Bex_Monster).GetComponent<Monster>();
+                }
                 else
                 {
                     Logger.LogWarning("Didn't find champion data for " + __instance.name);
@@ -384,6 +387,30 @@ namespace Archipelago.MonsterSanctuary.Client
             }
         }
 
-        #endregion
+        /// <summary>
+        /// Because we randomize monsters within AP, this method is only used to get the Tanuki monster replacement
+        /// </summary>
+        [HarmonyPatch(typeof(GameModeManager), "GetReplacementMonster", new Type[] { typeof(GameObject) })]
+        private class GameModeManager_GetReplacementMonster
+        {
+            [UsedImplicitly]
+            private static void Postfix(GameModeManager __instance, GameObject monster, ref GameObject __result)
+            {
+                var mon = monster.GetComponent<Monster>();
+                
+                if (mon.Name == "Tanuki")
+                {
+                    Patcher.Logger.LogInfo("Replacing Tanuki with " + SlotData.Tanuki_Monster);
+                    __result = GameData.GetMonsterByName(SlotData.Tanuki_Monster);
+                }
+                else if (mon.Name == "Skorch")
+                {
+                    Patcher.Logger.LogInfo("Replacing Skorch with " + SlotData.Bex_Monster);
+                    __result = GameData.GetMonsterByName(SlotData.Bex_Monster);
+                }
+
+                // Might need to add shockhopper cryomancer mon here
+            }
+        }
     }
 }

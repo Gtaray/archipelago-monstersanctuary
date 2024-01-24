@@ -28,6 +28,13 @@ namespace Archipelago.MonsterSanctuary.Client
             SaveChecksRemaining();
         }
 
+        public static void DeleteChecksRemaining()
+        {
+            if (File.Exists(CHECKS_REMAINING_FILENAME))
+                File.Delete(CHECKS_REMAINING_FILENAME);
+            _checks_remaining = new();
+        }
+
         public static void SaveChecksRemaining()
         {
             string rawPath = Environment.CurrentDirectory;
@@ -60,19 +67,6 @@ namespace Archipelago.MonsterSanctuary.Client
                 max = GameData.NumberOfChecks[region];
 
             return string.Format("{0,2}/{1,-2}", collected, max);
-        }
-
-        [HarmonyPatch(typeof(GameController), "LoadStartingArea")]
-        private class GameController_ClearChecksRemainingOnNewGame
-        {
-            [UsedImplicitly]
-            private static void Prefix()
-            {
-                // Clear the item persistence cache when a new file is created
-                Logger.LogWarning("New Save. Deleting checks remaining");
-                _checks_remaining.Clear();
-                SaveChecksRemaining();
-            }
         }
 
         [HarmonyPatch(typeof(MinimapView), "Start")]

@@ -26,6 +26,13 @@ namespace Archipelago.MonsterSanctuary.Client
         private const string ITEM_CACHE_FILENAME = "archipelago_items_received.json";
         private static HashSet<long> _itemCache = new HashSet<long>();
 
+        public static void DeleteItemCache()
+        {
+            if (File.Exists(ITEM_CACHE_FILENAME))
+                File.Delete(ITEM_CACHE_FILENAME);
+            _itemCache = new();
+        }
+
         private static void SaveItemsReceived()
         {
             string rawPath = Environment.CurrentDirectory;
@@ -45,6 +52,11 @@ namespace Archipelago.MonsterSanctuary.Client
                 reader.Close();
                 _itemCache = JsonConvert.DeserializeObject<HashSet<long>>(content);
             }
+        }
+
+        public static bool HasLocationBeenChecked(long locationId)
+        {
+            return _itemCache.Contains(locationId);
         }
         #endregion
 
@@ -86,19 +98,6 @@ namespace Archipelago.MonsterSanctuary.Client
         #endregion
 
         #region Pathces
-        [HarmonyPatch(typeof(GameController), "LoadStartingArea")]
-        private class GameController_ClearItemCacheOnNewGame
-        {
-            [UsedImplicitly]
-            private static void Prefix()
-            {
-                // Clear the item persistence cache when a new file is created
-                Logger.LogWarning("New Save. Deleting item cache");
-                _itemCache.Clear();
-                SaveItemsReceived();
-            }
-        }
-
         [HarmonyPatch(typeof(Chest), "OpenChest")]
         private class Chest_OpenChest
         {
@@ -194,9 +193,8 @@ namespace Archipelago.MonsterSanctuary.Client
                     _itemCache.Add(nextItem.LocationID);
                     SaveItemsReceived();
 
-                    // Only add to the locations checked counter if this is not a monster location
-                    if (!GameData.MonsterLocations.Contains(nextItem.LocationName))
-                        AddAndUpdateChecksRemaining(nextItem.LocationName);
+                    // Update the checks remaining
+                    AddAndUpdateChecksRemaining(nextItem.LocationName);
 
                     // If we're reached the end of the item queue,
                     // resync with the server to make sure we've gotten everything

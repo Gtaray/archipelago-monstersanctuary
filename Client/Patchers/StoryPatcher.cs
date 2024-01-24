@@ -19,6 +19,12 @@ namespace Archipelago.MonsterSanctuary.Client
             [UsedImplicitly]
             private static bool Prefix(GameController __instance, bool isNewGamePlus)
             {
+                // new game file started, delete old files so we start fresh.
+                Logger.LogWarning("New Save. Deleting item cache and checked locations");
+                DeleteItemCache();
+                DeleteChecksRemaining();
+                APState.Resync();
+
                 // if we're not skipping the intro, call the original function
                 if (!SlotData.SkipIntro)
                     return true;
@@ -33,6 +39,7 @@ namespace Archipelago.MonsterSanctuary.Client
                 __instance.CurrentSceneName = "MountainPath_North1";
                 SceneManager.LoadScene(__instance.CurrentSceneName, LoadSceneMode.Additive);
                 PlayerController.Instance.TimerAvailable = true;
+
 
                 return false;
             }

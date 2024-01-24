@@ -74,7 +74,7 @@ namespace Archipelago.MonsterSanctuary.Client
                 "Monster Sanctuary",
                 ConnectionInfo.slot_name,
                 ItemsHandlingFlags.AllItems,
-                new Version(0, 4, 2),
+                new Version(AP_VERSION[0], AP_VERSION[1], AP_VERSION[2]),
                 password: ConnectionInfo.password);
 
             if (loginResult is LoginSuccessful loginSuccess)
@@ -137,7 +137,6 @@ namespace Archipelago.MonsterSanctuary.Client
 
         public static void Resync()
         {
-            Patcher.Logger.LogInfo("Resyncing Items");
             foreach (NetworkItem item in Session.Items.AllItemsReceived)
             {
                 var action = Session.ConnectionInfo.Slot == item.Player
@@ -155,7 +154,6 @@ namespace Archipelago.MonsterSanctuary.Client
                 ? ItemTransferType.Aquired // We found our own item
                 : ItemTransferType.Received; // Someone else found our item
 
-            Patcher.Logger.LogInfo("Item Received: " + name + ", (" + item.Location + ")");
             Patcher.QueueItemTransfer(item.Item, item.Player, item.Location, action);
         }
 
@@ -200,7 +198,6 @@ namespace Archipelago.MonsterSanctuary.Client
                 if (Session.ConnectionInfo.Slot == location.Player)
                     continue;
 
-                Patcher.Logger.LogInfo("Item Sent: " + Session.Items.GetItemName(location.Item));
                 Patcher.QueueItemTransfer(location.Item, location.Player, location.Location, ItemTransferType.Sent);
             }
         }

@@ -3,9 +3,5 @@
   "MountainPath_North5_ManticorbNPC": "MountainPath_NorthHidden_2_0",
   "MountainPath_West6_MechGolem": "MountainPath_West6_3_0",
   "MountainPath_Center7_Monk": "MountainPath_Center7_1_0",
-  "SunPalace_North3_Kanko": "SunPalace_North3_3_0",
-  "BlueCave_WestWaters7_Skorch": "MagmaChamber_North8_East_27900026", // Need a way to handle this, because the item I want to go here is an egg
-  "SunPalace_West3_Skorch": "MagmaChamber_North8_East_27900026", // Probably have to update the replacer code to swap from an Egg to the Monster itself.
-  "HorizonBeach_East5_Skorch": "MagmaChamber_North8_East_27900026", // That will prevent needing to do anything extra in AP
-  "MagmaChamber_North8_Skorch": "MagmaChamber_North8_East_27900026" // This solution could probably be used elsewhere as well for shockhopper or plague egg
+  "SunPalace_North3_Kanko": "SunPalace_North3_3_0"
 }
