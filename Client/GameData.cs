@@ -11,6 +11,12 @@ using UnityEngine;
 
 namespace Archipelago.MonsterSanctuary.Client
 {
+    public class Hint
+    {
+        public string Text { get; set; }
+        public bool IgnoreRemainingText { get; set; }
+    }
+
     public class GameData
     {
         // Pre-loaded collection of monsters, so that we don't have to worry about async
@@ -45,6 +51,9 @@ namespace Archipelago.MonsterSanctuary.Client
 
         // Map Pin Locations
         public static Dictionary<string, List<long>> MapPins = new();
+
+        // Hints
+        public static Dictionary<int, Hint> Hints = new();
 
         public static void Load()
         {
@@ -292,6 +301,25 @@ namespace Archipelago.MonsterSanctuary.Client
             }
 
             Patcher.Logger.LogWarning($"Couldn't find {locationId} in map pins");
+        }
+
+        public static void AddHint(int id, string text, bool ignoreRemainingText)
+        {
+            Hints[id] = new Hint() { Text = text, IgnoreRemainingText = ignoreRemainingText };
+        }
+
+        public static string GetHint(int id)
+        {
+            if (!Hints.ContainsKey(id))
+                return null;
+            return Hints[id].Text;
+        }
+
+        public static bool EndHintDialog(int id)
+        {
+            if (!Hints.ContainsKey(id))
+                return false;
+            return Hints[id].IgnoreRemainingText;
         }
     }
 }

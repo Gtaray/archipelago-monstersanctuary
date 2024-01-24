@@ -16,6 +16,7 @@ using Archipelago.MultiClient.Net.Packets;
 using Archipelago.MultiClient.Net.Models;
 using static System.Collections.Specialized.BitVector32;
 using static MonoMod.Cil.RuntimeILReferenceBag.FastDelegateInvokers;
+using Archipelago.MultiClient.Net.BounceFeatures.DeathLink;
 
 namespace Archipelago.MonsterSanctuary.Client
 {
@@ -37,6 +38,8 @@ namespace Archipelago.MonsterSanctuary.Client
         public static ArchipelagoSession Session;
         public static bool Authenticated;
         public static HashSet<long> CheckedLocations = new HashSet<long>();
+
+        private static DeathLinkService _deathLink;
 
         public static bool Connect()
         {
@@ -60,6 +63,9 @@ namespace Archipelago.MonsterSanctuary.Client
             Session.Socket.PacketReceived += Session_PacketReceived;
             Session.Items.ItemReceived += ReceiveItem;
 
+            _deathLink = Session.CreateDeathLinkService();
+            _deathLink.OnDeathLinkReceived += (deathLinkObject) => ReceiveDeathLink;
+
             string rawPath = Environment.CurrentDirectory;
             if (rawPath != null)
             {
@@ -79,6 +85,7 @@ namespace Archipelago.MonsterSanctuary.Client
 
             if (loginResult is LoginSuccessful loginSuccess)
             {
+                _deathLink.EnableDeathLink();
                 Authenticated = true;
                 
                 State = ConnectionState.Connected;
@@ -133,6 +140,23 @@ namespace Archipelago.MonsterSanctuary.Client
                 Task.Run(() => { Session.Socket.DisconnectAsync(); }).Wait();
             }
             Session = null;
+            _deathLink.DisableDeathLink();
+        }
+
+        public static void SendDeathLink()
+        {
+            if (!APState.IsConnected)
+                return;
+
+            _deathLink.SendDeathLink(new DeathLink(Session.Players.GetPlayerName(Session.ConnectionInfo.Slot), "lost a combat"));
+        }
+
+        public static void ReceiveDeathLink(DeathLink deathLinkMessage)
+        {
+            if (!APState.IsConnected)
+                return;
+
+            // Nothing to do here
         }
 
         public static void Resync()

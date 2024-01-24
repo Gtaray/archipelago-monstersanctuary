@@ -1,6 +1,7 @@
 ﻿using Newtonsoft
     .Json;
 using Newtonsoft.Json.Linq;
+using Newtonsoft.Json.Serialization;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,6 +23,18 @@ namespace Archipelago.MonsterSanctuary.Client
         All = 0,
         Minimal = 1,
         None = 2
+    }
+
+    public class HintData
+    {
+        [JsonProperty("id")]
+        public int ID { get; set; }
+
+        [JsonProperty("text")]
+        public string Text { get; set; }
+
+        [JsonProperty("ignore_other_text")]
+        public bool IgnoreRemainingText { get; set; }
     }
 
     public class SlotData
@@ -54,9 +67,12 @@ namespace Archipelago.MonsterSanctuary.Client
 
             var locations = GetDictionaryData(slotData, "monster_locations");
             foreach (var location in locations)
-            {
                 GameData.AddMonster(location.Key, location.Value);
-            }
+
+            var hints = GetListData<HintData>(slotData, "hints");
+            foreach (var hint in hints)
+                GameData.AddHint(hint.ID, hint.Text, hint.IgnoreRemainingText);
+
 
             Patcher.Logger.LogInfo("Exp Multiplier: " + ExpMultiplier);
             Patcher.Logger.LogInfo("Force Egg Drop: " + AlwaysGetEgg);
@@ -65,6 +81,7 @@ namespace Archipelago.MonsterSanctuary.Client
             Patcher.Logger.LogInfo("Skip Intro: " + SkipIntro);
             Patcher.Logger.LogInfo("Skip Plot: " + SkipPlot);
             Patcher.Logger.LogInfo("Monster Locations: " + locations.Count());
+            Patcher.Logger.LogInfo("Hints: " + hints.Count());
         }
 
         private static string GetStringData(Dictionary<string, object> data, string key)
@@ -138,6 +155,15 @@ namespace Archipelago.MonsterSanctuary.Client
                 return JsonConvert.DeserializeObject<Dictionary<string, string>>(data[key].ToString());
 
             return new Dictionary<string, string>();
+        }
+
+        private static IList<T> GetListData<T>(Dictionary<string, object> data, string key) where T : class
+        {
+            if (data[key].ToString() != null)
+            {
+                return JsonConvert.DeserializeObject<List<T>>(data[key].ToString());
+            }
+            return new List<T>();
         }
     }
 }
