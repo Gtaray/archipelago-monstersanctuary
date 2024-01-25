@@ -64,7 +64,7 @@ namespace Archipelago.MonsterSanctuary.Client
             Session.Items.ItemReceived += ReceiveItem;
 
             _deathLink = Session.CreateDeathLinkService();
-            _deathLink.OnDeathLinkReceived += (deathLinkObject) => ReceiveDeathLink;
+            _deathLink.OnDeathLinkReceived += (deathLinkObject) => ReceiveDeathLink(deathLinkObject);
 
             string rawPath = Environment.CurrentDirectory;
             if (rawPath != null)

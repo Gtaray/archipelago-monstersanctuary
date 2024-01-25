@@ -300,7 +300,8 @@ namespace Archipelago.MonsterSanctuary.Client
                 }
             }
 
-            Patcher.Logger.LogWarning($"Couldn't find {locationId} in map pins");
+            var location_name = APState.Session.Locations.GetLocationNameFromId(locationId);
+            Patcher.Logger.LogWarning($"Couldn't find {location_name} ({locationId}) in map pins");
         }
 
         public static void AddHint(int id, string text, bool ignoreRemainingText)

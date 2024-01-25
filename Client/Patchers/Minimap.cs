@@ -20,7 +20,7 @@ namespace Archipelago.MonsterSanctuary.Client
 
         public static void AddAndUpdateChecksRemaining(string locationName)
         {
-            string region = locationName.Split('_').First();
+            string region = locationName.Replace(" ", "").Split('-').First();
             if (!_checks_remaining.ContainsKey(region))
                 _checks_remaining[region] = 0;
             _checks_remaining[region] += 1;
