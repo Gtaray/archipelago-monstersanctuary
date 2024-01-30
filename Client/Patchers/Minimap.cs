@@ -4,9 +4,11 @@ using JetBrains.Annotations;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Data.Odbc;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -19,6 +21,7 @@ namespace Archipelago.MonsterSanctuary.Client
         private const string LOCATIONS_CHECKED_FILENAME = "archipelago_locations_checked.json";
         private static List<long> _locations_checked = new List<long>();  // Includes champion rank up items
         private static Dictionary<string, int> _check_counter = new Dictionary<string, int>();  // does NOT include champion rank up items
+        private static Dictionary<string, bool> _pin_tracker = new();
 
         public static void AddAndUpdateCheckedLocations(long locationId)
         {
@@ -174,22 +177,24 @@ namespace Archipelago.MonsterSanctuary.Client
             }
         }
 
-        [HarmonyPatch(typeof(MapMenu), "Awake")]
-        private class MapMenu_Awake
-        {
-            [UsedImplicitly]
-            private static void Postfix(MapMenu __instance)
-            {
-                //var go = new GameObject("Locations");
-                //go.transform.SetParent(__instance.gameObject.transform);
+        //[HarmonyPatch(typeof(MinimapView), "UpdateMinimap")]
+        //private class MinimapView_UpdateMinimap
+        //{
+        //    static bool updatingPins = false;
 
-                //var ap = __instance.gameObject.transform.Find("AreaPercent");
-                //var aptext = ap.transform.Find("Text");
-                //var apbg = ap.transform.Find("Background");
+        //    private static bool Prefix()
+        //    {
+        //        // If we're already updating the pins, do not do any other updates
+        //        if (updatingPins)
+        //            return false;
 
-                //var mountainpath_bg = GameObject.Instantiate(apbg);
-            }
-        }
+        //        updatingPins = true;
+        //        Patcher.UpdateMapPins();
+        //        updatingPins = false;
+
+        //        return true;
+        //    }
+        //}
 
         [HarmonyPatch(typeof(MinimapTileView), "DisplayTile")]
         private class MinimapTileView_DisplayTile
@@ -215,7 +220,7 @@ namespace Archipelago.MonsterSanctuary.Client
                 if (checks == 0)
                 {
                     entry.DeleteMinimapMarker(tileIndex);
-                    // __instance.SetMarker(0);
+                    __instance.SetMarker(0);
                     return;
                 }
 
@@ -224,8 +229,47 @@ namespace Archipelago.MonsterSanctuary.Client
                     : $"{checks} Checks";
 
                 entry.SetMinimapMarker(tileIndex, 3, name);
-                // __instance.SetMarker(3);
             }
-        }        
+        }
+
+        [HarmonyPatch(typeof(MapMenu), "InitMapTiles")]
+        private class MapMenu_InitMapTiles
+        {
+            private static void Postfix(MapMenu __instance)
+            {
+                var tiles = Traverse.Create(UIController.Instance.IngameMenu.Map).Field("tiles").GetValue<List<MinimapTileView>>();
+
+                foreach (var tile in tiles)
+                {
+                    if (tile.MinimapEntry.MapData.IsIndoor)
+                        continue;
+
+                    var index = tile.MinimapEntry.GetTileViewIndex(tile);
+                    int posX = index % (int)tile.MinimapEntry.MapData.Size.x;
+                    int posY = index / (int)tile.MinimapEntry.MapData.Size.x;
+
+                    string key = $"{tile.MinimapEntry.MapData.SceneName}_{posX}_{posY}";
+
+                    if (!GameData.MapPins.ContainsKey(key))
+                        continue;
+
+                    var checks = GameData.MapPins[key].Except(_locations_checked).Count();
+                    if (checks == 0)
+                    {
+                        tile.MinimapEntry.DeleteMinimapMarker(tile.MinimapEntry.GetTileViewIndex(tile));
+                        tile.SetMarker(0);
+                    }
+                    else
+                    {
+                        string name = checks == 1
+                            ? "1 Check"
+                            : $"{checks} Checks";
+
+                        tile.MinimapEntry.SetMinimapMarker(tile.MinimapEntry.GetTileViewIndex(tile), 3, name);
+                        tile.SetMarker(3);
+                    }
+                }
+            }
+        }
     }
 }

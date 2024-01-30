@@ -73,7 +73,6 @@ namespace Archipelago.MonsterSanctuary.Client
                 
                 if (!GameData.OriginalChampions.ContainsKey(GameController.Instance.CurrentSceneName))
                 {
-                    Patcher.Logger.LogInfo($"Original champion for location '{GameController.Instance.CurrentSceneName}' not found");
                     return true;
                 }
 
