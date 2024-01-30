@@ -4,6 +4,7 @@ using JetBrains.Annotations;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -15,58 +16,93 @@ namespace Archipelago.MonsterSanctuary.Client
 {
     public partial class Patcher
     {
-        private const string CHECKS_REMAINING_FILENAME = "archipelago_locations_checked.json";
-        private static Dictionary<string, int> _checks_remaining = new Dictionary<string, int>();
+        private const string LOCATIONS_CHECKED_FILENAME = "archipelago_locations_checked.json";
+        private static List<long> _locations_checked = new List<long>();  // Includes champion rank up items
+        private static Dictionary<string, int> _check_counter = new Dictionary<string, int>();  // does NOT include champion rank up items
 
-        public static void AddAndUpdateChecksRemaining(string locationName)
+        public static void AddAndUpdateCheckedLocations(long locationId)
         {
-            string region = locationName.Replace(" ", "").Split('-').First();
-            if (!_checks_remaining.ContainsKey(region))
-                _checks_remaining[region] = 0;
-            _checks_remaining[region] += 1;
+            _locations_checked.Add(locationId);
+            SaveLocationsChecked();
 
-            SaveChecksRemaining();
+            // If the item we just recieved is a rank up item, we don't increment the counter
+            if (GameData.ChampionRankIds.ContainsValue(locationId))
+                return;
+
+            IncrementCheckCounter(locationId);
+
+            // Update the minimap with the new map pins
+            UIController.Instance.Minimap.UpdateMinimap();
         }
 
-        public static void DeleteChecksRemaining()
+        public static void DeleteLocationsChecked()
         {
-            if (File.Exists(CHECKS_REMAINING_FILENAME))
-                File.Delete(CHECKS_REMAINING_FILENAME);
-            _checks_remaining = new();
+            if (File.Exists(LOCATIONS_CHECKED_FILENAME))
+                File.Delete(LOCATIONS_CHECKED_FILENAME);
+            _locations_checked = new();
+            _check_counter = new();
         }
 
-        public static void SaveChecksRemaining()
+        public static void SaveLocationsChecked()
         {
             string rawPath = Environment.CurrentDirectory;
             if (rawPath != null)
             {
-                var bytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(_checks_remaining));
-                File.WriteAllBytes(Path.Combine(rawPath, CHECKS_REMAINING_FILENAME), bytes);
+                var bytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(_locations_checked));
+                File.WriteAllBytes(Path.Combine(rawPath, LOCATIONS_CHECKED_FILENAME), bytes);
             }
         }
 
-        public static void LoadChecksRemaining()
+        public static void LoadLocationsChecked()
         {
-            if (File.Exists(CHECKS_REMAINING_FILENAME))
+            if (File.Exists(LOCATIONS_CHECKED_FILENAME))
             {
-                var reader = File.OpenText(CHECKS_REMAINING_FILENAME);
+                var reader = File.OpenText(LOCATIONS_CHECKED_FILENAME);
                 var content = reader.ReadToEnd();
                 reader.Close();
-                _checks_remaining = JsonConvert.DeserializeObject<Dictionary<string, int>>(content);
+                _locations_checked = JsonConvert.DeserializeObject<List<long>>(content);
+
+                RebuildCheckCounter();                
             }
+        }
+
+        public static void RebuildCheckCounter()
+        {
+            if (!APState.IsConnected)
+                return;
+
+            _check_counter = new();
+            var locations = _locations_checked.Except(GameData.ChampionRankIds.Values);
+
+            foreach (var location in locations)
+                IncrementCheckCounter(location);
+        }
+
+        public static void IncrementCheckCounter(long locationId)
+        {
+            if (!APState.IsConnected)
+                return;
+
+            // Add a check to our check counter base don the area
+            var locationName = APState.Session.Locations.GetLocationNameFromId(locationId);
+            var regionName = locationName.Replace(" ", "").Split('-').First();
+            if (!_check_counter.ContainsKey(regionName))
+                _check_counter[regionName] = 0;
+            _check_counter[regionName] += 1;
         }
 
         private static string GetCheckString(string region)
         {
             int collected = 0;
             int max = 0;
-            if (_checks_remaining.ContainsKey(region))
-                collected = _checks_remaining[region];
+
+            if (_check_counter.ContainsKey(region))
+                collected = _check_counter[region];
 
             if (GameData.NumberOfChecks.ContainsKey(region))
                 max = GameData.NumberOfChecks[region];
 
-            return string.Format("{0,2}/{1,-2}", collected, max);
+            return string.Format("{0,2} / {1,-2}", collected, max);
         }
 
         [HarmonyPatch(typeof(MinimapView), "Start")]
@@ -173,17 +209,22 @@ namespace Archipelago.MonsterSanctuary.Client
                     return;
                 }
 
-                if (GameData.MapPins[key].Count() == 0)
+                var checks = GameData.MapPins[key].Except(_locations_checked).Count();
+
+                // If all map pins for this tile are contained within the _itemcache, then we can delete the marker
+                if (checks == 0)
                 {
                     entry.DeleteMinimapMarker(tileIndex);
+                    // __instance.SetMarker(0);
                     return;
                 }
 
-                string name = GameData.MapPins[key].Count() == 1
+                string name = checks == 1
                     ? "1 Check"
-                    : $"{GameData.MapPins[key].Count()} Checks";
+                    : $"{checks} Checks";
 
                 entry.SetMinimapMarker(tileIndex, 3, name);
+                // __instance.SetMarker(3);
             }
         }        
     }

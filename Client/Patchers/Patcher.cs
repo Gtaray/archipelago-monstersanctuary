@@ -31,7 +31,7 @@ namespace Archipelago.MonsterSanctuary.Client
             new Harmony(MyPluginInfo.PLUGIN_GUID).PatchAll(Assembly.GetExecutingAssembly());
 
             LoadItemsReceived();
-            LoadChecksRemaining();
+            LoadLocationsChecked();
         }
 
         [HarmonyPatch(typeof(MainMenu))]

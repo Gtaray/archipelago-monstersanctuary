@@ -33,6 +33,12 @@ namespace Archipelago.MonsterSanctuary.Client
             _itemCache = new();
         }
 
+        public static void AddToItemCache(long id)
+        {
+            _itemCache.Add(id);
+            SaveItemsReceived();
+        }
+
         private static void SaveItemsReceived()
         {
             string rawPath = Environment.CurrentDirectory;
@@ -108,9 +114,13 @@ namespace Archipelago.MonsterSanctuary.Client
                     return;
 
                 string locName = $"{GameController.Instance.CurrentSceneName}_{__instance.ID}";
-                var locationId = APState.CheckLocation(GameData.GetMappedLocation(locName));
-                if (locationId < 0)
+                if (!GameData.ItemChecks.ContainsKey(locName))
+                {
+                    Patcher.Logger.LogWarning($"Location '{locName}' does not have a location ID assigned to it");
                     return;
+                }
+
+                APState.CheckLocation(GameData.ItemChecks[locName]);
 
                 __instance.Item = null;
                 __instance.Gold = 0;
@@ -128,11 +138,15 @@ namespace Archipelago.MonsterSanctuary.Client
                     return true;
 
                 string locName = $"{GameController.Instance.CurrentSceneName}_{__instance.ID}";
-                var locationId = APState.CheckLocation(GameData.GetMappedLocation(locName));
-                if (locationId < 0)
+                if (!GameData.ItemChecks.ContainsKey(locName))
+                {
+                    Patcher.Logger.LogWarning($"Location '{locName}' does not have a location ID assigned to it");
                     return true;
+                }
 
-                _giftActions.TryAdd(locationId, __instance);
+                APState.CheckLocation(GameData.ItemChecks[locName]);
+
+                _giftActions.TryAdd(GameData.ItemChecks[locName], __instance);
 
                 return false;
             }
@@ -188,13 +202,11 @@ namespace Archipelago.MonsterSanctuary.Client
                             nextItem.PlayerName,
                             nextItem.Action == ItemTransferType.Aquired,
                             callback);
+
+                        // We only want to save items to the item cache if we're receiving the item. 
+                        // Do not cache items we send to other people
+                        AddToItemCache(nextItem.LocationID);
                     }
-
-                    _itemCache.Add(nextItem.LocationID);
-                    SaveItemsReceived();
-
-                    // Update the checks remaining
-                    AddAndUpdateChecksRemaining(nextItem.LocationName);
 
                     // If we're reached the end of the item queue,
                     // resync with the server to make sure we've gotten everything
@@ -253,8 +265,6 @@ namespace Archipelago.MonsterSanctuary.Client
             }
 
             GiveItem(newItem, player, self, quantity, confirmCallback);
-
-            UIController.Instance.Minimap.UpdateMinimap();
         }        
 
         #region Give Items

@@ -1,4 +1,6 @@
-﻿using HarmonyLib;
+﻿using Archipelago.MultiClient.Net.Enums;
+using Archipelago.MultiClient.Net.Packets;
+using HarmonyLib;
 using JetBrains.Annotations;
 using System;
 using System.Collections.Generic;
@@ -25,8 +27,11 @@ namespace Archipelago.MonsterSanctuary.Client
                 if (!APState.IsConnected)
                     return;
 
-                string monsterName = champion.GetName();
-                var monster = GameData.GetReplacementChampion(monsterName);
+                if (!GameData.ChampionScenes.ContainsKey(GameController.Instance.CurrentSceneName))
+                    return;
+
+                var go = GameData.GetMonsterByName(GameData.ChampionScenes[GameController.Instance.CurrentSceneName]);
+                var monster = go.GetComponent<Monster>();
 
                 for (int i = 0; i < __instance.ChampionScores.Count; i++)
                 {
@@ -65,8 +70,14 @@ namespace Archipelago.MonsterSanctuary.Client
                         return false;
                     }
                 }
+                
+                if (!GameData.OriginalChampions.ContainsKey(GameController.Instance.CurrentSceneName))
+                {
+                    Patcher.Logger.LogInfo($"Original champion for location '{GameController.Instance.CurrentSceneName}' not found");
+                    return true;
+                }
 
-                var champ = GameData.GetReverseChampionReplacement(GameController.Instance.CurrentSceneName);
+                var champ = GameData.GetMonsterByName(GameData.OriginalChampions[GameController.Instance.CurrentSceneName]);
                 if (champ == null)
                     return true;
 
@@ -92,12 +103,10 @@ namespace Archipelago.MonsterSanctuary.Client
             {
                 string loc = $"{GameController.Instance.CurrentSceneName}_{monster.Encounter?.ID}_{monster.Index}";
 
-
                 // If the monster we're checking for does not have an encounter, then we 
                 // default to the original function
                 if (!GameData.MonstersCache.ContainsKey(loc))
                 {
-                    Logger.LogInfo("No monster location found for for " + loc);
                     return true;
                 }
 
@@ -107,6 +116,47 @@ namespace Archipelago.MonsterSanctuary.Client
                 return false;
             }
         }
+
+        /// <summary>
+        /// Given a champion monster's name, return the replacement for that champion
+        /// </summary>
+        /// <param name="championName"></param>
+        /// <returns></returns>
+        //public static Monster GetReplacementChampion(string championName)
+        //{
+        //    string location = null;
+        //    if (ChampionLocations.ContainsKey(championName))
+        //        location = ChampionLocations[championName];
+
+        //    // If for some reason the location is not found, just bail
+        //    if (location == null)
+        //    {
+        //        // Patcher.Logger.LogError($"Champion location for {championName} was not found.");
+        //        return null;
+        //    }
+
+        //    // Because champion monsters could exist in either slot 1 (for figths with 3 monsters)
+        //    // or in slot 0 (for fights with 1 monster), we need to check which one this is
+        //    GameObject monsterObject = GetReplacementMonster(location + "_1");
+        //    if (monsterObject == null)
+        //        monsterObject = GetReplacementMonster(location + "_0");
+
+        //    if (monsterObject == null)
+        //    {
+        //        // Patcher.Logger.LogError($"Could not get replacement monster for {championName} at {location}");
+        //        return null;
+        //    }
+
+        //    Monster monster = monsterObject.GetComponent<Monster>();
+
+        //    if (monster == null)
+        //    {
+        //        // Patcher.Logger.LogError($"Monster component for {championName} was not found.");
+        //        return null;
+        //    }
+
+        //    return monster;
+        //}
 
         /// <summary>
         /// Sets up a monster encounter. We replace the whole function because of the GetReplacementMonster call in the middle that we need 
@@ -122,8 +172,15 @@ namespace Archipelago.MonsterSanctuary.Client
                     return true;
 
 
+                // TODO: This doesn't seem to be changing the level of super champions
+                // Need to double check this.
                 if (isChampion)
-                    encounter.VariableLevel = true; // We force this to true so that super champions aren't locked to level 42
+                {
+                    encounter.PredefinedMonsters.level = ((PlayerController.Instance.Minimap.CurrentEntry.EncounterLevel != 0)
+                        ? PlayerController.Instance.Minimap.CurrentEntry.EncounterLevel
+                        : PlayerController.Instance.CurrentSpawnLevel);
+                }
+
                 MonsterEncounter.EncounterConfig encounterConfig = encounter.DetermineEnemy();
 
                 // Replace the monsters in encounterConfig. We do this outside of the foreach loop below because if a 1 monster champion fight is replaced with a 3 monster champion fight
@@ -262,11 +319,24 @@ namespace Archipelago.MonsterSanctuary.Client
                 if (__instance.CurrentEncounter.IsKeeperBattle)
                     return;
 
-                // We only want to operate on champion encounters
-                if (__instance.CurrentEncounter.IsChampion)
+                if (!__instance.CurrentEncounter.IsChampion)
+                    return;
+
+                // if victory condition is to beat the mad lord, check to see if we've done that
+                if (SlotData.Goal == CompletionEvent.MadLord && GameController.Instance.CurrentSceneName == "AbandonedTower_Final")
                 {
-                    APState.CheckLocation(GameData.GetMappedLocation($"{GameController.Instance.CurrentSceneName}_Champion"));
+                    APState.CompleteGame();
                 }
+
+                // We only want to operate on champion encounters
+                string locName = $"{GameController.Instance.CurrentSceneName}_Champion";
+                if (!GameData.ItemChecks.ContainsKey(locName))
+                {
+                    Patcher.Logger.LogWarning($"Location '{locName}' does not have a location ID assigned to it");
+                    return;
+                }
+
+                APState.CheckLocation(GameData.ItemChecks[locName]);
             }
         }
 
@@ -302,9 +372,9 @@ namespace Archipelago.MonsterSanctuary.Client
                 {
                     monster = GameData.GetReplacementMonster(GameData.NPCs[monster_id]).GetComponent<Monster>();
                 }
-                else if (__instance.name == "SkorchNPC" && !string.IsNullOrEmpty(SlotData.Bex_Monster))
+                else if (__instance.name == "SkorchNPC" && !string.IsNullOrEmpty(SlotData.BexMonster))
                 {
-                    monster = GameData.GetMonsterByName(SlotData.Bex_Monster).GetComponent<Monster>();
+                    monster = GameData.GetMonsterByName(SlotData.BexMonster).GetComponent<Monster>();
                 }
                 else
                 {
@@ -400,13 +470,13 @@ namespace Archipelago.MonsterSanctuary.Client
                 
                 if (mon.Name == "Tanuki")
                 {
-                    Patcher.Logger.LogInfo("Replacing Tanuki with " + SlotData.Tanuki_Monster);
-                    __result = GameData.GetMonsterByName(SlotData.Tanuki_Monster);
+                    Patcher.Logger.LogInfo("Replacing Tanuki with " + SlotData.TanukiMonster);
+                    __result = GameData.GetMonsterByName(SlotData.TanukiMonster);
                 }
                 else if (mon.Name == "Skorch")
                 {
-                    Patcher.Logger.LogInfo("Replacing Skorch with " + SlotData.Bex_Monster);
-                    __result = GameData.GetMonsterByName(SlotData.Bex_Monster);
+                    Patcher.Logger.LogInfo("Replacing Skorch with " + SlotData.BexMonster);
+                    __result = GameData.GetMonsterByName(SlotData.BexMonster);
                 }
 
                 // Might need to add shockhopper cryomancer mon here

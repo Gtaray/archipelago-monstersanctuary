@@ -85,12 +85,17 @@ namespace Archipelago.MonsterSanctuary.Client
 
             if (loginResult is LoginSuccessful loginSuccess)
             {
-                _deathLink.EnableDeathLink();
                 Authenticated = true;
                 
                 State = ConnectionState.Connected;
+
                 SlotData.LoadSlotData(loginSuccess.SlotData);
+
+                if (SlotData.DeathLink)
+                    _deathLink.EnableDeathLink();
+
                 GameData.LoadMinimap();
+                Patcher.RebuildCheckCounter();
 
                 // If the player opened chests while not connected, this get those items upon connection
                 if (CheckedLocations != null)
@@ -209,8 +214,7 @@ namespace Archipelago.MonsterSanctuary.Client
 
                 Task.Run(() => ScoutLocation(locationsToCheck.ToArray()));
 
-                GameData.RemoveLocationFromMapPins(locationId);
-                UIController.Instance.Minimap.UpdateMinimap();
+                Patcher.AddAndUpdateCheckedLocations(locationId);
             }
         }
 
@@ -224,6 +228,16 @@ namespace Archipelago.MonsterSanctuary.Client
 
                 Patcher.QueueItemTransfer(location.Item, location.Player, location.Location, ItemTransferType.Sent);
             }
+        }
+
+        public static void CompleteGame()
+        {
+            if (!APState.IsConnected)
+                return;
+
+            var statusUpdatePacket = new StatusUpdatePacket();
+            statusUpdatePacket.Status = ArchipelagoClientState.ClientGoal;
+            Session.Socket.SendPacket(statusUpdatePacket);
         }
     }
 }

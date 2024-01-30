@@ -22,7 +22,7 @@ namespace Archipelago.MonsterSanctuary.Client
                 // new game file started, delete old files so we start fresh.
                 Logger.LogWarning("New Save. Deleting item cache and checked locations");
                 DeleteItemCache();
-                DeleteChecksRemaining();
+                DeleteLocationsChecked();
                 APState.Resync();
 
                 // if we're not skipping the intro, call the original function
@@ -212,6 +212,15 @@ namespace Archipelago.MonsterSanctuary.Client
                 if (!APState.IsConnected)
                     return true;
 
+                if (GameController.Instance.CurrentSceneName == "StrongholdDungeon_SummonRoom")
+                {
+                    // if mad lord is the current goal, then we allow aazerach to be fought before postgame
+                    if (SlotData.Goal == CompletionEvent.MadLord)
+                    {
+                        ProgressManager.Instance.SetBool("TrevisanQuestAazerach", true, true);
+                    }
+                    return true;
+                }
                 if (GameController.Instance.CurrentSceneName == "MountainPath_North1" 
                     && __instance.ID == 18)
                 {
