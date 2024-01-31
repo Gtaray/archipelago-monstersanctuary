@@ -13,6 +13,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using static MonoMod.Cil.RuntimeILReferenceBag.FastDelegateInvokers;
 using static PopupController;
 using static System.Collections.Specialized.BitVector32;
 
@@ -110,10 +111,19 @@ namespace Archipelago.MonsterSanctuary.Client
             [UsedImplicitly]
             private static void Prefix(ref Chest __instance)
             {
-                if (!APState.IsConnected)
-                    return;
-
                 string locName = $"{GameController.Instance.CurrentSceneName}_{__instance.ID}";
+
+                // We want to do this even if we're disconnected so the player knows that they're not connected.
+                __instance.Item = null;
+                __instance.Gold = 0;
+
+                // If we're not connected, we add this location to a list of locations that need to be checked once we are connected
+                if (!APState.IsConnected)
+                {
+                    APState.OfflineChecks.Add(locName);
+                    return;
+                }
+
                 if (!GameData.ItemChecks.ContainsKey(locName))
                 {
                     Patcher.Logger.LogWarning($"Location '{locName}' does not have a location ID assigned to it");
@@ -121,9 +131,6 @@ namespace Archipelago.MonsterSanctuary.Client
                 }
 
                 APState.CheckLocation(GameData.ItemChecks[locName]);
-
-                __instance.Item = null;
-                __instance.Gold = 0;
             }
         }
 
@@ -134,10 +141,15 @@ namespace Archipelago.MonsterSanctuary.Client
             [UsedImplicitly]
             private static bool Prefix(ref GrantItemsAction __instance)
             {
-                if (!APState.IsConnected)
-                    return true;
-
                 string locName = $"{GameController.Instance.CurrentSceneName}_{__instance.ID}";
+
+                // If we're not connected, we add this location to a list of locations that need to be checked once we are connected
+                if (!APState.IsConnected)
+                {
+                    APState.OfflineChecks.Add(locName);
+                    return true;
+                }
+
                 if (!GameData.ItemChecks.ContainsKey(locName))
                 {
                     Patcher.Logger.LogWarning($"Location '{locName}' does not have a location ID assigned to it");
@@ -206,6 +218,12 @@ namespace Archipelago.MonsterSanctuary.Client
                         // We only want to save items to the item cache if we're receiving the item. 
                         // Do not cache items we send to other people
                         AddToItemCache(nextItem.LocationID);
+                    }
+
+                    // If we're sending or receiving an item that we found, we want to update the locations checked.
+                    if (nextItem.PlayerID == APState.Session.ConnectionInfo.Slot)
+                    {
+                        Patcher.AddAndUpdateCheckedLocations(nextItem.LocationID);
                     }
 
                     // If we're reached the end of the item queue,

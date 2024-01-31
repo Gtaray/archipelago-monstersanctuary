@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Archipelago.MonsterSanctuary.Client.Patchers
+namespace Archipelago.MonsterSanctuary.Client
 {
     public partial class Patcher
     {

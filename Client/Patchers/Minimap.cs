@@ -21,10 +21,16 @@ namespace Archipelago.MonsterSanctuary.Client
         private const string LOCATIONS_CHECKED_FILENAME = "archipelago_locations_checked.json";
         private static List<long> _locations_checked = new List<long>();  // Includes champion rank up items
         private static Dictionary<string, int> _check_counter = new Dictionary<string, int>();  // does NOT include champion rank up items
-        private static Dictionary<string, bool> _pin_tracker = new();
 
         public static void AddAndUpdateCheckedLocations(long locationId)
         {
+            Patcher.Logger.LogInfo("AddAndUpdateCheckedLocations()");
+            if (_locations_checked.Contains(locationId))
+            {
+                Patcher.Logger.LogInfo($"\t{locationId} already checked");
+                return;
+            }
+
             _locations_checked.Add(locationId);
             SaveLocationsChecked();
 

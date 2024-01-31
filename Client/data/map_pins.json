@@ -34,7 +34,7 @@
   "KeeperStronghold_WestStairwell_0_2": [ "KeeperStronghold_WestStairwell_5" ],
   "KeeperStronghold_WestTowers_0_0": [ "KeeperStronghold_WestTowers_4" ],
   "KeeperStronghold_Smith_0_0": [ "KeeperStronghold_Smith_290", "KeeperStronghold_Smith_291", "KeeperStronghold_Smith_292", "KeeperStronghold_Smith_293", "KeeperStronghold_Smith_294" ],
-  "KeeperStronghold_Storage_0_1": [ "KeeperStronghold_Storage_5", "KeeperStronghold_Storage_6" ],
+  "KeeperStronghold_Storage_1_0": [ "KeeperStronghold_Storage_5", "KeeperStronghold_Storage_6" ],
   "KeeperStronghold_ParentsRoom_0_0": [ "KeeperStronghold_ParentsRoom_326", "KeeperStronghold_ParentsRoom_403", "KeeperStronghold_ParentsRoom_2800011", "KeeperStronghold_ParentsRoom_2800021", "KeeperStronghold_ParentsRoom_2800022", "KeeperStronghold_ParentsRoom_2800023", "KeeperStronghold_ParentsRoom_2800024" ],
   "KeeperStronghold_DuelCircle_0_0": [ "KeeperStronghold_DuelCircle_701" ],
 
@@ -446,7 +446,7 @@
   "AbandonedTower_South7_0_0": [ "AbandonedTower_South7_7", "AbandonedTower_South7_3" ],
   "AbandonedTower_South8_1_0": [ "AbandonedTower_South8_3" ],
   "AbandonedTower_South8_0_1": [ "AbandonedTower_South8_7" ],
-  "AbandonedTower_SouthHidden1_0_0": [ "AbandonedTower_SouthHidden_1" ],
+  "AbandonedTower_SouthHidden1_0_0": [ "AbandonedTower_SouthHidden1_1" ],
   "AbandonedTower_SouthHidden2_0_0": [ "AbandonedTower_SouthHidden2_0", "AbandonedTower_SouthHidden2_3" ],
   "AbandonedTower_Center2_0_0": [ "AbandonedTower_Center2_3" ],
   "AbandonedTower_Center3_0_0": [ "AbandonedTower_Center3_10" ],

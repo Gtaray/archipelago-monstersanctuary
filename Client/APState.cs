@@ -37,7 +37,8 @@ namespace Archipelago.MonsterSanctuary.Client
         public static ArchipelagoConnectionInfo ConnectionInfo = new ArchipelagoConnectionInfo();
         public static ArchipelagoSession Session;
         public static bool Authenticated;
-        public static HashSet<long> CheckedLocations = new HashSet<long>();
+        public static HashSet<string> OfflineChecks = new HashSet<string>(); // Keeps track of locations that were checked while offline
+        public static HashSet<long> CheckedLocations = new HashSet<long>(); // Keeps track of checked locations for the current session. Does not persist
 
         private static DeathLinkService _deathLink;
 
@@ -98,9 +99,12 @@ namespace Archipelago.MonsterSanctuary.Client
                 Patcher.RebuildCheckCounter();
 
                 // If the player opened chests while not connected, this get those items upon connection
-                if (CheckedLocations != null)
+                if (OfflineChecks.Count() > 0)
                 {
-                    Session.Locations.CompleteLocationChecks(CheckedLocations.ToArray());
+                    Patcher.Logger.LogInfo("Number of Locations Checked While Offline: " + OfflineChecks.Count());
+                    var ids = OfflineChecks.Select(loc => GameData.ItemChecks[loc]).ToArray();
+                    foreach (var id in ids)
+                        CheckLocation(id);
                 }
 
                 Resync();
@@ -166,6 +170,9 @@ namespace Archipelago.MonsterSanctuary.Client
 
         public static void Resync()
         {
+            if (!APState.IsConnected)
+                return;
+
             foreach (NetworkItem item in Session.Items.AllItemsReceived)
             {
                 var action = Session.ConnectionInfo.Slot == item.Player
@@ -204,6 +211,9 @@ namespace Archipelago.MonsterSanctuary.Client
         {
             if (CheckedLocations.Add(locationId))
             {
+                if (!APState.IsConnected)
+                    return;
+
                 var locationsToCheck = CheckedLocations.Except(Session.Locations.AllLocationsChecked);
 
                 Task.Run(() =>
@@ -213,8 +223,6 @@ namespace Archipelago.MonsterSanctuary.Client
                 }).ConfigureAwait(false);
 
                 Task.Run(() => ScoutLocation(locationsToCheck.ToArray()));
-
-                Patcher.AddAndUpdateCheckedLocations(locationId);
             }
         }
 

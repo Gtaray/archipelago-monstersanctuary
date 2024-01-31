@@ -3,11 +3,14 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.Remoting.Messaging;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Experimental.UIElements.StyleEnums;
 using UnityEngine.SceneManagement;
+using static PopupController;
+using static SaveGameMenu;
 
 namespace Archipelago.MonsterSanctuary.Client
 {
@@ -105,6 +108,187 @@ namespace Archipelago.MonsterSanctuary.Client
                     return false;
                 }
                 return true;
+            }
+        }
+
+        [HarmonyPatch(typeof(SaveGameMenu), "OnItemSelected")]
+        public static class SaveGameMenu_OnItemSelected
+        {
+            public static bool Prefix(SaveGameMenu __instance, MenuListItem item)
+            {
+                // If we're already connected, just go through the normal method so we doing all this reflection
+                if (APState.IsConnected)
+                    return true;
+
+                SaveGameSlot component = item.GetComponent<SaveGameSlot>();
+                var menu = Traverse.Create(__instance);
+                int currentPage = menu.Field("currentPage").GetValue<int>();
+                var saveGameSlots = menu.Field("saveGameSlots").GetValue<List<SaveGameSlot>>();
+
+                var slotToBeLoaded = currentPage * 10 + saveGameSlots.IndexOf(component);
+                menu.Field("slotToBeLoaded").SetValue(slotToBeLoaded);
+
+                var choosingCopySlot = menu.Field("choosingCopySlot").GetValue<bool>();
+                var openType = menu.Field("openType").GetValue<EOpenType>();
+                if (choosingCopySlot)
+                {
+                    return true;
+                }
+                else if (openType == EOpenType.NewGame)
+                {
+                    if (component.SaveData != null)
+                    {
+                        // Holy shit this is an absolute travesty of delegates, but it works
+                        PopupController.Instance.ShowRequest(Utils.LOCA("Delete?"), Utils.LOCA("Delete existing progress?"),
+                            () => PromptConnectToArchipelago(__instance,
+                                () => menu.Method("StartNewGame").GetValue(),
+                                () => ConfirmWithoutArchipelago(
+                                    __instance,
+                                    "Create a new save file while not connected to Archipelago?",
+                                    () => menu.Method("StartNewGame").GetValue()), 
+                                true),
+                            () => menu.Method("OnNewGameCancelled").GetValue());
+                        __instance.MenuList.SetLocked(locked: true);
+                    }
+                    else
+                    {
+                        PromptConnectToArchipelago(__instance,
+                            () => menu.Method("StartNewGame").GetValue(),
+                            () => ConfirmWithoutArchipelago(
+                                __instance,
+                                "Create a new save file while not connected to Archipelago?",
+                                () => menu.Method("StartNewGame").GetValue()),
+                            true);
+                        __instance.MenuList.SetLocked(locked: true);
+                    }
+                }
+                else if (openType == EOpenType.NewGamePlus)
+                {
+                    return true;
+                }
+                else
+                {
+                    // Either we load the game after connect to AP
+                    // Or we prompt the user to load 
+                    PromptConnectToArchipelago(__instance,
+                        () => LoadGame(__instance),
+                        () => ConfirmWithoutArchipelago(
+                            __instance,
+                            "Load this save file while not connected to Archipelago?",
+                            () => LoadGame(__instance)),
+                        false);
+                    __instance.MenuList.SetLocked(locked: true);
+                }
+
+                return false;
+            }
+
+            private static void PromptConnectToArchipelago(SaveGameMenu __instance, PopupController.PopupDelegate postConnectionAction, PopupController.PopupDelegate disconnectedAction, bool withTimer = false)
+            {
+                if (withTimer)
+                {
+                    Timer.StartTimer(__instance.MainMenu.gameObject, 0.25f, () => PopupController.Instance.ShowRequest(
+                        "Connect to Archipleago", 
+                        "You are not connected to archipelago. Would you like to connect with your current info?",
+                        () => ConnectToArchipelago(__instance, postConnectionAction),
+                        () => disconnectedAction.Invoke()));
+                    return;
+                }
+
+                Timer.StartTimer(__instance.MainMenu.gameObject, 0.25f, () => PopupController.Instance.ShowRequest(
+                    "Connect to Archipleago",
+                    "You are not connected to archipelago. Would you like to connect with your current info?",
+                    () => ConnectToArchipelago(__instance, postConnectionAction),
+                    () => disconnectedAction.Invoke()));
+
+            }
+
+            private static void ConfirmWithoutArchipelago(SaveGameMenu __instance, string message, PopupController.PopupDelegate confirm)
+            {
+                Timer.StartTimer(__instance.MainMenu.gameObject, 0.3f, () => PopupController.Instance.ShowRequest("Disconnected", message,
+                    () => confirm.Invoke(),
+                    () => __instance.MenuList.SetLocked(false),
+                    true));
+            }
+
+            private static void ConnectToArchipelago(SaveGameMenu __instance, PopupController.PopupDelegate postConnectionAction)
+            {
+                Patcher.Logger.LogInfo("Trying to connect");
+                if (APState.Connect())
+                {
+                    Patcher.Logger.LogInfo("Loading Game");
+                    postConnectionAction.Invoke();
+                    return;
+                }
+
+                Patcher.Logger.LogInfo("Failed to connect");
+                PopupController.Instance.Close();
+                Timer.StartTimer(__instance.MainMenu.gameObject, 0.3f, () => ShowConnectionFailedMessage(__instance));
+                // If we failed, just throw up an error and then return back to the load game screen
+                
+                __instance.MenuList.SetLocked(false);
+            }
+
+            private static void ShowConnectionFailedMessage(SaveGameMenu __instance)
+            {
+                __instance.MenuList.SetLocked(true);
+                PopupController.Instance.ShowMessage("Connection Failed", "Failed to connect to Archipelago. Check your connection settings and try again.",
+                    () => __instance.MenuList.SetLocked(false));
+            }
+
+            private static void LoadGame(SaveGameMenu __instance)
+            {
+                // If we connected, then simply load the game.
+                var menu = Traverse.Create(__instance);
+                Timer.StartTimer(__instance.MainMenu.gameObject, 1f, () => menu.Method("LoadGame").GetValue());
+                OverlayController.Instance.StartFadeOut(Color.black, 1f);
+                menu.Method("Close").GetValue();
+                __instance.MainMenu.MenuList.Close();
+            }
+
+        }
+
+        [HarmonyPatch(typeof(SaveGameMenu), "ConfirmHeroVisuals")]
+        public static class SaveGameMenu_ConfirmHeroVisuals
+        {
+            private static bool Prefix(SaveGameMenu __instance)
+            {
+                var menu = Traverse.Create(__instance);
+
+                string name = string.Empty;
+                if (APState.IsConnected)
+                {
+                    name = APState.ConnectionInfo.slot_name;
+                }
+
+                UIController.Instance.NameMenu.Open(
+                    Utils.LOCA("Name your character"), 
+                    name,
+                    new NameMenu.ConfirmNameDelegate((name) => menu.Method("ConfirmHeroName", name).GetValue(name)), 
+                    new Action(() => menu.Method("OnNameCancelled").GetValue()), 
+                    NameMenu.ENameType.PlayerName);
+                return false;
+            }
+        }
+
+        [HarmonyPatch(typeof(PopupController), "ShowRequest")]
+        public static class PopupController_ShowRequest
+        {
+            private static void Prefix(PopupController __instance, string headline)
+            {
+                var confirm = __instance.gameObject.transform.Find("MessageBox").Find("MenuRoot").Find("Confirm").Find("Text").GetComponent<tk2dTextMesh>();
+                var cancel = __instance.gameObject.transform.Find("MessageBox").Find("MenuRoot").Find("Cancel").Find("Text").GetComponent<tk2dTextMesh>();
+
+                if (headline == "Connect to Archipleago" || headline == "Disconnected")
+                {
+                    confirm.text = "Yes";
+                    cancel.text = "No";
+                }
+                else
+                {
+                    confirm.text = "Ok";
+                    cancel.text = "Cancel";
+                }
             }
         }
     }
