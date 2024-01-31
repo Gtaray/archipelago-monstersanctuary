@@ -16,6 +16,7 @@ using Archipelago.MultiClient.Net.Packets;
 using Archipelago.MultiClient.Net.Models;
 using static System.Collections.Specialized.BitVector32;
 using static MonoMod.Cil.RuntimeILReferenceBag.FastDelegateInvokers;
+using Archipelago.MultiClient.Net.BounceFeatures.DeathLink;
 
 namespace Archipelago.MonsterSanctuary.Client
 {
@@ -27,7 +28,7 @@ namespace Archipelago.MonsterSanctuary.Client
             Connected
         }
 
-        public static int[] AP_VERSION = new int[] { 0, 4, 2 };
+        public static int[] AP_VERSION = new int[] { 0, 4, 4 };
         public static ArchipelagoUI UI;
 
         public static ConnectionState State = ConnectionState.Disconnected;
@@ -36,7 +37,10 @@ namespace Archipelago.MonsterSanctuary.Client
         public static ArchipelagoConnectionInfo ConnectionInfo = new ArchipelagoConnectionInfo();
         public static ArchipelagoSession Session;
         public static bool Authenticated;
-        public static HashSet<long> CheckedLocations = new HashSet<long>();
+        public static HashSet<string> OfflineChecks = new HashSet<string>(); // Keeps track of locations that were checked while offline
+        public static HashSet<long> CheckedLocations = new HashSet<long>(); // Keeps track of checked locations for the current session. Does not persist
+
+        private static DeathLinkService _deathLink;
 
         public static bool Connect()
         {
@@ -60,6 +64,9 @@ namespace Archipelago.MonsterSanctuary.Client
             Session.Socket.PacketReceived += Session_PacketReceived;
             Session.Items.ItemReceived += ReceiveItem;
 
+            _deathLink = Session.CreateDeathLinkService();
+            _deathLink.OnDeathLinkReceived += (deathLinkObject) => ReceiveDeathLink(deathLinkObject);
+
             string rawPath = Environment.CurrentDirectory;
             if (rawPath != null)
             {
@@ -74,7 +81,7 @@ namespace Archipelago.MonsterSanctuary.Client
                 "Monster Sanctuary",
                 ConnectionInfo.slot_name,
                 ItemsHandlingFlags.AllItems,
-                new Version(0, 4, 2),
+                new Version(AP_VERSION[0], AP_VERSION[1], AP_VERSION[2]),
                 password: ConnectionInfo.password);
 
             if (loginResult is LoginSuccessful loginSuccess)
@@ -82,12 +89,22 @@ namespace Archipelago.MonsterSanctuary.Client
                 Authenticated = true;
                 
                 State = ConnectionState.Connected;
+
                 SlotData.LoadSlotData(loginSuccess.SlotData);
 
+                if (SlotData.DeathLink)
+                    _deathLink.EnableDeathLink();
+
+                GameData.LoadMinimap();
+                Patcher.RebuildCheckCounter();
+
                 // If the player opened chests while not connected, this get those items upon connection
-                if (CheckedLocations != null)
+                if (OfflineChecks.Count() > 0)
                 {
-                    Session.Locations.CompleteLocationChecks(CheckedLocations.ToArray());
+                    Patcher.Logger.LogInfo("Number of Locations Checked While Offline: " + OfflineChecks.Count());
+                    var ids = OfflineChecks.Select(loc => GameData.ItemChecks[loc]).ToArray();
+                    foreach (var id in ids)
+                        CheckLocation(id);
                 }
 
                 Resync();
@@ -132,11 +149,30 @@ namespace Archipelago.MonsterSanctuary.Client
                 Task.Run(() => { Session.Socket.DisconnectAsync(); }).Wait();
             }
             Session = null;
+            _deathLink.DisableDeathLink();
+        }
+
+        public static void SendDeathLink()
+        {
+            if (!APState.IsConnected)
+                return;
+
+            _deathLink.SendDeathLink(new DeathLink(Session.Players.GetPlayerName(Session.ConnectionInfo.Slot), "lost a combat"));
+        }
+
+        public static void ReceiveDeathLink(DeathLink deathLinkMessage)
+        {
+            if (!APState.IsConnected)
+                return;
+
+            // Nothing to do here
         }
 
         public static void Resync()
         {
-            Patcher.Logger.LogInfo("Resyncing Items");
+            if (!APState.IsConnected)
+                return;
+
             foreach (NetworkItem item in Session.Items.AllItemsReceived)
             {
                 var action = Session.ConnectionInfo.Slot == item.Player
@@ -154,7 +190,6 @@ namespace Archipelago.MonsterSanctuary.Client
                 ? ItemTransferType.Aquired // We found our own item
                 : ItemTransferType.Received; // Someone else found our item
 
-            Patcher.Logger.LogInfo("Item Received: " + name + ", (" + item.Location + ")");
             Patcher.QueueItemTransfer(item.Item, item.Player, item.Location, action);
         }
 
@@ -176,6 +211,9 @@ namespace Archipelago.MonsterSanctuary.Client
         {
             if (CheckedLocations.Add(locationId))
             {
+                if (!APState.IsConnected)
+                    return;
+
                 var locationsToCheck = CheckedLocations.Except(Session.Locations.AllLocationsChecked);
 
                 Task.Run(() =>
@@ -196,9 +234,18 @@ namespace Archipelago.MonsterSanctuary.Client
                 if (Session.ConnectionInfo.Slot == location.Player)
                     continue;
 
-                Patcher.Logger.LogInfo("Item Sent: " + Session.Items.GetItemName(location.Item));
                 Patcher.QueueItemTransfer(location.Item, location.Player, location.Location, ItemTransferType.Sent);
             }
+        }
+
+        public static void CompleteGame()
+        {
+            if (!APState.IsConnected)
+                return;
+
+            var statusUpdatePacket = new StatusUpdatePacket();
+            statusUpdatePacket.Status = ArchipelagoClientState.ClientGoal;
+            Session.Socket.SendPacket(statusUpdatePacket);
         }
     }
 }

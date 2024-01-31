@@ -13,6 +13,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using static MonoMod.Cil.RuntimeILReferenceBag.FastDelegateInvokers;
 using static PopupController;
 using static System.Collections.Specialized.BitVector32;
 
@@ -25,6 +26,19 @@ namespace Archipelago.MonsterSanctuary.Client
         #region Persistence
         private const string ITEM_CACHE_FILENAME = "archipelago_items_received.json";
         private static HashSet<long> _itemCache = new HashSet<long>();
+
+        public static void DeleteItemCache()
+        {
+            if (File.Exists(ITEM_CACHE_FILENAME))
+                File.Delete(ITEM_CACHE_FILENAME);
+            _itemCache = new();
+        }
+
+        public static void AddToItemCache(long id)
+        {
+            _itemCache.Add(id);
+            SaveItemsReceived();
+        }
 
         private static void SaveItemsReceived()
         {
@@ -45,6 +59,11 @@ namespace Archipelago.MonsterSanctuary.Client
                 reader.Close();
                 _itemCache = JsonConvert.DeserializeObject<HashSet<long>>(content);
             }
+        }
+
+        public static bool HasLocationBeenChecked(long locationId)
+        {
+            return _itemCache.Contains(locationId);
         }
         #endregion
 
@@ -86,35 +105,32 @@ namespace Archipelago.MonsterSanctuary.Client
         #endregion
 
         #region Pathces
-        [HarmonyPatch(typeof(GameController), "LoadStartingArea")]
-        private class GameController_ClearItemCacheOnNewGame
-        {
-            [UsedImplicitly]
-            private static void Prefix()
-            {
-                // Clear the item persistence cache when a new file is created
-                Logger.LogWarning("New Save. Deleting item cache");
-                _itemCache.Clear();
-                SaveItemsReceived();
-            }
-        }
-
         [HarmonyPatch(typeof(Chest), "OpenChest")]
         private class Chest_OpenChest
         {
             [UsedImplicitly]
             private static void Prefix(ref Chest __instance)
             {
-                if (!APState.IsConnected)
-                    return;
-
                 string locName = $"{GameController.Instance.CurrentSceneName}_{__instance.ID}";
-                var locationId = APState.CheckLocation(GameData.GetMappedLocation(locName));
-                if (locationId < 0)
-                    return;
 
+                // We want to do this even if we're disconnected so the player knows that they're not connected.
                 __instance.Item = null;
                 __instance.Gold = 0;
+
+                // If we're not connected, we add this location to a list of locations that need to be checked once we are connected
+                if (!APState.IsConnected)
+                {
+                    APState.OfflineChecks.Add(locName);
+                    return;
+                }
+
+                if (!GameData.ItemChecks.ContainsKey(locName))
+                {
+                    Patcher.Logger.LogWarning($"Location '{locName}' does not have a location ID assigned to it");
+                    return;
+                }
+
+                APState.CheckLocation(GameData.ItemChecks[locName]);
             }
         }
 
@@ -125,15 +141,24 @@ namespace Archipelago.MonsterSanctuary.Client
             [UsedImplicitly]
             private static bool Prefix(ref GrantItemsAction __instance)
             {
-                if (!APState.IsConnected)
-                    return true;
-
                 string locName = $"{GameController.Instance.CurrentSceneName}_{__instance.ID}";
-                var locationId = APState.CheckLocation(GameData.GetMappedLocation(locName));
-                if (locationId < 0)
-                    return true;
 
-                _giftActions.TryAdd(locationId, __instance);
+                // If we're not connected, we add this location to a list of locations that need to be checked once we are connected
+                if (!APState.IsConnected)
+                {
+                    APState.OfflineChecks.Add(locName);
+                    return true;
+                }
+
+                if (!GameData.ItemChecks.ContainsKey(locName))
+                {
+                    Patcher.Logger.LogWarning($"Location '{locName}' does not have a location ID assigned to it");
+                    return true;
+                }
+
+                APState.CheckLocation(GameData.ItemChecks[locName]);
+
+                _giftActions.TryAdd(GameData.ItemChecks[locName], __instance);
 
                 return false;
             }
@@ -189,14 +214,17 @@ namespace Archipelago.MonsterSanctuary.Client
                             nextItem.PlayerName,
                             nextItem.Action == ItemTransferType.Aquired,
                             callback);
+
+                        // We only want to save items to the item cache if we're receiving the item. 
+                        // Do not cache items we send to other people
+                        AddToItemCache(nextItem.LocationID);
                     }
 
-                    _itemCache.Add(nextItem.LocationID);
-                    SaveItemsReceived();
-
-                    // Only add to the locations checked counter if this is not a monster location
-                    if (!GameData.MonsterLocations.Contains(nextItem.LocationName))
-                        AddAndUpdateChecksRemaining(nextItem.LocationName);
+                    // If we're sending or receiving an item that we found, we want to update the locations checked.
+                    if (nextItem.PlayerID == APState.Session.ConnectionInfo.Slot)
+                    {
+                        Patcher.AddAndUpdateCheckedLocations(nextItem.LocationID);
+                    }
 
                     // If we're reached the end of the item queue,
                     // resync with the server to make sure we've gotten everything
@@ -270,7 +298,6 @@ namespace Archipelago.MonsterSanctuary.Client
                     callback);
 
                 PlayerController.Instance.Inventory.AddItem(item, quantity, 0);
-                UIController.Instance.Minimap.UpdateKeys();
             }
         }
 

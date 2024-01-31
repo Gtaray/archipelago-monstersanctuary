@@ -17,30 +17,25 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="data\champion_locations.json" />
+    <None Remove="data\map_pins.json" />
     <None Remove="data\minimal_locked_doors.json" />
-    <None Remove="data\monsters.json" />
-    <None Remove="data\monster_locations.json" />
+    <None Remove="data\monster_names.json" />
     <None Remove="data\npcs.json" />
-    <None Remove="data\number_of_checks.json" />
+    <None Remove="data\original_champions.json" />
     <None Remove="data\plotless_flags.json" />
     <None Remove="data\script_nodes.json" />
-    <None Remove="data\subsections.json" />
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="data\champion_locations.json" />
+    <EmbeddedResource Include="data\map_pins.json" />
     <EmbeddedResource Include="data\minimal_locked_doors.json" />
-    <EmbeddedResource Include="data\monsters.json" />
-    <EmbeddedResource Include="data\monster_locations.json" />
+    <EmbeddedResource Include="data\monster_names.json" />
   </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Include="data\npcs.json" />
-    <EmbeddedResource Include="data\number_of_checks.json" />
+    <EmbeddedResource Include="data\original_champions.json" />
     <EmbeddedResource Include="data\plotless_flags.json" />
-    <EmbeddedResource Include="data\script_nodes.json" />
-    <EmbeddedResource Include="data\subsections.json" />
   </ItemGroup>
 
   <ItemGroup>
