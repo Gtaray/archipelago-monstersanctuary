@@ -10,8 +10,9 @@ NOTE: This mod is currently in its alpha stage. Features are likely to be broken
 - [Download the latest version of this mod from this link.](https://github.com/Gtaray/archipelago-monstersanctuary/releases/latest/download/Monster_Sanctuary_Mod.zip)
 - Extra and copy the zip file into the root folder where Monster Sanctuary is located. By default it should be something like:
 `C:\Program Files (x86)\Steam\steamapps\common\Monster Sanctuary`
+	- Windows likes to place an intermediary folder when extracting zip files. Make sure that the `BepInEx` folder, `doorstop_config.ini`, and `winhttp.dll` are all located directly in the game's install folder.
 - Launch the game and close it. This will finalise the installation for BepInEx.
-- Launch the game again and you should see a new bit of UI in the top-left of the screen showing `Archipelago v0.4.2 Status: Not Connected`, as well as text fields to enter connection info.
+- Launch the game again and you should see a new bit of UI in the top-left of the screen showing `Archipelago v0.4.4 Status: Not Connected`, as well as text fields to enter connection info.
 - To uninstall the mod, either remove/delete the `Archipelago.MonsterSanctuary` folder from the plugins folder, or rename the winhttp.dll file in the game's root directory (this will disable all mods from running)
 
 ## Generating a Multiworld
