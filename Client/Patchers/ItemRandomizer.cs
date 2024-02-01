@@ -75,13 +75,20 @@ namespace Archipelago.MonsterSanctuary.Client
 
         public static void QueueItemTransfer(long itemId, int playerId, long locationId, ItemTransferType action)
         {
+            // We need to do this here so that we know for sure when an check is done the map is updated
+            // If the item action is either sent or acquired, we want to update the minimap. If we received the item then its not from us at all.
+            if (action != ItemTransferType.Received)
+            {
+                Patcher.AddAndUpdateCheckedLocations(locationId);
+            }
+
             // Do not queue a new item if we've already received that item.
             if (_itemCache.Contains(locationId))
                 return;
 
             var itemName = APState.Session.Items.GetItemName(itemId);
 
-            // We don't care about these, they're just flags
+            // We don't care about these, they're just flags for AP
             if (itemName == "Champion Defeated")
                 return;
 
@@ -218,12 +225,6 @@ namespace Archipelago.MonsterSanctuary.Client
                         // We only want to save items to the item cache if we're receiving the item. 
                         // Do not cache items we send to other people
                         AddToItemCache(nextItem.LocationID);
-                    }
-
-                    // If we're sending or receiving an item that we found, we want to update the locations checked.
-                    if (nextItem.PlayerID == APState.Session.ConnectionInfo.Slot)
-                    {
-                        Patcher.AddAndUpdateCheckedLocations(nextItem.LocationID);
                     }
 
                     // If we're reached the end of the item queue,
