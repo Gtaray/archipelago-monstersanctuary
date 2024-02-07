@@ -291,6 +291,15 @@ namespace Archipelago.MonsterSanctuary.Client
                 }
             }
         }
+
+        [HarmonyPatch(typeof(IngameBaseMenu), "GoBackToMainMenu")]
+        public static class IngameBaseMenu_GoBackToMainMenu
+        {
+            private static void Postfix()
+            {
+                APState.InitiateDisconnect();
+            }
+        }
     }
 
     public class ReturnToStartMenuItem : MenuListItem

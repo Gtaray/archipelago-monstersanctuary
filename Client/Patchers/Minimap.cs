@@ -24,7 +24,6 @@ namespace Archipelago.MonsterSanctuary.Client
 
         public static void AddAndUpdateCheckedLocations(long locationId)
         {
-            Patcher.Logger.LogInfo("AddAndUpdateCheckedLocations()");
             if (_locations_checked.Contains(locationId))
             {
                 return;
@@ -207,6 +206,9 @@ namespace Archipelago.MonsterSanctuary.Client
             [UsedImplicitly]
             private static void Prefix(MinimapTileView __instance, MinimapEntry entry, int posX, int posY)
             {
+                if (!APState.IsConnected)
+                    return;
+
                 string key = $"{entry.MapData.SceneName}_{posX}_{posY}";
 
                 // If there are no checks at this spot, bail
@@ -242,6 +244,9 @@ namespace Archipelago.MonsterSanctuary.Client
         {
             private static void Postfix(MapMenu __instance)
             {
+                if (!APState.IsConnected)
+                    return;
+
                 var tiles = Traverse.Create(UIController.Instance.IngameMenu.Map).Field("tiles").GetValue<List<MinimapTileView>>();
 
                 foreach (var tile in tiles)

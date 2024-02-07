@@ -30,7 +30,14 @@ namespace Archipelago.MonsterSanctuary.Client
                 if (!GameData.ChampionScenes.ContainsKey(GameController.Instance.CurrentSceneName))
                     return;
 
-                var go = GameData.GetMonsterByName(GameData.ChampionScenes[GameController.Instance.CurrentSceneName]);
+                var name = GameData.ChampionScenes[GameController.Instance.CurrentSceneName];
+                var go = GameData.GetMonsterByName(name);
+                if (go == null)
+                {
+                    Patcher.Logger.LogError($"Failed to find monster with name '{name}'");
+                    return;
+                }
+
                 var monster = go.GetComponent<Monster>();
 
                 for (int i = 0; i < __instance.ChampionScores.Count; i++)
@@ -100,6 +107,9 @@ namespace Archipelago.MonsterSanctuary.Client
             [UsedImplicitly]
             private static bool Prefix(ref Monster __result, ref Monster monster)
             {
+                if (!APState.IsConnected)
+                    return true;
+
                 string loc = $"{GameController.Instance.CurrentSceneName}_{monster.Encounter?.ID}_{monster.Index}";
 
                 // If the monster we're checking for does not have an encounter, then we 
@@ -117,47 +127,6 @@ namespace Archipelago.MonsterSanctuary.Client
         }
 
         /// <summary>
-        /// Given a champion monster's name, return the replacement for that champion
-        /// </summary>
-        /// <param name="championName"></param>
-        /// <returns></returns>
-        //public static Monster GetReplacementChampion(string championName)
-        //{
-        //    string location = null;
-        //    if (ChampionLocations.ContainsKey(championName))
-        //        location = ChampionLocations[championName];
-
-        //    // If for some reason the location is not found, just bail
-        //    if (location == null)
-        //    {
-        //        // Patcher.Logger.LogError($"Champion location for {championName} was not found.");
-        //        return null;
-        //    }
-
-        //    // Because champion monsters could exist in either slot 1 (for figths with 3 monsters)
-        //    // or in slot 0 (for fights with 1 monster), we need to check which one this is
-        //    GameObject monsterObject = GetReplacementMonster(location + "_1");
-        //    if (monsterObject == null)
-        //        monsterObject = GetReplacementMonster(location + "_0");
-
-        //    if (monsterObject == null)
-        //    {
-        //        // Patcher.Logger.LogError($"Could not get replacement monster for {championName} at {location}");
-        //        return null;
-        //    }
-
-        //    Monster monster = monsterObject.GetComponent<Monster>();
-
-        //    if (monster == null)
-        //    {
-        //        // Patcher.Logger.LogError($"Monster component for {championName} was not found.");
-        //        return null;
-        //    }
-
-        //    return monster;
-        //}
-
-        /// <summary>
         /// Sets up a monster encounter. We replace the whole function because of the GetReplacementMonster call in the middle that we need 
         /// to modify so it handles our own custom replacement.
         /// </summary>
@@ -169,7 +138,6 @@ namespace Archipelago.MonsterSanctuary.Client
             {
                 if (!APState.IsConnected)
                     return true;
-
 
                 // TODO: This doesn't seem to be changing the level of super champions
                 // Need to double check this.
@@ -304,42 +272,6 @@ namespace Archipelago.MonsterSanctuary.Client
         }
 
         /// <summary>
-        /// 
-        /// </summary>
-        [HarmonyPatch(typeof(CombatController), "WinCombat")]
-        private static class CombatController_WinCombat
-        {
-            [UsedImplicitly]
-            private static void Prefix(CombatController __instance)
-            {
-                if (!APState.IsConnected)
-                    return;
-
-                if (__instance.CurrentEncounter.IsKeeperBattle)
-                    return;
-
-                if (!__instance.CurrentEncounter.IsChampion)
-                    return;
-
-                // if victory condition is to beat the mad lord, check to see if we've done that
-                if (SlotData.Goal == CompletionEvent.MadLord && GameController.Instance.CurrentSceneName == "AbandonedTower_Final")
-                {
-                    APState.CompleteGame();
-                }
-
-                // We only want to operate on champion encounters
-                string locName = $"{GameController.Instance.CurrentSceneName}_Champion";
-                if (!GameData.ItemChecks.ContainsKey(locName))
-                {
-                    Patcher.Logger.LogWarning($"Location '{locName}' does not have a location ID assigned to it");
-                    return;
-                }
-
-                APState.CheckLocation(GameData.ItemChecks[locName]);
-            }
-        }
-
-        /// <summary>
         /// Used by non-encounter game objects such as champions or decoration mobs
         /// Since we want champions to actually show the sprite of the monster they're randomized to, we do that here.
         /// The reason we have to pull in the entire function is because the GetReplacementMonster call in the middle needs to be swapped out
@@ -465,6 +397,10 @@ namespace Archipelago.MonsterSanctuary.Client
             [UsedImplicitly]
             private static void Postfix(GameModeManager __instance, GameObject monster, ref GameObject __result)
             {
+                if (!APState.IsConnected)
+                {
+                    return;
+                }
                 var mon = monster.GetComponent<Monster>();
                 
                 if (mon.Name == "Tanuki")

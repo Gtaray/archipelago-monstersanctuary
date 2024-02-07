@@ -78,19 +78,25 @@ namespace Archipelago.MonsterSanctuary.Client
             TanukiMonster = GetStringData(monsterData, "tanuki");
             BexMonster = GetStringData(monsterData, "bex_monster");
 
+            GameData.MonstersCache = new();
             var monsterLocations = GetDictionaryData<string>(monsterData, "monster_locations");
             foreach (var location in monsterLocations)
                 GameData.AddMonster(location.Key, location.Value);
 
+            GameData.ChampionScenes = new();
             GameData.ChampionScenes = GetDictionaryData<string>(monsterData, "champions");
 
             var itemLocations = GetDictionaryData<Dictionary<string, long>>(slotData, "locations");
 
             //  Have to do this first so we have a list of all rank item ids before we process the rest of the items
+            GameData.ChampionRankIds = new();
             foreach (var item in itemLocations["ranks"])
             {
                 GameData.ChampionRankIds.Add(item.Key, item.Value);
             }
+
+            GameData.ItemChecks = new();
+            GameData.NumberOfChecks = new();
             foreach (var locationGroup in itemLocations)
             {
                 // Each entry in itemLocations is a key value pair
@@ -103,6 +109,7 @@ namespace Archipelago.MonsterSanctuary.Client
             }
 
             var hints = GetListData<HintData>(slotData, "hints");
+            GameData.Hints = new();
             foreach (var hint in hints)
                 GameData.AddHint(hint.ID, hint.Text, hint.IgnoreRemainingText);
 

@@ -16,6 +16,9 @@ namespace Archipelago.MonsterSanctuary.Client.Patchers
             [UsedImplicitly]
             private static bool Prefix(ref Door __instance)
             {
+                if (!APState.IsConnected)
+                    return true;
+
                 string id = $"{GameController.Instance.CurrentSceneName}_{__instance.ID}";
 
                 if (SlotData.LockedDoors == LockedDoorsFlag.None 

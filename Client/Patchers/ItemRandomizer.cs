@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Diagnostics.Eventing.Reader;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Runtime.Remoting.Messaging;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -25,7 +26,7 @@ namespace Archipelago.MonsterSanctuary.Client
 
         #region Persistence
         private const string ITEM_CACHE_FILENAME = "archipelago_items_received.json";
-        private static HashSet<long> _itemCache = new HashSet<long>();
+        private static HashSet<int> _itemCache = new HashSet<int>();
 
         public static void DeleteItemCache()
         {
@@ -34,7 +35,7 @@ namespace Archipelago.MonsterSanctuary.Client
             _itemCache = new();
         }
 
-        public static void AddToItemCache(long id)
+        public static void AddToItemCache(int id)
         {
             _itemCache.Add(id);
             SaveItemsReceived();
@@ -57,13 +58,8 @@ namespace Archipelago.MonsterSanctuary.Client
                 var reader = File.OpenText(ITEM_CACHE_FILENAME);
                 var content = reader.ReadToEnd();
                 reader.Close();
-                _itemCache = JsonConvert.DeserializeObject<HashSet<long>>(content);
+                _itemCache = JsonConvert.DeserializeObject<HashSet<int>>(content);
             }
-        }
-
-        public static bool HasLocationBeenChecked(long locationId)
-        {
-            return _itemCache.Contains(locationId);
         }
         #endregion
 
@@ -73,9 +69,9 @@ namespace Archipelago.MonsterSanctuary.Client
         // messages from the client.
         private static ConcurrentQueue<ItemTransfer> _itemQueue = new();
 
-        public static void QueueItemTransfer(long itemId, int playerId, long locationId, ItemTransferType action)
+        public static void QueueItemTransfer(int itemIndex, long itemId, int playerId, long locationId, ItemTransferType action)
         {
-            // We need to do this here so that we know for sure when an check is done the map is updated
+            // We need to do this here so that we know for sure when a check is done the map is updated
             // If the item action is either sent or acquired, we want to update the minimap. If we received the item then its not from us at all.
             if (action != ItemTransferType.Received)
             {
@@ -83,21 +79,18 @@ namespace Archipelago.MonsterSanctuary.Client
             }
 
             // Do not queue a new item if we've already received that item.
-            if (_itemCache.Contains(locationId))
+            if (_itemCache.Contains(itemIndex))
                 return;
 
             var itemName = APState.Session.Items.GetItemName(itemId);
 
-            // We don't care about these, they're just flags for AP
-            if (itemName == "Champion Defeated")
-                return;
-
-            // Don't queue an item if the queue already contains that item id.
-            if (_itemQueue.Any(i => i.ItemID == itemId))
+            // Don't queue an item if the queue already contains that index.
+            if (_itemQueue.Any(i => i.ItemIndex == itemIndex))
                 return;
 
             var transfer = new ItemTransfer()
             {
+                ItemIndex = itemIndex,
                 ItemID = itemId,
                 ItemName = itemName,
                 PlayerID = playerId,
@@ -112,6 +105,91 @@ namespace Archipelago.MonsterSanctuary.Client
         #endregion
 
         #region Pathces
+        [HarmonyPatch(typeof(GameController), "Update")]
+        private class GameController_Update
+        {
+            private static void Postfix()
+            {
+                // Showing a pop up takes the game out of the isExploring state so we
+                // should be guaranteed to never give an item until the pop up
+                // is closed.
+                if (!CanGiveItem())
+                    return;
+
+                if (_itemQueue.Count() == 0)
+                {
+                    // if the item queue is empty and we have gift actions that need solving
+                    // we simply complete them so we can move on
+                    if (_giftActions.Count() > 0)
+                    {
+                        var kvp = _giftActions.First();
+                        kvp.Value.Finish();
+                        _giftActions.TryRemove(kvp.Key, out var action);
+                    }
+                    return;
+                }
+
+                if (_itemQueue.TryDequeue(out ItemTransfer nextItem))
+                {
+                    // For these, we just want to increment the counter and move on. Nothing else.
+                    if (nextItem.ItemName == "Champion Defeated")
+                    {
+                        APState.ChampionsDefeated++;
+                        if (APState.ChampionsDefeated >= 27 && SlotData.Goal == CompletionEvent.Champions)
+                        {
+                            APState.CompleteGame();
+                        }
+                        return;
+                    }
+
+                    PopupController.PopupDelegate callback = null;
+                    if (_giftActions.ContainsKey(nextItem.LocationID))
+                    {
+                        callback = () =>
+                        {
+                            _giftActions[nextItem.LocationID].Finish();
+                            _giftActions.TryRemove(nextItem.LocationID, out var action);
+                        };
+                    }
+
+                    if (nextItem.Action == ItemTransferType.Sent)
+                    {
+                        SentItem(
+                            nextItem.ItemName,
+                            nextItem.PlayerName,
+                            callback);
+                    }
+                    else
+                    {
+                        ReceiveItem(
+                            nextItem.ItemName,
+                            nextItem.PlayerName,
+                            nextItem.Action == ItemTransferType.Aquired,
+                            callback);
+
+                        // We only want to save items to the item cache if we're receiving the item. 
+                        // Do not cache items we send to other people
+                        AddToItemCache(nextItem.ItemIndex);
+                    }
+
+                    // If we're reached the end of the item queue,
+                    // resync with the server to make sure we've gotten everything
+                    if (_itemQueue.Count() == 0)
+                    {
+                        APState.Resync();
+                    }
+                }
+            }
+
+            private static bool CanGiveItem()
+            {
+                // If we're in the intro, then don't send items
+                if (!ProgressManager.Instance.GetBool("FinishedIntro"))
+                    return false;
+                return GameStateManager.Instance.IsExploring();
+            }
+        }
+
         [HarmonyPatch(typeof(Chest), "OpenChest")]
         private class Chest_OpenChest
         {
@@ -119,10 +197,6 @@ namespace Archipelago.MonsterSanctuary.Client
             private static void Prefix(ref Chest __instance)
             {
                 string locName = $"{GameController.Instance.CurrentSceneName}_{__instance.ID}";
-
-                // We want to do this even if we're disconnected so the player knows that they're not connected.
-                __instance.Item = null;
-                __instance.Gold = 0;
 
                 // If we're not connected, we add this location to a list of locations that need to be checked once we are connected
                 if (!APState.IsConnected)
@@ -136,6 +210,9 @@ namespace Archipelago.MonsterSanctuary.Client
                     Patcher.Logger.LogWarning($"Location '{locName}' does not have a location ID assigned to it");
                     return;
                 }
+
+                __instance.Item = null;
+                __instance.Gold = 0;
 
                 APState.CheckLocation(GameData.ItemChecks[locName]);
             }
@@ -168,80 +245,6 @@ namespace Archipelago.MonsterSanctuary.Client
                 _giftActions.TryAdd(GameData.ItemChecks[locName], __instance);
 
                 return false;
-            }
-        }
-
-        [HarmonyPatch(typeof(GameController), "Update")]
-        private class GameController_Update
-        {
-            private static void Postfix()
-            {
-                // Showing a pop up takes the game out of the isExploring state so we
-                // should be guaranteed to never give an item until the pop up
-                // is closed.
-                if (!CanGiveItem())
-                    return;
-
-                if (_itemQueue.Count() == 0)
-                {
-                    // if the item queue is empty and we have gift actions that need solving
-                    // we simply complete them so we can move on
-                    if (_giftActions.Count() > 0)
-                    {
-                        var kvp = _giftActions.First();
-                        kvp.Value.Finish();
-                        _giftActions.TryRemove(kvp.Key, out var action);
-                    }
-                    return;
-                }
-
-                if (_itemQueue.TryDequeue(out ItemTransfer nextItem))
-                {
-                    PopupController.PopupDelegate callback = null;
-                    if (_giftActions.ContainsKey(nextItem.LocationID))
-                    {
-                        callback = () =>
-                        {
-                            _giftActions[nextItem.LocationID].Finish();
-                            _giftActions.TryRemove(nextItem.LocationID, out var action);
-                        };
-                    }
-
-                    if (nextItem.Action == ItemTransferType.Sent)
-                    {
-                        SentItem(
-                            nextItem.ItemName, 
-                            nextItem.PlayerName, 
-                            callback);
-                    } 
-                    else 
-                    {
-                        ReceiveItem(
-                            nextItem.ItemName,
-                            nextItem.PlayerName,
-                            nextItem.Action == ItemTransferType.Aquired,
-                            callback);
-
-                        // We only want to save items to the item cache if we're receiving the item. 
-                        // Do not cache items we send to other people
-                        AddToItemCache(nextItem.LocationID);
-                    }
-
-                    // If we're reached the end of the item queue,
-                    // resync with the server to make sure we've gotten everything
-                    if (_itemQueue.Count() == 0)
-                    {
-                        APState.Resync();
-                    }
-                }
-            }
-
-            private static bool CanGiveItem()
-            {
-                // If we're in the intro, then don't send items
-                if (!ProgressManager.Instance.GetBool("FinishedIntro"))
-                    return false;
-                return GameStateManager.Instance.IsExploring();
             }
         }
         #endregion

@@ -17,6 +17,7 @@ using Archipelago.MultiClient.Net.Models;
 using static System.Collections.Specialized.BitVector32;
 using static MonoMod.Cil.RuntimeILReferenceBag.FastDelegateInvokers;
 using Archipelago.MultiClient.Net.BounceFeatures.DeathLink;
+using System.Net;
 
 namespace Archipelago.MonsterSanctuary.Client
 {
@@ -25,6 +26,7 @@ namespace Archipelago.MonsterSanctuary.Client
         public enum ConnectionState
         {
             Disconnected,
+            Connecting,
             Connected
         }
 
@@ -33,6 +35,7 @@ namespace Archipelago.MonsterSanctuary.Client
 
         public static ConnectionState State = ConnectionState.Disconnected;
         public static bool IsConnected => State == ConnectionState.Connected;
+        public static int ChampionsDefeated { get; set; } = 0;
 
         public static ArchipelagoConnectionInfo ConnectionInfo = new ArchipelagoConnectionInfo();
         public static ArchipelagoSession Session;
@@ -55,6 +58,7 @@ namespace Archipelago.MonsterSanctuary.Client
             }
 
             Patcher.Logger.LogInfo($"Connecting to {ConnectionInfo.host_name} as {ConnectionInfo.slot_name}...");
+            State = ConnectionState.Connecting;
 
             // Start the archipelago session.
             Session = ArchipelagoSessionFactory.CreateSession(ConnectionInfo.host_name);
@@ -140,16 +144,25 @@ namespace Archipelago.MonsterSanctuary.Client
             Disconnect();
         }
 
-        public static void Disconnect()
+        public static void InitiateDisconnect()
         {
-            Authenticated = false;
-            State = ConnectionState.Disconnected;
+            if (!APState.IsConnected)
+                return;
+
             if (Session != null && Session.Socket != null && Session.Socket.Connected)
             {
-                Task.Run(() => { Session.Socket.DisconnectAsync(); }).Wait();
+                _deathLink.DisableDeathLink();
+                Session.Socket.DisconnectAsync();
             }
+        }
+        public static void Disconnect()
+        {
+            if (!APState.IsConnected)
+                return;
+
+            Authenticated = false;
+            State = ConnectionState.Disconnected;
             Session = null;
-            _deathLink.DisableDeathLink();
         }
 
         public static void SendDeathLink()
@@ -173,12 +186,20 @@ namespace Archipelago.MonsterSanctuary.Client
             if (!APState.IsConnected)
                 return;
 
-            foreach (NetworkItem item in Session.Items.AllItemsReceived)
+            for (int i = 0; i < Session.Items.AllItemsReceived.Count();  i++)
             {
+                var item = Session.Items.AllItemsReceived[i];
+                // When resyncing, we ignore items that were handed out by the server.
+                // Otherwise we'd get the same server item every time we resynced
+                if (item.Location < 0)
+                {
+                    continue;
+                }
+
                 var action = Session.ConnectionInfo.Slot == item.Player
                     ? ItemTransferType.Aquired // We found our own item
                     : ItemTransferType.Received; // Someone else found our item
-                Patcher.QueueItemTransfer(item.Item, item.Player, item.Location, action);
+                Patcher.QueueItemTransfer(i, item.Item, item.Player, item.Location, action);
             }
         }
         
@@ -186,11 +207,12 @@ namespace Archipelago.MonsterSanctuary.Client
         {
             var item = helper.DequeueItem();
             var name = helper.GetItemName(item.Item);
+            Patcher.Logger.LogInfo("ReceiveItem(): " + name + " (" + item.Item + ")");
             var action = Session.ConnectionInfo.Slot == item.Player
                 ? ItemTransferType.Aquired // We found our own item
                 : ItemTransferType.Received; // Someone else found our item
 
-            Patcher.QueueItemTransfer(item.Item, item.Player, item.Location, action);
+            Patcher.QueueItemTransfer(helper.Index, item.Item, item.Player, item.Location, action);
         }
 
         public static long CheckLocation(string location)
@@ -221,20 +243,6 @@ namespace Archipelago.MonsterSanctuary.Client
                     Session.Locations.CompleteLocationChecksAsync(
                         locationsToCheck.ToArray());
                 }).ConfigureAwait(false);
-
-                Task.Run(() => ScoutLocation(locationsToCheck.ToArray()));
-            }
-        }
-
-        private static async Task ScoutLocation(long[] locationsToCheck)
-        {
-            var packet = await Session.Locations.ScoutLocationsAsync(false, locationsToCheck);
-            foreach (var location in packet.Locations)
-            {
-                if (Session.ConnectionInfo.Slot == location.Player)
-                    continue;
-
-                Patcher.QueueItemTransfer(location.Item, location.Player, location.Location, ItemTransferType.Sent);
             }
         }
 
