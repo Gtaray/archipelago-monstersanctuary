@@ -204,6 +204,20 @@ namespace Archipelago.MonsterSanctuary.Client
             }
         }
 
+        [HarmonyPatch(typeof(ItemCondition), "EvaluateCondition")]
+        private class ItemCondition_EvaluateCondition
+        {
+            private static void Prefix(ItemCondition __instance)
+            {
+                // if checking how many sanctuary tokens we have, we modify the compare value to be 5
+                // This way the cut-scene will only trigger if all 5 sanctuary tokens are already gathered
+                if (__instance.ID == 29300015)
+                {
+                    __instance.CompareValue = 5;
+                }
+            }
+        }
+
         [HarmonyPatch(typeof(TouchTrigger), "Touch")]
         private class TouchTrigger_Touch
         {
