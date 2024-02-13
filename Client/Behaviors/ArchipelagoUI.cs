@@ -72,7 +72,7 @@ namespace Archipelago.MonsterSanctuary.Client
             y = 36;
 
             // Login details
-            if ((APState.Session == null || !APState.Authenticated) && APState.State == APState.ConnectionState.Disconnected)
+            if ((APState.Session == null || !APState.Authenticated) && APState.State != APState.ConnectionState.Connected)
             {
                 GUI.Label(new Rect(16, 36, 150, 20), "Host: ");
                 GUI.Label(new Rect(16, 56, 150, 20), "PlayerName: ");

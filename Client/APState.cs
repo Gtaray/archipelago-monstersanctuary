@@ -115,6 +115,7 @@ namespace Archipelago.MonsterSanctuary.Client
             }
             else if (loginResult is LoginFailure loginFailure)
             {
+                State = ConnectionState.Disconnected;
                 Authenticated = false;
                 Patcher.Logger.LogError(String.Join("\n", loginFailure.Errors));
                 Session = null;
@@ -125,23 +126,23 @@ namespace Archipelago.MonsterSanctuary.Client
 
         static void Session_PacketReceived(ArchipelagoPacketBase packet)
         {
-            Debug.LogWarning("Packet Received: " + packet.ToString());
+            //Patcher.Logger.LogWarning("Packet Received: " + packet.ToJObject().ToString());
         }
         static void Session_SocketClosed(string reason)
         {
-            Debug.LogError("Connection to Archipelago lost: " + reason);
+            Patcher.Logger.LogError("Connection to Archipelago lost: " + reason);
             Disconnect();
         }
         static void Session_MessageReceived(LogMessage message)
         {
-            Debug.Log("Session_MessageReceived");
-            Debug.Log(message);
+            Patcher.Logger.LogDebug("Session_MessageReceived");
+            Patcher.Logger.LogDebug(message);
         }
         static void Session_ErrorReceived(Exception e, string message)
         {
-            Debug.LogError("Session_ErrorReceived: " + message);
-            if (e != null) Debug.LogError(e.ToString());
-            Disconnect();
+            Patcher.Logger.LogError("Session_ErrorReceived: " + message);
+            if (e != null) Patcher.Logger.LogError(e.ToString());
+            InitiateDisconnect();
         }
 
         public static void InitiateDisconnect()
@@ -186,15 +187,10 @@ namespace Archipelago.MonsterSanctuary.Client
             if (!APState.IsConnected)
                 return;
 
+            Patcher.Logger.LogInfo("Resync()");
             for (int i = 0; i < Session.Items.AllItemsReceived.Count();  i++)
             {
                 var item = Session.Items.AllItemsReceived[i];
-                // When resyncing, we ignore items that were handed out by the server.
-                // Otherwise we'd get the same server item every time we resynced
-                if (item.Location < 0)
-                {
-                    continue;
-                }
 
                 var action = Session.ConnectionInfo.Slot == item.Player
                     ? ItemTransferType.Aquired // We found our own item
@@ -215,20 +211,6 @@ namespace Archipelago.MonsterSanctuary.Client
             Patcher.QueueItemTransfer(helper.Index, item.Item, item.Player, item.Location, action);
         }
 
-        public static long CheckLocation(string location)
-        {
-            var id = APState.Session.Locations.GetLocationIdFromName("Monster Sanctuary", location);
-            if (id < 0)
-            {
-                Patcher.Logger.LogError($"Location ID for '{location}' was -1");
-                return -1;
-            }
-
-            APState.CheckLocation(id);
-
-            return id;
-        }
-
         public static void CheckLocation(long locationId)
         {
             if (CheckedLocations.Add(locationId))
@@ -236,7 +218,9 @@ namespace Archipelago.MonsterSanctuary.Client
                 if (!APState.IsConnected)
                     return;
 
+                Patcher.Logger.LogInfo("CheckLocation(): " + locationId);
                 var locationsToCheck = CheckedLocations.Except(Session.Locations.AllLocationsChecked);
+                Patcher.Logger.LogInfo($"{locationsToCheck.Count()} locations to check");
 
                 Task.Run(() =>
                 {

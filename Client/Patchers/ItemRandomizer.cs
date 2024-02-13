@@ -26,18 +26,19 @@ namespace Archipelago.MonsterSanctuary.Client
 
         #region Persistence
         private const string ITEM_CACHE_FILENAME = "archipelago_items_received.json";
-        private static HashSet<int> _itemCache = new HashSet<int>();
+        private static int _itemsReceivedIndex = -1;
 
         public static void DeleteItemCache()
         {
             if (File.Exists(ITEM_CACHE_FILENAME))
                 File.Delete(ITEM_CACHE_FILENAME);
-            _itemCache = new();
+            _itemsReceivedIndex = -1;
         }
 
         public static void AddToItemCache(int id)
         {
-            _itemCache.Add(id);
+            Patcher.Logger.LogInfo("AddToItemCache(): " + id);
+            _itemsReceivedIndex = id;
             SaveItemsReceived();
         }
 
@@ -46,7 +47,7 @@ namespace Archipelago.MonsterSanctuary.Client
             string rawPath = Environment.CurrentDirectory;
             if (rawPath != null)
             {
-                var bytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(_itemCache));
+                var bytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(_itemsReceivedIndex));
                 File.WriteAllBytes(Path.Combine(rawPath, ITEM_CACHE_FILENAME), bytes);
             }
         }
@@ -58,7 +59,7 @@ namespace Archipelago.MonsterSanctuary.Client
                 var reader = File.OpenText(ITEM_CACHE_FILENAME);
                 var content = reader.ReadToEnd();
                 reader.Close();
-                _itemCache = JsonConvert.DeserializeObject<HashSet<int>>(content);
+                _itemsReceivedIndex = JsonConvert.DeserializeObject<int>(content);
             }
         }
         #endregion
@@ -79,14 +80,22 @@ namespace Archipelago.MonsterSanctuary.Client
             }
 
             // Do not queue a new item if we've already received that item.
-            if (_itemCache.Contains(itemIndex))
+            if (itemIndex <= _itemsReceivedIndex)
+            {
+                Patcher.Logger.LogInfo($"Already received this item. Recieved item's index is {itemIndex}, while we've received up to item {_itemsReceivedIndex}");
                 return;
+            }
 
             var itemName = APState.Session.Items.GetItemName(itemId);
 
             // Don't queue an item if the queue already contains that index.
             if (_itemQueue.Any(i => i.ItemIndex == itemIndex))
+            {
+                Patcher.Logger.LogInfo($"Item queue already contains item index {itemIndex}");
                 return;
+            }
+
+            Patcher.Logger.LogInfo("QueueItemTransfer(): " + itemName);
 
             var transfer = new ItemTransfer()
             {
@@ -123,6 +132,7 @@ namespace Archipelago.MonsterSanctuary.Client
                     if (_giftActions.Count() > 0)
                     {
                         var kvp = _giftActions.First();
+                        Patcher.Logger.LogInfo("Resolve gift action: " + kvp.Key);
                         kvp.Value.Finish();
                         _giftActions.TryRemove(kvp.Key, out var action);
                     }
@@ -131,6 +141,7 @@ namespace Archipelago.MonsterSanctuary.Client
 
                 if (_itemQueue.TryDequeue(out ItemTransfer nextItem))
                 {
+                    Patcher.Logger.LogInfo("TryDequeue(): " + nextItem.ItemName);
                     // For these, we just want to increment the counter and move on. Nothing else.
                     if (nextItem.ItemName == "Champion Defeated")
                     {
@@ -150,10 +161,12 @@ namespace Archipelago.MonsterSanctuary.Client
                             _giftActions[nextItem.LocationID].Finish();
                             _giftActions.TryRemove(nextItem.LocationID, out var action);
                         };
+                        Patcher.Logger.LogInfo("Set callback to clear gift action");
                     }
 
                     if (nextItem.Action == ItemTransferType.Sent)
                     {
+                        Patcher.Logger.LogInfo("Sending item in update loop");
                         SentItem(
                             nextItem.ItemName,
                             nextItem.PlayerName,
@@ -161,6 +174,7 @@ namespace Archipelago.MonsterSanctuary.Client
                     }
                     else
                     {
+                        Patcher.Logger.LogInfo("Receiving item in update loop");
                         ReceiveItem(
                             nextItem.ItemName,
                             nextItem.PlayerName,
@@ -176,7 +190,8 @@ namespace Archipelago.MonsterSanctuary.Client
                     // resync with the server to make sure we've gotten everything
                     if (_itemQueue.Count() == 0)
                     {
-                        APState.Resync();
+                        //Patcher.Logger.LogInfo("item queue is emptied. Resyncing");
+                        //APState.Resync();
                     }
                 }
             }
@@ -197,6 +212,7 @@ namespace Archipelago.MonsterSanctuary.Client
             private static void Prefix(ref Chest __instance)
             {
                 string locName = $"{GameController.Instance.CurrentSceneName}_{__instance.ID}";
+                Patcher.Logger.LogInfo("OpenChest(): " + locName);
 
                 // If we're not connected, we add this location to a list of locations that need to be checked once we are connected
                 if (!APState.IsConnected)
@@ -269,6 +285,13 @@ namespace Archipelago.MonsterSanctuary.Client
                 return;
             }
 
+            // If an egg is given out, we need to trim all spaces from it
+            //if (itemName.EndsWith(" Egg"))
+            //{
+            //    itemName = itemName.Replace(" ", "");
+            //}
+
+            Patcher.Logger.LogInfo("ReceiveItem(): " + itemName);
             var gold = GetGoldQuantity(itemName);
             if (gold > 0)
             {
@@ -282,7 +305,7 @@ namespace Archipelago.MonsterSanctuary.Client
             if (newItem == null)
             {
                 // This shouldn't happen. Might need a smarter way to solve this.
-                Logger.LogError($"No item reference was found with the matching name '{itemName}'.");
+                Logger.LogError($"No item reference was found matching the name '{itemName}'.");
                 return;
             }
 
@@ -292,6 +315,7 @@ namespace Archipelago.MonsterSanctuary.Client
         #region Give Items
         static void GiveItem(BaseItem item, string player, bool self, int quantity = 1, PopupDelegate callback = null)
         {
+            Patcher.Logger.LogInfo("GiveItem(): " + item.name);
             if (item != null)
             {
                 item = Utils.CheckForCostumeReplacement(item);
@@ -307,6 +331,7 @@ namespace Archipelago.MonsterSanctuary.Client
 
         public static int GetQuantityOfItem(ref string name)
         {
+            Patcher.Logger.LogInfo("GetQuantityOfItem(): " + name);
             int quantity = 1;
             var match = Regex.Match(name, "^(\\d+)x");
 
@@ -325,15 +350,24 @@ namespace Archipelago.MonsterSanctuary.Client
 
         static BaseItem GetItemByName(string name)
         {
-            // Trim "#x" from the name
+            if (name.EndsWith(" Egg"))
+                return GetItemByName<Egg>(name);
+
+            return GetItemByName<BaseItem>(name);
+        }
+
+        static BaseItem GetItemByName<T>(string name) where T : BaseItem
+        {
+            Patcher.Logger.LogInfo("GetItemByName(): " + name);            
             return GameController.Instance.WorldData.Referenceables
-                    .Where(x => x?.gameObject.GetComponent<BaseItem>() != null)
-                    .Select(x => x.gameObject.GetComponent<BaseItem>())
-                    .SingleOrDefault(i => string.Equals(i.GetName(), name, StringComparison.OrdinalIgnoreCase));
+                .Where(x => x?.gameObject.GetComponent<T>() != null)
+                .Select(x => x.gameObject.GetComponent<T>())
+                .SingleOrDefault(i => string.Equals(i.GetName(), name, StringComparison.OrdinalIgnoreCase));
         }
 
         private static string FormatItemReceivedMessage(string item, int quantity, string player, bool self)
         {
+            Patcher.Logger.LogInfo("FormatItemReceivedMessage(): " + item);
             item = GameDefines.FormatTextAsHighlight(item);
             player = GameDefines.FormatTextAsHighlight(player);
 
@@ -356,6 +390,7 @@ namespace Archipelago.MonsterSanctuary.Client
         #region Give Gold
         static void GiveGold(int amount, string player, bool self, bool showMsg = true, PopupController.PopupDelegate callback = null)
         {
+            Patcher.Logger.LogInfo("GiveGold(): " + amount);
             if (showMsg)
             {
                 PopupController.Instance.ShowMessage(
@@ -374,6 +409,7 @@ namespace Archipelago.MonsterSanctuary.Client
 
         public static int GetGoldQuantity(string itemName)
         {
+            Patcher.Logger.LogInfo("GetGoldQuantity(): " + itemName);
             int gold = 0;
             var match = Regex.Match(itemName, "^(\\d+) G");
             if (match.Success)
@@ -381,7 +417,6 @@ namespace Archipelago.MonsterSanctuary.Client
                 var strGold = match.Groups[1].Value;
 
                 gold = int.Parse(strGold);
-
             }
 
             return gold;
@@ -389,7 +424,7 @@ namespace Archipelago.MonsterSanctuary.Client
 
         private static string FormatGoldReceivedMessage(int quantity, string player, bool self)
         {
-
+            Patcher.Logger.LogInfo("FormatGoldReceivedMessage(): " + quantity);
             string gold = GameDefines.FormatTextAsHighlight(string.Format("{0} Gold", quantity));
             player = GameDefines.FormatTextAsHighlight(player);
 
