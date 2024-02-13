@@ -213,15 +213,12 @@ namespace Archipelago.MonsterSanctuary.Client
 
             private static void ConnectToArchipelago(SaveGameMenu __instance, PopupController.PopupDelegate postConnectionAction)
             {
-                Patcher.Logger.LogInfo("Trying to connect");
                 if (APState.Connect())
                 {
-                    Patcher.Logger.LogInfo("Loading Game");
                     postConnectionAction.Invoke();
                     return;
                 }
 
-                Patcher.Logger.LogInfo("Failed to connect");
                 PopupController.Instance.Close();
                 Timer.StartTimer(__instance.MainMenu.gameObject, 0.3f, () => ShowConnectionFailedMessage(__instance));
                 // If we failed, just throw up an error and then return back to the load game screen

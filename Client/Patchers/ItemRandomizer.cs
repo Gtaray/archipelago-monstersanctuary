@@ -37,7 +37,6 @@ namespace Archipelago.MonsterSanctuary.Client
 
         public static void AddToItemCache(int id)
         {
-            Patcher.Logger.LogInfo("AddToItemCache(): " + id);
             _itemsReceivedIndex = id;
             SaveItemsReceived();
         }
@@ -82,7 +81,6 @@ namespace Archipelago.MonsterSanctuary.Client
             // Do not queue a new item if we've already received that item.
             if (itemIndex <= _itemsReceivedIndex)
             {
-                Patcher.Logger.LogInfo($"Already received this item. Recieved item's index is {itemIndex}, while we've received up to item {_itemsReceivedIndex}");
                 return;
             }
 
@@ -91,11 +89,8 @@ namespace Archipelago.MonsterSanctuary.Client
             // Don't queue an item if the queue already contains that index.
             if (_itemQueue.Any(i => i.ItemIndex == itemIndex))
             {
-                Patcher.Logger.LogInfo($"Item queue already contains item index {itemIndex}");
                 return;
             }
-
-            Patcher.Logger.LogInfo("QueueItemTransfer(): " + itemName);
 
             var transfer = new ItemTransfer()
             {
@@ -117,8 +112,23 @@ namespace Archipelago.MonsterSanctuary.Client
         [HarmonyPatch(typeof(GameController), "Update")]
         private class GameController_Update
         {
+            static float elapsed = 0;
+
             private static void Postfix()
             {
+                // This method needs to run at or below 100 FPS in order to avoid
+                // the dreaded item received menu glitch.
+                // So we track how much time has elapsed since the last frame, and wait for
+                // enough time to have passed before moving on.
+                // 144 FPS has a frametime of 0.00694 seconds, or 6.94 milliseconds
+                // 100 FPS has a frametime of 0.01 seconds, or 10 milliseconds
+                elapsed += Time.deltaTime;
+                if (elapsed < 0.01f)
+                {
+                    return;
+                }
+                elapsed = 0f;
+
                 // Showing a pop up takes the game out of the isExploring state so we
                 // should be guaranteed to never give an item until the pop up
                 // is closed.
@@ -132,7 +142,6 @@ namespace Archipelago.MonsterSanctuary.Client
                     if (_giftActions.Count() > 0)
                     {
                         var kvp = _giftActions.First();
-                        Patcher.Logger.LogInfo("Resolve gift action: " + kvp.Key);
                         kvp.Value.Finish();
                         _giftActions.TryRemove(kvp.Key, out var action);
                     }
@@ -141,7 +150,6 @@ namespace Archipelago.MonsterSanctuary.Client
 
                 if (_itemQueue.TryDequeue(out ItemTransfer nextItem))
                 {
-                    Patcher.Logger.LogInfo("TryDequeue(): " + nextItem.ItemName);
                     // For these, we just want to increment the counter and move on. Nothing else.
                     if (nextItem.ItemName == "Champion Defeated")
                     {
@@ -161,12 +169,10 @@ namespace Archipelago.MonsterSanctuary.Client
                             _giftActions[nextItem.LocationID].Finish();
                             _giftActions.TryRemove(nextItem.LocationID, out var action);
                         };
-                        Patcher.Logger.LogInfo("Set callback to clear gift action");
                     }
 
                     if (nextItem.Action == ItemTransferType.Sent)
                     {
-                        Patcher.Logger.LogInfo("Sending item in update loop");
                         SentItem(
                             nextItem.ItemName,
                             nextItem.PlayerName,
@@ -174,7 +180,6 @@ namespace Archipelago.MonsterSanctuary.Client
                     }
                     else
                     {
-                        Patcher.Logger.LogInfo("Receiving item in update loop");
                         ReceiveItem(
                             nextItem.ItemName,
                             nextItem.PlayerName,
@@ -212,7 +217,6 @@ namespace Archipelago.MonsterSanctuary.Client
             private static void Prefix(ref Chest __instance)
             {
                 string locName = $"{GameController.Instance.CurrentSceneName}_{__instance.ID}";
-                Patcher.Logger.LogInfo("OpenChest(): " + locName);
 
                 // If we're not connected, we add this location to a list of locations that need to be checked once we are connected
                 if (!APState.IsConnected)
@@ -285,13 +289,6 @@ namespace Archipelago.MonsterSanctuary.Client
                 return;
             }
 
-            // If an egg is given out, we need to trim all spaces from it
-            //if (itemName.EndsWith(" Egg"))
-            //{
-            //    itemName = itemName.Replace(" ", "");
-            //}
-
-            Patcher.Logger.LogInfo("ReceiveItem(): " + itemName);
             var gold = GetGoldQuantity(itemName);
             if (gold > 0)
             {
@@ -315,7 +312,6 @@ namespace Archipelago.MonsterSanctuary.Client
         #region Give Items
         static void GiveItem(BaseItem item, string player, bool self, int quantity = 1, PopupDelegate callback = null)
         {
-            Patcher.Logger.LogInfo("GiveItem(): " + item.name);
             if (item != null)
             {
                 item = Utils.CheckForCostumeReplacement(item);
@@ -331,7 +327,6 @@ namespace Archipelago.MonsterSanctuary.Client
 
         public static int GetQuantityOfItem(ref string name)
         {
-            Patcher.Logger.LogInfo("GetQuantityOfItem(): " + name);
             int quantity = 1;
             var match = Regex.Match(name, "^(\\d+)x");
 
@@ -357,8 +352,7 @@ namespace Archipelago.MonsterSanctuary.Client
         }
 
         static BaseItem GetItemByName<T>(string name) where T : BaseItem
-        {
-            Patcher.Logger.LogInfo("GetItemByName(): " + name);            
+        {       
             return GameController.Instance.WorldData.Referenceables
                 .Where(x => x?.gameObject.GetComponent<T>() != null)
                 .Select(x => x.gameObject.GetComponent<T>())
@@ -367,7 +361,6 @@ namespace Archipelago.MonsterSanctuary.Client
 
         private static string FormatItemReceivedMessage(string item, int quantity, string player, bool self)
         {
-            Patcher.Logger.LogInfo("FormatItemReceivedMessage(): " + item);
             item = GameDefines.FormatTextAsHighlight(item);
             player = GameDefines.FormatTextAsHighlight(player);
 
@@ -390,7 +383,6 @@ namespace Archipelago.MonsterSanctuary.Client
         #region Give Gold
         static void GiveGold(int amount, string player, bool self, bool showMsg = true, PopupController.PopupDelegate callback = null)
         {
-            Patcher.Logger.LogInfo("GiveGold(): " + amount);
             if (showMsg)
             {
                 PopupController.Instance.ShowMessage(
@@ -409,7 +401,6 @@ namespace Archipelago.MonsterSanctuary.Client
 
         public static int GetGoldQuantity(string itemName)
         {
-            Patcher.Logger.LogInfo("GetGoldQuantity(): " + itemName);
             int gold = 0;
             var match = Regex.Match(itemName, "^(\\d+) G");
             if (match.Success)
@@ -424,7 +415,6 @@ namespace Archipelago.MonsterSanctuary.Client
 
         private static string FormatGoldReceivedMessage(int quantity, string player, bool self)
         {
-            Patcher.Logger.LogInfo("FormatGoldReceivedMessage(): " + quantity);
             string gold = GameDefines.FormatTextAsHighlight(string.Format("{0} Gold", quantity));
             player = GameDefines.FormatTextAsHighlight(player);
 

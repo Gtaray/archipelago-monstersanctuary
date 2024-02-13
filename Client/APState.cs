@@ -187,7 +187,6 @@ namespace Archipelago.MonsterSanctuary.Client
             if (!APState.IsConnected)
                 return;
 
-            Patcher.Logger.LogInfo("Resync()");
             for (int i = 0; i < Session.Items.AllItemsReceived.Count();  i++)
             {
                 var item = Session.Items.AllItemsReceived[i];
@@ -203,7 +202,6 @@ namespace Archipelago.MonsterSanctuary.Client
         {
             var item = helper.DequeueItem();
             var name = helper.GetItemName(item.Item);
-            Patcher.Logger.LogInfo("ReceiveItem(): " + name + " (" + item.Item + ")");
             var action = Session.ConnectionInfo.Slot == item.Player
                 ? ItemTransferType.Aquired // We found our own item
                 : ItemTransferType.Received; // Someone else found our item
@@ -218,9 +216,7 @@ namespace Archipelago.MonsterSanctuary.Client
                 if (!APState.IsConnected)
                     return;
 
-                Patcher.Logger.LogInfo("CheckLocation(): " + locationId);
                 var locationsToCheck = CheckedLocations.Except(Session.Locations.AllLocationsChecked);
-                Patcher.Logger.LogInfo($"{locationsToCheck.Count()} locations to check");
 
                 Task.Run(() =>
                 {

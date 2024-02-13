@@ -26,6 +26,7 @@ namespace Archipelago.MonsterSanctuary.Client
         {
             if (_locations_checked.Contains(locationId))
             {
+                Patcher.Logger.LogWarning("_locations_checked alreadly includes this id");
                 return;
             }
 
@@ -180,25 +181,6 @@ namespace Archipelago.MonsterSanctuary.Client
                 }
             }
         }
-
-        //[HarmonyPatch(typeof(MinimapView), "UpdateMinimap")]
-        //private class MinimapView_UpdateMinimap
-        //{
-        //    static bool updatingPins = false;
-
-        //    private static bool Prefix()
-        //    {
-        //        // If we're already updating the pins, do not do any other updates
-        //        if (updatingPins)
-        //            return false;
-
-        //        updatingPins = true;
-        //        Patcher.UpdateMapPins();
-        //        updatingPins = false;
-
-        //        return true;
-        //    }
-        //}
 
         [HarmonyPatch(typeof(MinimapTileView), "DisplayTile")]
         private class MinimapTileView_DisplayTile
