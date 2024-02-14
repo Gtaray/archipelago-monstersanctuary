@@ -223,6 +223,21 @@ namespace Archipelago.MonsterSanctuary.Client
                     Session.Locations.CompleteLocationChecksAsync(
                         locationsToCheck.ToArray());
                 }).ConfigureAwait(false);
+
+                Task.Run(() => ScoutLocation(locationsToCheck.ToArray()));
+            }
+        }
+
+        private static async Task ScoutLocation(long[] locationsToCheck)
+        {
+            var packet = await Session.Locations.ScoutLocationsAsync(false, locationsToCheck);
+            foreach (var location in packet.Locations)
+            {
+                if (Session.ConnectionInfo.Slot == location.Player)
+                    continue;
+
+                // This needs to work without an index (because sent items never have an index.
+                Patcher.QueueItemTransfer(null, location.Item, location.Player, location.Location, ItemTransferType.Sent);
             }
         }
 

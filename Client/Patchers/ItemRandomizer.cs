@@ -69,7 +69,7 @@ namespace Archipelago.MonsterSanctuary.Client
         // messages from the client.
         private static ConcurrentQueue<ItemTransfer> _itemQueue = new();
 
-        public static void QueueItemTransfer(int itemIndex, long itemId, int playerId, long locationId, ItemTransferType action)
+        public static void QueueItemTransfer(int? itemIndex, long itemId, int playerId, long locationId, ItemTransferType action)
         {
             // We need to do this here so that we know for sure when a check is done the map is updated
             // If the item action is either sent or acquired, we want to update the minimap. If we received the item then its not from us at all.
@@ -79,18 +79,13 @@ namespace Archipelago.MonsterSanctuary.Client
             }
 
             // Do not queue a new item if we've already received that item.
-            if (itemIndex <= _itemsReceivedIndex)
+            // Do not queue an item if the queue already contains that index.
+            if (itemIndex != null && (itemIndex <= _itemsReceivedIndex || _itemQueue.Any(i => i.ItemIndex == itemIndex)))
             {
                 return;
             }
 
             var itemName = APState.Session.Items.GetItemName(itemId);
-
-            // Don't queue an item if the queue already contains that index.
-            if (_itemQueue.Any(i => i.ItemIndex == itemIndex))
-            {
-                return;
-            }
 
             var transfer = new ItemTransfer()
             {
@@ -123,10 +118,11 @@ namespace Archipelago.MonsterSanctuary.Client
                 // 144 FPS has a frametime of 0.00694 seconds, or 6.94 milliseconds
                 // 100 FPS has a frametime of 0.01 seconds, or 10 milliseconds
                 elapsed += Time.deltaTime;
-                if (elapsed < 0.01f)
+                if (elapsed < 0.015f)
                 {
                     return;
                 }
+                //Patcher.Logger.LogInfo(elapsed);
                 elapsed = 0f;
 
                 // Showing a pop up takes the game out of the isExploring state so we
@@ -188,7 +184,7 @@ namespace Archipelago.MonsterSanctuary.Client
 
                         // We only want to save items to the item cache if we're receiving the item. 
                         // Do not cache items we send to other people
-                        AddToItemCache(nextItem.ItemIndex);
+                        AddToItemCache(nextItem.ItemIndex.Value);
                     }
 
                     // If we're reached the end of the item queue,
