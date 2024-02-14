@@ -40,7 +40,7 @@ namespace Archipelago.MonsterSanctuary.Client
             IncrementCheckCounter(locationId);
 
             // Update the minimap with the new map pins
-            UIController.Instance.Minimap.UpdateMinimap();
+            //UIController.Instance.Minimap.UpdateMinimap();
         }
 
         public static void DeleteLocationsChecked()
