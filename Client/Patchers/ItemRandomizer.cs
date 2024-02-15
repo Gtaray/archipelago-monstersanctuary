@@ -1,22 +1,16 @@
-﻿using Archipelago.MultiClient.Net.Models;
-using HarmonyLib;
+﻿using HarmonyLib;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Diagnostics.Eventing.Reader;
 using System.IO;
 using System.Linq;
-using System.Net;
-using System.Runtime.Remoting.Messaging;
 using System.Text;
 using System.Text.RegularExpressions;
 using UnityEngine;
-using UnityEngine.SceneManagement;
-using static MonoMod.Cil.RuntimeILReferenceBag.FastDelegateInvokers;
 using static PopupController;
-using static System.Collections.Specialized.BitVector32;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace Archipelago.MonsterSanctuary.Client
 {
@@ -69,23 +63,41 @@ namespace Archipelago.MonsterSanctuary.Client
         // messages from the client.
         private static ConcurrentQueue<ItemTransfer> _itemQueue = new();
 
+        // When skipping dialog that gives the player multiple items, calling CheckLocation back to back that fast
+        // can cause problems, especially when finding other players' items. In those cases we batch all item checks
+        // until the player is able to move again, then check all of them at once.
+        private static List<long> _giftQueue = new();
+
         public static void QueueItemTransfer(int? itemIndex, long itemId, int playerId, long locationId, ItemTransferType action)
         {
+            var itemName = APState.Session.Items.GetItemName(itemId);
+            Patcher.Logger.LogInfo("QueueItemTransfer()");
+            Patcher.Logger.LogInfo("\tItem Index: " + itemIndex);
+            Patcher.Logger.LogInfo("\tItem Name: " + itemName);
+            Patcher.Logger.LogInfo("\tLocation ID: " + locationId);
+            Patcher.Logger.LogInfo("\tAction: " + Enum.GetName(typeof(ItemTransferType), action));
+
+            // If item index is null (meaning this is someone else's item), we can only rely on whether the location ID is checked.
+            if (itemIndex == null && _locations_checked.Contains(locationId))
+            {
+                Patcher.Logger.LogInfo("Another player's item is already queued item or handled");
+                return;
+            }
+
             // We need to do this here so that we know for sure when a check is done the map is updated
             // If the item action is either sent or acquired, we want to update the minimap. If we received the item then its not from us at all.
             if (action != ItemTransferType.Received)
             {
                 Patcher.AddAndUpdateCheckedLocations(locationId);
-            }
+            }   
 
             // Do not queue a new item if we've already received that item.
             // Do not queue an item if the queue already contains that index.
             if (itemIndex != null && (itemIndex <= _itemsReceivedIndex || _itemQueue.Any(i => i.ItemIndex == itemIndex)))
             {
+                Patcher.Logger.LogInfo("Our own item is already queued item or handled");
                 return;
             }
-
-            var itemName = APState.Session.Items.GetItemName(itemId);
 
             var transfer = new ItemTransfer()
             {
@@ -103,7 +115,7 @@ namespace Archipelago.MonsterSanctuary.Client
         }
         #endregion
 
-        #region Pathces
+        #region Patches
         [HarmonyPatch(typeof(GameController), "Update")]
         private class GameController_Update
         {
@@ -117,19 +129,28 @@ namespace Archipelago.MonsterSanctuary.Client
                 // enough time to have passed before moving on.
                 // 144 FPS has a frametime of 0.00694 seconds, or 6.94 milliseconds
                 // 100 FPS has a frametime of 0.01 seconds, or 10 milliseconds
-                elapsed += Time.deltaTime;
-                if (elapsed < 0.015f)
-                {
-                    return;
-                }
+                //elapsed += Time.deltaTime;
+                //if (elapsed < 0.015f)
+                //{
+                //    return;
+                //}
                 //Patcher.Logger.LogInfo(elapsed);
-                elapsed = 0f;
+                //elapsed = 0f;
 
                 // Showing a pop up takes the game out of the isExploring state so we
                 // should be guaranteed to never give an item until the pop up
                 // is closed.
                 if (!CanGiveItem())
                     return;
+
+                // If we've built up a list of items in the gift queue,
+                // check all of those locations at once and then clear the queue
+                if (_giftQueue.Count > 0)
+                {
+                    Patcher.Logger.LogInfo($"{_giftQueue.Count} gift items in the queue. Checking those locations");
+                    APState.CheckLocations(_giftQueue.ToArray());
+                    _giftQueue.Clear();
+                }
 
                 if (_itemQueue.Count() == 0)
                 {
@@ -188,14 +209,6 @@ namespace Archipelago.MonsterSanctuary.Client
                         // Do not cache items we send to other people
                         AddToItemCache(nextItem.ItemIndex.Value);
                     }
-
-                    // If we're reached the end of the item queue,
-                    // resync with the server to make sure we've gotten everything
-                    if (_itemQueue.Count() == 0)
-                    {
-                        //Patcher.Logger.LogInfo("item queue is emptied. Resyncing");
-                        //APState.Resync();
-                    }
                 }
             }
 
@@ -241,8 +254,9 @@ namespace Archipelago.MonsterSanctuary.Client
         {
             // This needs to also handle NPCs that give the player eggs, and randomize which egg is given
             [UsedImplicitly]
-            private static bool Prefix(ref GrantItemsAction __instance)
+            private static bool Prefix(ref GrantItemsAction __instance, bool showMessage)
             {
+                Patcher.Logger.LogInfo("GrantItem()");
                 string locName = $"{GameController.Instance.CurrentSceneName}_{__instance.ID}";
 
                 // If we're not connected, we add this location to a list of locations that need to be checked once we are connected
@@ -258,8 +272,14 @@ namespace Archipelago.MonsterSanctuary.Client
                     return true;
                 }
 
-                APState.CheckLocation(GameData.ItemChecks[locName]);
+                if (!showMessage)
+                {
+                    Patcher.Logger.LogInfo("Skipping. Adding gift to queue");
+                    _giftQueue.Add(GameData.ItemChecks[locName]);
+                    return false;
+                }
 
+                APState.CheckLocation(GameData.ItemChecks[locName]);
                 _giftActions.TryAdd(GameData.ItemChecks[locName], __instance);
 
                 return false;
@@ -269,12 +289,13 @@ namespace Archipelago.MonsterSanctuary.Client
 
         public static void SentItem(string item, string player, PopupDelegate confirmCallback)
         {
-            item = GameDefines.FormatTextAsHighlight(item);
-            player = GameDefines.FormatTextAsHighlight(player);
+            Patcher.Logger.LogInfo("SentItem()");
+            var text = string.Format("Sent {0} to {1}", FormatItem(item), FormatPlayer(player));
+            Patcher.Logger.LogInfo("\tText: " + text);
 
             PopupController.Instance.ShowMessage(
                     Utils.LOCA("Archipelago"),
-                    string.Format("Sent {0} to {1}", item, player), 
+                    text, 
                     confirmCallback);
         }
 
@@ -359,21 +380,28 @@ namespace Archipelago.MonsterSanctuary.Client
 
         private static string FormatItemReceivedMessage(string item, int quantity, string player, bool self)
         {
-            item = GameDefines.FormatTextAsHighlight(item);
-            player = GameDefines.FormatTextAsHighlight(player);
+            item = FormatItem(item);
 
             if (self)
             {
                 if (quantity > 1)
-                    return string.Format("You found {0} of your {1}", quantity, item);
+                    return string.Format("{0} found {1} of your {2}", 
+                        FormatPlayer("You"),
+                        quantity, 
+                        item);
 
-                return string.Format("You found your {0}", item);
+                return string.Format("{0} found your {1}", 
+                    FormatPlayer("You"),
+                    item);
             }
             else
             {
                 if (quantity > 1)
                     item = string.Format("{0}x {1}", quantity, item);
-                return string.Format("Received {0} from {1}", item, player);
+
+                return string.Format("Received {0} from {1}", 
+                    item, 
+                    FormatOtherPlayer(player));
             }
         }
         #endregion
@@ -387,11 +415,6 @@ namespace Archipelago.MonsterSanctuary.Client
                     Utils.LOCA("Treasure"),
                     FormatGoldReceivedMessage(amount, player, self),
                     callback);
-                UIController.Instance.PopupController.ShowMessage(
-                    Utils.LOCA("Treasure", ELoca.UI),
-                    string.Format(Utils.LOCA("Obtained {0}", ELoca.UI), GameDefines.FormatTextAsGold(amount + " G", false)),
-                    callback
-                );
             }
 
             PlayerController.Instance.Gold += amount;
@@ -413,13 +436,43 @@ namespace Archipelago.MonsterSanctuary.Client
 
         private static string FormatGoldReceivedMessage(int quantity, string player, bool self)
         {
-            string gold = GameDefines.FormatTextAsHighlight(string.Format("{0} Gold", quantity));
-            player = GameDefines.FormatTextAsHighlight(player);
+            string gold = FormatItem(string.Format("{0} Gold", quantity));
 
             if (self)
-                return string.Format("You found your {0}", gold);
+                return string.Format("{0} found {1}", 
+                    FormatPlayer("You"), 
+                    gold);
             else
-                return string.Format("Received {0} from {1}", gold, player);
+                return string.Format("Received {0} from {1}", 
+                    gold, 
+                    FormatOtherPlayer(player));
+        }
+        #endregion
+
+        #region String Formatting / Coloring
+        private static string FormatItem(string text)
+        {
+            text = RemoveProblematicCharacters(text);
+            return GameDefines.FormatString(GameDefines.ColorCodeTextHighlight, text, true);
+        }
+
+        private static string FormatPlayer(string text)
+        {
+            text = RemoveProblematicCharacters(text);
+            return GameDefines.FormatString("00ffff", text, true);
+        }
+
+        private static string FormatOtherPlayer(string text)
+        {
+            text = RemoveProblematicCharacters(text);
+            return GameDefines.FormatString("ff00ff", text, true);
+        }
+
+        private static string RemoveProblematicCharacters(string text)
+        {
+            return text.Replace("<3", "heart")
+                .Replace("<", "")
+                .Replace(">", "");
         }
         #endregion
     }

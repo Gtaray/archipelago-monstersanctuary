@@ -105,8 +105,7 @@ namespace Archipelago.MonsterSanctuary.Client
                 {
                     Patcher.Logger.LogInfo("Number of Locations Checked While Offline: " + OfflineChecks.Count());
                     var ids = OfflineChecks.Select(loc => GameData.ItemChecks[loc]).ToArray();
-                    foreach (var id in ids)
-                        CheckLocation(id);
+                    CheckLocations(ids);
                 }
 
                 Resync();
@@ -207,33 +206,49 @@ namespace Archipelago.MonsterSanctuary.Client
             Patcher.QueueItemTransfer(helper.Index, item.Item, item.Player, item.Location, action);
         }
 
-        public static void CheckLocation(long locationId)
+        public static void CheckLocations(params long[] locationIds)
         {
-            if (CheckedLocations.Add(locationId))
+            Patcher.Logger.LogInfo("CheckLocations()");
+            foreach (var locationId in locationIds)
             {
-                if (!APState.IsConnected)
-                    return;
+                CheckedLocations.Add(locationId);
+            };
 
-                var locationsToCheck = CheckedLocations.Except(Session.Locations.AllLocationsChecked);
+            if (!APState.IsConnected)
+                return;
 
-                Task.Run(() =>
-                {
-                    Session.Locations.CompleteLocationChecksAsync(
-                        locationsToCheck.ToArray());
-                }).ConfigureAwait(false);
+            var locationsToCheck = CheckedLocations.Except(Session.Locations.AllLocationsChecked);
+            foreach (var location in locationsToCheck)
+                Patcher.Logger.LogInfo("\tLocation ID: " + location);
 
-                Task.Run(() => ScoutLocation(locationsToCheck.ToArray()));
-            }
+            Task.Run(() =>
+            {
+                Session.Locations.CompleteLocationChecksAsync(
+                    locationsToCheck.ToArray());
+            }).ConfigureAwait(false);
+
+            Task.Run(() => ScoutLocations(locationsToCheck.ToArray()));
         }
 
-        private static async Task ScoutLocation(long[] locationsToCheck)
+        public static void CheckLocation(long locationId)
         {
+            CheckLocations(locationId);
+        }
+
+        private static async Task ScoutLocations(long[] locationsToCheck)
+        {
+            // First we go through and 
+            Patcher.Logger.LogInfo("ScoutLocationsAsync()");
             var packet = await Session.Locations.ScoutLocationsAsync(false, locationsToCheck);
+            Patcher.Logger.LogInfo($"\t{packet.Locations.Count()} locations scouted");
             foreach (var location in packet.Locations)
             {
                 if (Session.ConnectionInfo.Slot == location.Player)
+                {
                     continue;
+                }
 
+                Patcher.Logger.LogInfo("Scouting Location: " + location.Location);
                 // This needs to work without an index (because sent items never have an index.
                 Patcher.QueueItemTransfer(null, location.Item, location.Player, location.Location, ItemTransferType.Sent);
             }

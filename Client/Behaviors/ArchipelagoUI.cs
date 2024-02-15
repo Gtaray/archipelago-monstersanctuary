@@ -2,49 +2,122 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using UnityEngine;
 
 namespace Archipelago.MonsterSanctuary.Client
 {
+    internal class ItemHistoryEntry
+    {
+        public string Text { get; set; }
+        public float Timer { get; set; } = 0;
+        public float Alpha { get; set; } = 1;
+    }
+
     public class ArchipelagoUI : MonoBehaviour
     {
-        public static int MaxItemHistory = 20;
-        public static int FontSize = 20;
-        public static int X = 16;
-        public static int Y = 100;
-        public static int Width = 300;
-        public static int Height = 500;
+        public int MaxItemHistory = 10;
+        public int FontSize = 20;
+        public int X = 16;
+        public int Y = 50;
+        public int Width = 300;
+        public int OutlineOffset = 1;
+        public bool DrawBox = false;
+        public bool FadeOutEntries = true;
+        public float FadeOutAfterSeconds = 8f;
+        public float FadeOutTime = 2f;
 
-        private static GUIStyle _style = new() { richText = true, wordWrap = true };
-        private static string _playerColor = "cyan";
-        private static string _itemColor = "orange";
-        private static string _otherPlayerColor = "magenta";
-        private static List<ItemTransfer> _itemHistory = new();
-        private static string _itemHistoryText;
+        private GUIStyle _style = new() { richText = true };
+        private string _playerColor = "#00ffffff";
+        private string _itemColor = "#ffbb00ff";
+        private string _otherPlayerColor = "#ff00ffff";
+        private List<ItemHistoryEntry> _itemHistory = new();
 
         public void Awake()
         {
             _style.normal.textColor = Color.white;
         }
 
+        public void Update()
+        {
+            if (!FadeOutEntries)
+                return;
+
+            List<ItemHistoryEntry> toRemove = new();
+
+            foreach (ItemHistoryEntry entry in _itemHistory)
+            {
+                entry.Timer += Time.deltaTime;
+                
+                // If we're not fading out yet, then we don't do anything
+                if (entry.Timer < FadeOutAfterSeconds)
+                    continue;
+
+                // As timer approaches FadeOutTime, alpha goes from 1 to 0
+                entry.Alpha = Mathf.Lerp(1, 0, (entry.Timer - FadeOutAfterSeconds) / FadeOutTime);
+
+                // Update the color tags with the correct alpha
+                var hex = FloatToHex(entry.Alpha);
+                entry.Text = Regex.Replace(entry.Text, @"(?<=color=#[0-9a-f]{6})[0-9a-f]{2}", hex);
+
+                if (entry.Alpha <= 0)
+                    toRemove.Add(entry);
+            }
+
+            foreach (var entry in toRemove)
+                _itemHistory.Remove(entry);
+        }
+
+        private string FloatToHex(float f)
+        {
+            // Convert float to int between 0 and 255 so that we have a better conversion to hex
+            int val = (int)(f * 255); 
+            return val.ToString("X2").ToLower();
+        }
+
         public void AddItemToHistory(ItemTransfer itemTransfer)
         {
-            _itemHistory.Insert(0, itemTransfer);
+            var entry = new ItemHistoryEntry()
+            {
+                Text = GetEntryText(itemTransfer.PlayerName, itemTransfer.ItemName, itemTransfer.Action)
+            };
+
+            if (string.IsNullOrEmpty(entry.Text))
+                return;
+
+            _itemHistory.Insert(0, entry);
             if (_itemHistory.Count > MaxItemHistory)
             {
                 _itemHistory.RemoveRange(MaxItemHistory, _itemHistory.Count() - MaxItemHistory);
             }
-            _itemHistoryText = BuildItemHistoryText();
+        }
+
+        private string GetEntryText(string playerName, string itemName, ItemTransferType action)
+        {
+            if (action == ItemTransferType.Aquired)
+            {
+                return $"<color={_playerColor}>You</color> found your <color={_itemColor}>{itemName}</color>";
+            }
+            else if (action == ItemTransferType.Received)
+            {
+                return $"<color={_otherPlayerColor}>{playerName}</color> sent you <color={_itemColor}>{itemName}</color>";
+            }
+            else if (action == ItemTransferType.Sent)
+            {
+                return $"<color={_playerColor}>You</color> sent <color={_itemColor}>{itemName}</color> to <color={_otherPlayerColor}>{playerName}</color>";
+            }
+
+            return "";
         }
 
         void OnGUI()
         {
-            DisplayConnectionInfo();
-            DisplayItemHistory();
+            int y = DisplayConnectionInfo();
+            DisplayItemHistory(y);
         }
 
-        private static void DisplayConnectionInfo()
+        private static int DisplayConnectionInfo()
         {
             string ap_ver = "Archipelago v" + APState.AP_VERSION[0] + "." + APState.AP_VERSION[1] + "." + APState.AP_VERSION[2];
 
@@ -90,40 +163,70 @@ namespace Archipelago.MonsterSanctuary.Client
                 {
                     APState.Connect();
                 }
+
+                return 120;
             }
+
+            return 40;
         }
 
-        private static void DisplayItemHistory()
+        private void DisplayItemHistory(int y)
         {
+            //y = Screen.height - FontSize - (FontSize * MaxItemHistory);
             _style.fontSize = FontSize;
-            GUI.Box(new Rect(X - 3, Y - 3, Width + 6, Height + 6), "");
-            GUI.Label(new Rect(X, Y, Width, Height), _itemHistoryText, _style);
-        }
+            int height = FontSize * MaxItemHistory;
 
-        private static string BuildItemHistoryText()
-        {
-            StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < _itemHistory.Count(); i++)
+            if (DrawBox)
             {
-                var item = _itemHistory[i];
-
-                if (item.Action == ItemTransferType.Aquired)
-                {
-                    sb.Append($"<color={_playerColor}>You</color> found your <color={_itemColor}>{item.ItemName}</color>");
-                }
-                else if (item.Action == ItemTransferType.Received)
-                {
-                    sb.Append($"<color={_otherPlayerColor}>{item.PlayerName}</color> sent you <color={_itemColor}>{item}</color>");
-                }
-                else if (item.Action == ItemTransferType.Sent)
-                {
-                    sb.Append($"<color={_playerColor}>You</color> sent <color={_itemColor}>{item.ItemName}</color> to <color={_otherPlayerColor}>{item.PlayerName}</color>");
-                }
-
-                sb.Append("\n");
+                // The box will fade in and out with the most recent entry
+                var alpha = _itemHistory.Max(i => i.Alpha);
+                GUI.color = new Color(GUI.color.r, GUI.color.g, GUI.color.b, alpha);
+                GUI.Box(new Rect(X - 3, y + Y - 3, Width + 6, height + 6), "");
             }
 
-            return sb.ToString();
+            foreach (var entry in _itemHistory) 
+            {
+                // Set the alpha of this entry
+                GUI.color = new Color(GUI.color.r, GUI.color.g, GUI.color.b, entry.Alpha);
+                _style.normal.textColor = new Color(GUI.color.r, GUI.color.g, GUI.color.b, entry.Alpha);
+
+                // Print this entry
+                DrawTextWithOutline(new Rect(X, y + Y, Width, height), entry.Text, _style, Color.black);
+
+                y += FontSize;
+            }
+        }
+
+        private void DrawTextWithOutline(Rect position, string text, GUIStyle style, Color borderColor)
+        {
+            var backupStyle = style;
+
+            if (OutlineOffset > 0)
+            {
+                // Get rid of color tags
+                var borderText = Regex.Replace(text, @"\<color=#[0-9a-f]+\>", "");
+                borderText = Regex.Replace(borderText, @"\<\/color\>", "");
+
+                var oldColor = style.normal.textColor;
+                style.normal.textColor = borderColor;
+
+                position.x -= OutlineOffset;
+                GUI.Label(position, borderText, style);
+                position.x += (OutlineOffset * 2);
+                GUI.Label(position, borderText, style);
+                position.x -= OutlineOffset;
+
+                position.y -= OutlineOffset;
+                GUI.Label(position, borderText, style);
+                position.y += (OutlineOffset * 2);
+                GUI.Label(position, borderText, style);
+                position.y -= OutlineOffset;
+
+                style.normal.textColor = oldColor;
+            }
+
+            GUI.Label(position, text, style);
+            style = backupStyle;
         }
     }
 }
