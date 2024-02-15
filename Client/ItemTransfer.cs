@@ -12,7 +12,7 @@ namespace Archipelago.MonsterSanctuary.Client
         Received = 1,
         Sent = 2
     }
-    internal class ItemTransfer
+    public class ItemTransfer
     {
         public string ItemName { get; set; }
         public string PlayerName { get; set; }

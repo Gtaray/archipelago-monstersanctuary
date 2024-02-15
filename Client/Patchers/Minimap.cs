@@ -26,10 +26,10 @@ namespace Archipelago.MonsterSanctuary.Client
         {
             if (_locations_checked.Contains(locationId))
             {
-                Patcher.Logger.LogWarning("_locations_checked alreadly includes this id");
                 return;
             }
 
+            Patcher.Logger.LogInfo("AddAndUpdateCheckedLocations(): " + locationId);
             _locations_checked.Add(locationId);
             SaveLocationsChecked();
 
@@ -38,9 +38,6 @@ namespace Archipelago.MonsterSanctuary.Client
                 return;
 
             IncrementCheckCounter(locationId);
-
-            // Update the minimap with the new map pins
-            //UIController.Instance.Minimap.UpdateMinimap();
         }
 
         public static void DeleteLocationsChecked()
