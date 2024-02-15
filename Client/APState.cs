@@ -31,8 +31,6 @@ namespace Archipelago.MonsterSanctuary.Client
         }
 
         public static int[] AP_VERSION = new int[] { 0, 4, 4 };
-        public static ArchipelagoUI UI;
-
         public static ConnectionState State = ConnectionState.Disconnected;
         public static bool IsConnected => State == ConnectionState.Connected;
         public static int ChampionsDefeated { get; set; } = 0;

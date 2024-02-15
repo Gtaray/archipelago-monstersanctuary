@@ -63,7 +63,7 @@ namespace Archipelago.MonsterSanctuary.Client
         }
         #endregion
 
-        #region Queue Fucntions
+        #region Queue Functions
         // Because both items sent and received use the same pop up system to inform the player
         // we use this item queue to merge item received messages from AP as well as items sent
         // messages from the client.
@@ -156,6 +156,8 @@ namespace Archipelago.MonsterSanctuary.Client
                         }
                         return;
                     }
+
+                    Patcher.UI.AddItemToHistory(nextItem);
 
                     PopupController.PopupDelegate callback = null;
                     if (_giftActions.ContainsKey(nextItem.LocationID))

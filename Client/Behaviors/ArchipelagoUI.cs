@@ -9,48 +9,43 @@ namespace Archipelago.MonsterSanctuary.Client
 {
     public class ArchipelagoUI : MonoBehaviour
     {
-        string RoomName = "";
-        // key is chest id, string is item contained
-        public Dictionary<int, string> Chests = new Dictionary<int, string>();
-        // key is the encounter id, tuple is monster id and monster name
-        public Dictionary<int, string> Monsters = new Dictionary<int, string>();
-        public List<string> Connections = new List<string>();
-        public Dictionary<int, string> Gifts = new Dictionary<int, string>();
+        public static int MaxItemHistory = 20;
+        public static int FontSize = 20;
+        public static int X = 16;
+        public static int Y = 100;
+        public static int Width = 300;
+        public static int Height = 500;
 
-        public void ClearData()
+        private static GUIStyle _style = new() { richText = true, wordWrap = true };
+        private static string _playerColor = "cyan";
+        private static string _itemColor = "orange";
+        private static string _otherPlayerColor = "magenta";
+        private static List<ItemTransfer> _itemHistory = new();
+        private static string _itemHistoryText;
+
+        public void Awake()
         {
-            Chests.Clear();
-            Monsters.Clear();
-            Connections.Clear();
-            Gifts.Clear();
+            _style.normal.textColor = Color.white;
         }
 
-        public void AddChest(int id, string item)
+        public void AddItemToHistory(ItemTransfer itemTransfer)
         {
-            if (Chests.ContainsKey(id)) return;
-            Chests.Add(id, item);
-        }
-
-        public void AddMonster(int encounterID, string monsterName)
-        {
-            if (Monsters.ContainsKey(encounterID)) return;
-            Monsters.Add(encounterID, monsterName);
-        }
-
-        public void AddConnection(string connection)
-        {
-            Connections.Add(connection);
-        }
-
-        public void AddGift(int id, string item)
-        {
-            if (Gifts.ContainsKey(id)) return;
-            Gifts.Add(id, item);
+            _itemHistory.Insert(0, itemTransfer);
+            if (_itemHistory.Count > MaxItemHistory)
+            {
+                _itemHistory.RemoveRange(MaxItemHistory, _itemHistory.Count() - MaxItemHistory);
+            }
+            _itemHistoryText = BuildItemHistoryText();
         }
 
         void OnGUI()
         {
-            int y = 0;
+            DisplayConnectionInfo();
+            DisplayItemHistory();
+        }
+
+        private static void DisplayConnectionInfo()
+        {
             string ap_ver = "Archipelago v" + APState.AP_VERSION[0] + "." + APState.AP_VERSION[1] + "." + APState.AP_VERSION[2];
 
             if (APState.Session != null)
@@ -68,8 +63,6 @@ namespace Archipelago.MonsterSanctuary.Client
             {
                 GUI.Label(new Rect(16, 16, 300, 20), ap_ver + " Status: Not Connected");
             }
-
-            y = 36;
 
             // Login details
             if ((APState.Session == null || !APState.Authenticated) && APState.State != APState.ConnectionState.Connected)
@@ -97,82 +90,40 @@ namespace Archipelago.MonsterSanctuary.Client
                 {
                     APState.Connect();
                 }
-
-                y += 80; // Height of each of the 3 elements
             }
+        }
 
-            if (GameController.Instance == null || string.IsNullOrEmpty(GameController.Instance.CurrentSceneName))
+        private static void DisplayItemHistory()
+        {
+            _style.fontSize = FontSize;
+            GUI.Box(new Rect(X - 3, Y - 3, Width + 6, Height + 6), "");
+            GUI.Label(new Rect(X, Y, Width, Height), _itemHistoryText, _style);
+        }
+
+        private static string BuildItemHistoryText()
+        {
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < _itemHistory.Count(); i++)
             {
-                return;
-            }
+                var item = _itemHistory[i];
 
-# if DEBUG
-            var scene = GameController.Instance.CurrentSceneName;
-            if (RoomName != scene)
-            {
-                ClearData();
-                RoomName = scene;
-            }
-
-
-            if (!string.IsNullOrEmpty(GameController.Instance.CurrentSceneName))
-            {
-                GUI.Label(new Rect(16, y, 100, 20), "Room Name:");
-                GUI.Label(new Rect(16 + 100 + 8, y, 300, 20), GameController.Instance.CurrentSceneName);
-                y += 20;
-            }
-
-            if (Connections.Count() > 0)
-            {
-                GUI.Label(new Rect(16, y, 200, 20), "CONNECTIONS");
-                y += 20;
-
-                foreach (var connection in Connections)
+                if (item.Action == ItemTransferType.Aquired)
                 {
-                    GUI.Label(new Rect(16, y, 200, 20), connection);
-                    y += 20;
+                    sb.Append($"<color={_playerColor}>You</color> found your <color={_itemColor}>{item.ItemName}</color>");
                 }
-            }
-
-            if (Chests.Count() > 0)
-            {
-                GUI.Label(new Rect(16, y, 60, 20), "CHESTS");
-                y += 20;
-
-                foreach (var chestdata in Chests)
+                else if (item.Action == ItemTransferType.Received)
                 {
-                    GUI.Label(new Rect(16, y, 100, 20), $"Chest ID {chestdata.Key}:");
-                    GUI.Label(new Rect(16 + 100 + 8, y, 150, 20), chestdata.Value);
-                    y += 20;
+                    sb.Append($"<color={_otherPlayerColor}>{item.PlayerName}</color> sent you <color={_itemColor}>{item}</color>");
                 }
-            }
-
-            if (Gifts.Count() > 0)
-            {
-                GUI.Label(new Rect(16, y, 60, 20), "GIFTS");
-                y += 20;
-
-                foreach (var giftdata in Gifts)
+                else if (item.Action == ItemTransferType.Sent)
                 {
-                    GUI.Label(new Rect(16, y, 100, 20), $"Gift ID {giftdata.Key}:");
-                    GUI.Label(new Rect(16 + 100 + 8, y, 150, 20), giftdata.Value);
-                    y += 20;
+                    sb.Append($"<color={_playerColor}>You</color> sent <color={_itemColor}>{item.ItemName}</color> to <color={_otherPlayerColor}>{item.PlayerName}</color>");
                 }
+
+                sb.Append("\n");
             }
 
-            if (Monsters.Count() > 0)
-            {
-                GUI.Label(new Rect(16, y, 200, 20), "ENCOUNTERS");
-                y += 20;
-
-                foreach (var encounterdata in Monsters)
-                {
-                    GUI.Label(new Rect(16, y, 100, 20), $"Encounter ID {encounterdata.Key}:");
-                    GUI.Label(new Rect(16 + 100 + 8, y, 300, 20), encounterdata.Value);
-                    y += 20;
-                }
-            }
-#endif
+            return sb.ToString();
         }
     }
 }

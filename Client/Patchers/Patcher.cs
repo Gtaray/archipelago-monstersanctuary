@@ -20,6 +20,7 @@ namespace Archipelago.MonsterSanctuary.Client
     public partial class Patcher : BaseUnityPlugin
     {
         public static ManualLogSource Logger;
+        public static ArchipelagoUI UI;
 
         private void Awake()
         {
@@ -41,9 +42,11 @@ namespace Archipelago.MonsterSanctuary.Client
             [HarmonyPostfix]
             public static void CreateArchipelagoUI()
             {
-                var guiObject = new GameObject();
-                APState.UI = guiObject.AddComponent<ArchipelagoUI>();
-                GameObject.DontDestroyOnLoad(guiObject);
+                if (Patcher.UI != null)
+                    return;
+
+                var guiObject = new GameObject("Archipelago UI");
+                Patcher.UI = guiObject.AddComponent<ArchipelagoUI>();
 
                 var rawPath = Environment.CurrentDirectory;
                 var lastConnection = ArchipelagoConnection.LoadFromFile(rawPath + "/archipelago_last_connection.json");
