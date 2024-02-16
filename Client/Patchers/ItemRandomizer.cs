@@ -80,7 +80,13 @@ namespace Archipelago.MonsterSanctuary.Client
             // If item index is null (meaning this is someone else's item), we can only rely on whether the location ID is checked.
             if (itemIndex == null && _locations_checked.Contains(locationId))
             {
-                Patcher.Logger.LogInfo("Another player's item is already queued item or handled");
+                Patcher.Logger.LogInfo("\tAnother player's item is already queued item or handled");
+                return;
+            }
+
+            if (GameData.AbilityChecks.ContainsValue(locationId))
+            {
+                Patcher.Logger.LogInfo("\tAbility item. Bailing.");
                 return;
             }
 
@@ -95,7 +101,7 @@ namespace Archipelago.MonsterSanctuary.Client
             // Do not queue an item if the queue already contains that index.
             if (itemIndex != null && (itemIndex <= _itemsReceivedIndex || _itemQueue.Any(i => i.ItemIndex == itemIndex)))
             {
-                Patcher.Logger.LogInfo("Our own item is already queued item or handled");
+                Patcher.Logger.LogInfo("\tOur own item is already queued item or handled");
                 return;
             }
 
@@ -123,20 +129,6 @@ namespace Archipelago.MonsterSanctuary.Client
 
             private static void Postfix()
             {
-                // This method needs to run at or below 100 FPS in order to avoid
-                // the dreaded item received menu glitch.
-                // So we track how much time has elapsed since the last frame, and wait for
-                // enough time to have passed before moving on.
-                // 144 FPS has a frametime of 0.00694 seconds, or 6.94 milliseconds
-                // 100 FPS has a frametime of 0.01 seconds, or 10 milliseconds
-                //elapsed += Time.deltaTime;
-                //if (elapsed < 0.015f)
-                //{
-                //    return;
-                //}
-                //Patcher.Logger.LogInfo(elapsed);
-                //elapsed = 0f;
-
                 // Showing a pop up takes the game out of the isExploring state so we
                 // should be guaranteed to never give an item until the pop up
                 // is closed.

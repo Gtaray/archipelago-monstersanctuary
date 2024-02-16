@@ -108,6 +108,8 @@ namespace Archipelago.MonsterSanctuary.Client
                 }
             }
 
+            GameData.AbilityChecks = GetDictionaryData<long>(slotData, "abilities");
+
             var hints = GetListData<HintData>(slotData, "hints");
             GameData.Hints = new();
             foreach (var hint in hints)
@@ -123,6 +125,7 @@ namespace Archipelago.MonsterSanctuary.Client
             Patcher.Logger.LogInfo("Monster Locations: " + GameData.MonstersCache.Count());
             Patcher.Logger.LogInfo("Champions: " + GameData.ChampionScenes.Count());
             Patcher.Logger.LogInfo("Item Locations: " + GameData.ItemChecks.Count());
+            Patcher.Logger.LogInfo("Explre Abilities: " + GameData.AbilityChecks.Count());
             Patcher.Logger.LogInfo("Hints: " + hints.Count());
         }
 
@@ -159,7 +162,7 @@ namespace Archipelago.MonsterSanctuary.Client
 
         }
 
-        private static Dictionary<string, T> GetDictionaryData<T>(Dictionary<string, object> data, string key) where T : class
+        private static Dictionary<string, T> GetDictionaryData<T>(Dictionary<string, object> data, string key)
         {
             if (data[key].ToString() != null)
                 return JsonConvert.DeserializeObject<Dictionary<string, T>>(data[key].ToString());
