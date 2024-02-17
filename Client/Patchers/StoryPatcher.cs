@@ -95,112 +95,22 @@ namespace Archipelago.MonsterSanctuary.Client
         {
             private static void Postfix(ref bool __result, string name)
             {
-                if (APState.IsConnected && SlotData.SkipPlot && GameData.Plotless.Contains(name) && __result == false)
+                if (!APState.IsConnected)
+                    return;
+
+                if (name == "KeyOfPowerGained")
+                {
+                    __result = PlayerController.Instance.Inventory.Uniques.Any(i => i.GetName() == "Key of Power");
+                    ProgressManager.Instance.SetBool(name, __result);
+                    return;
+                }
+
+                if (SlotData.SkipPlot && GameData.Plotless.Contains(name) && __result == false)
                 {
                     ProgressManager.Instance.SetBool(name, true);
                     __result = true;
+                    return;
                 }
-            }
-        }
-
-        //[HarmonyPatch(typeof(ProgressManager), "SetBool")]
-        //private class ProgressManager_SetBool
-        //{
-        //    private static void Prefix(string name, bool value)
-        //    {
-        //        Logger.LogInfo($"SetBool(): {name} => {value}");
-        //    }
-        //}
-
-        private static bool SkipAction(ScriptNode scriptNode)
-        {
-            return true;
-            //if (!APState.IsConnected)
-            //    return true;
-            //if (!SlotData.SkipPlot)
-            //    return true;
-
-            //Logger.LogWarning("Room in dict? " + GameData.PlotlessScriptNodes.ContainsKey(GameController.Instance.CurrentSceneName));
-            //if (!GameData.PlotlessScriptNodes.ContainsKey(GameController.Instance.CurrentSceneName))
-            //    return true;
-
-            //Logger.LogWarning("Skipping script node '" + scriptNode.ID + "'? " + GameData.PlotlessScriptNodes[GameController.Instance.CurrentSceneName].Contains(scriptNode.ID));
-            //bool skip = GameData.PlotlessScriptNodes[GameController.Instance.CurrentSceneName].Contains(scriptNode.ID);
-            //if (skip)
-            //    scriptNode.Finish();
-
-            //return !skip;
-        }
-
-        [HarmonyPatch(typeof(DialogueAction), "StartNode")]
-        private class DialogueAction_StartNode
-        {
-            private static bool Prefix(DialogueAction __instance)
-            {
-                return SkipAction(__instance);
-            }
-        }
-
-        [HarmonyPatch(typeof(PositionFollowerAction), "StartNode")]
-        private class PositionFollowerAction_StartNode
-        {
-            private static bool Prefix(PositionFollowerAction __instance)
-            {
-                return SkipAction(__instance);
-            }
-        }
-
-        [HarmonyPatch(typeof(MovePlayerAction), "StartNode")]
-        private class MovePlayerAction_StartNode
-        {
-            private static bool Prefix(MovePlayerAction __instance)
-            {
-                return SkipAction(__instance);
-            }
-        }
-
-        [HarmonyPatch(typeof(UpgradeAction), "StartNode")]
-        private class UpgradeAction_StartNode
-        {
-            private static bool Prefix(UpgradeAction __instance)
-            {
-                return SkipAction(__instance);
-            }
-        }
-
-        [HarmonyPatch(typeof(SetVisibleAction), "StartNode")]
-        private class SetVisibleAction_StartNode
-        {
-            private static bool Prefix(UpgradeAction __instance)
-            {
-                return SkipAction(__instance);
-            }
-        }
-
-        [HarmonyPatch(typeof(MoveAction), "StartNode")]
-        private class MoveAction_StartNode
-        {
-            private static bool Prefix(UpgradeAction __instance)
-            {
-                return SkipAction(__instance);
-            }
-        }
-
-        [HarmonyPatch(typeof(SetDirectionAction), "StartNode")]
-        private class SetDirectionAction_StartNode
-        {
-            private static bool Prefix(UpgradeAction __instance)
-            {
-                return SkipAction(__instance);
-            }
-        }
-
-        [HarmonyPatch(typeof(WaitAction), "StartNode")]
-        private class WaitAction_StartNode
-        {
-            private static bool Prefix(UpgradeAction __instance)
-            {
-                return SkipAction(__instance);
             }
         }
 

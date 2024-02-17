@@ -141,7 +141,7 @@ namespace Archipelago.MonsterSanctuary.Client
                     return;
 
                 var egg = (Egg)item;
-                CheckAbilityLocation(egg.Monster);
+                AddAbilityToDataStorage(egg.Monster);
             }
         }
 
@@ -152,11 +152,11 @@ namespace Archipelago.MonsterSanctuary.Client
             private static void Postfix(GameObject monsterPrefab)
             {
                 
-                CheckAbilityLocation(monsterPrefab);
+                AddAbilityToDataStorage(monsterPrefab);
             }
         }
 
-        private static void CheckAbilityLocation(GameObject monsterObj)
+        private static void AddAbilityToDataStorage(GameObject monsterObj)
         {
             var monster = monsterObj.GetComponent<Monster>();
             if (monster == null)
@@ -177,8 +177,6 @@ namespace Archipelago.MonsterSanctuary.Client
                 Patcher.Logger.LogError($"Could not find location ID for ability '{ability.Name}'");
                 return;
             }
-
-            APState.CheckLocation(GameData.AbilityChecks[ability.Name]);
         }
     }
 }

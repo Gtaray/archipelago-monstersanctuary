@@ -108,15 +108,6 @@ namespace Archipelago.MonsterSanctuary.Client
         }
         #endregion
 
-        #region Ability Location Data
-        public static Dictionary<string, long> AbilityChecks = new();
-
-        public static void AddAbilityCheck(string abilityName, long locationId)
-        {
-            AbilityChecks[abilityName] = locationId;
-        }
-        #endregion
-
         #region Hints
         public static Dictionary<int, Hint> Hints = new();
         public static void AddHint(int id, string text, bool ignoreRemainingText)
