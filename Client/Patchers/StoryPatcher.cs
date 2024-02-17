@@ -95,10 +95,21 @@ namespace Archipelago.MonsterSanctuary.Client
         {
             private static void Postfix(ref bool __result, string name)
             {
-                if (APState.IsConnected && SlotData.SkipPlot && GameData.Plotless.Contains(name) && __result == false)
+                if (!APState.IsConnected)
+                    return;
+
+                if (name == "KeyOfPowerGained")
+                {
+                    __result = PlayerController.Instance.Inventory.Uniques.Any(i => i.GetName() == "Key of Power");
+                    ProgressManager.Instance.SetBool(name, __result);
+                    return;
+                }
+
+                if (SlotData.SkipPlot && GameData.Plotless.Contains(name) && __result == false)
                 {
                     ProgressManager.Instance.SetBool(name, true);
                     __result = true;
+                    return;
                 }
             }
         }
