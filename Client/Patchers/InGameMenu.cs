@@ -64,7 +64,7 @@ namespace Archipelago.MonsterSanctuary.Client
         [HarmonyPatch(typeof(GameController), "OnSceneLoaded")]
         public static class GameController_OnSceneLoaded
         {
-            public static bool Prefix(GameController __instance, Scene scene)
+            public static bool Prefix(GameController __instance, ref Scene scene)
             {
                 if (__instance.ChangeType == GameController.SceneChangeType.Teleport && scene.name == "MountainPath_North1")
                 {

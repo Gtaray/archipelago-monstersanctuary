@@ -123,7 +123,6 @@ namespace Archipelago.MonsterSanctuary.Client
             Patcher.Logger.LogInfo("Monster Locations: " + GameData.MonstersCache.Count());
             Patcher.Logger.LogInfo("Champions: " + GameData.ChampionScenes.Count());
             Patcher.Logger.LogInfo("Item Locations: " + GameData.ItemChecks.Count());
-            Patcher.Logger.LogInfo("Explre Abilities: " + GameData.AbilityChecks.Count());
             Patcher.Logger.LogInfo("Hints: " + hints.Count());
         }
 

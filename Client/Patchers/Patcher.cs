@@ -171,12 +171,6 @@ namespace Archipelago.MonsterSanctuary.Client
                 Patcher.Logger.LogError($"{monster.Name} has a null ExploreAbility component");
                 return;
             }
-
-            if (!GameData.AbilityChecks.ContainsKey(ability.Name))
-            {
-                Patcher.Logger.LogError($"Could not find location ID for ability '{ability.Name}'");
-                return;
-            }
         }
     }
 }

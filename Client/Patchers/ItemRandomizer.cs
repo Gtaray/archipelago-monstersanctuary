@@ -84,12 +84,6 @@ namespace Archipelago.MonsterSanctuary.Client
                 return;
             }
 
-            if (GameData.AbilityChecks.ContainsValue(locationId))
-            {
-                Patcher.Logger.LogInfo("\tAbility item. Bailing.");
-                return;
-            }
-
             // We need to do this here so that we know for sure when a check is done the map is updated
             // If the item action is either sent or acquired, we want to update the minimap. If we received the item then its not from us at all.
             if (action != ItemTransferType.Received)
@@ -125,8 +119,6 @@ namespace Archipelago.MonsterSanctuary.Client
         [HarmonyPatch(typeof(GameController), "Update")]
         private class GameController_Update
         {
-            static float elapsed = 0;
-
             private static void Postfix()
             {
                 // Showing a pop up takes the game out of the isExploring state so we
