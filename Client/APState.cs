@@ -18,6 +18,7 @@ using static System.Collections.Specialized.BitVector32;
 using static MonoMod.Cil.RuntimeILReferenceBag.FastDelegateInvokers;
 using Archipelago.MultiClient.Net.BounceFeatures.DeathLink;
 using System.Net;
+using System.Data.SqlTypes;
 
 namespace Archipelago.MonsterSanctuary.Client
 {
@@ -262,6 +263,17 @@ namespace Archipelago.MonsterSanctuary.Client
             var statusUpdatePacket = new StatusUpdatePacket();
             statusUpdatePacket.Status = ArchipelagoClientState.ClientGoal;
             Session.Socket.SendPacket(statusUpdatePacket);
+        }
+
+        public static bool ReadBoolFromDataStorage(string key)
+        {
+            var value = Session.DataStorage[Scope.Slot, key].To<bool?>();
+            return value.HasValue ? value.Value : false;
+        }
+
+        public static void SetToDataStorage(string key, DataStorageElement value)
+        {
+            Session.DataStorage[Scope.Slot, key] = value;
         }
     }
 }
