@@ -11,6 +11,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
+using System.Threading;
 using Team17.Online;
 using UnityEngine;
 
@@ -128,6 +129,56 @@ namespace Archipelago.MonsterSanctuary.Client
 
                 return true;
             }
+        }
+
+        [HarmonyPatch(typeof(InventoryManager), "AddItem")]
+        private class InventoryManager_AddItem 
+        {
+            [UsedImplicitly]
+            private static void Postfix(InventoryManager __instance, BaseItem item) 
+            {
+                if (item is not Egg)
+                    return;
+
+                var egg = (Egg)item;
+                CheckAbilityLocation(egg.Monster);
+            }
+        }
+
+        [HarmonyPatch(typeof(MonsterManager), "AddMonsterByPrefab")]
+        private class MonsterManager_AddMonsterByPrefab
+        {
+            [UsedImplicitly]
+            private static void Postfix(GameObject monsterPrefab)
+            {
+                
+                CheckAbilityLocation(monsterPrefab);
+            }
+        }
+
+        private static void CheckAbilityLocation(GameObject monsterObj)
+        {
+            var monster = monsterObj.GetComponent<Monster>();
+            if (monster == null)
+            {
+                Patcher.Logger.LogWarning($"No monster component found for game object '{monsterObj.name}'");
+                return;
+            }
+
+            var ability = monster.ExploreAction.GetComponent<ExploreAbility>();
+            if (ability == null)
+            {
+                Patcher.Logger.LogError($"{monster.Name} has a null ExploreAbility component");
+                return;
+            }
+
+            if (!GameData.AbilityChecks.ContainsKey(ability.Name))
+            {
+                Patcher.Logger.LogError($"Could not find location ID for ability '{ability.Name}'");
+                return;
+            }
+
+            APState.CheckLocation(GameData.AbilityChecks[ability.Name]);
         }
     }
 }
