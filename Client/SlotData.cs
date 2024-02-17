@@ -108,8 +108,6 @@ namespace Archipelago.MonsterSanctuary.Client
                 }
             }
 
-            GameData.AbilityChecks = GetDictionaryData<long>(slotData, "abilities");
-
             var hints = GetListData<HintData>(slotData, "hints");
             GameData.Hints = new();
             foreach (var hint in hints)
