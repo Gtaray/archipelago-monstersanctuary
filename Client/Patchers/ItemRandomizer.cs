@@ -71,16 +71,10 @@ namespace Archipelago.MonsterSanctuary.Client
         public static void QueueItemTransfer(int? itemIndex, long itemId, int playerId, long locationId, ItemTransferType action)
         {
             var itemName = APState.Session.Items.GetItemName(itemId);
-            Patcher.Logger.LogInfo("QueueItemTransfer()");
-            Patcher.Logger.LogInfo("\tItem Index: " + itemIndex);
-            Patcher.Logger.LogInfo("\tItem Name: " + itemName);
-            Patcher.Logger.LogInfo("\tLocation ID: " + locationId);
-            Patcher.Logger.LogInfo("\tAction: " + Enum.GetName(typeof(ItemTransferType), action));
 
             // If item index is null (meaning this is someone else's item), we can only rely on whether the location ID is checked.
             if (itemIndex == null && _locations_checked.Contains(locationId))
             {
-                Patcher.Logger.LogInfo("\tAnother player's item is already queued item or handled");
                 return;
             }
 
@@ -95,7 +89,6 @@ namespace Archipelago.MonsterSanctuary.Client
             // Do not queue an item if the queue already contains that index.
             if (itemIndex != null && (itemIndex <= _itemsReceivedIndex || _itemQueue.Any(i => i.ItemIndex == itemIndex)))
             {
-                Patcher.Logger.LogInfo("\tOur own item is already queued item or handled");
                 return;
             }
 
@@ -131,7 +124,6 @@ namespace Archipelago.MonsterSanctuary.Client
                 // check all of those locations at once and then clear the queue
                 if (_giftQueue.Count > 0)
                 {
-                    Patcher.Logger.LogInfo($"{_giftQueue.Count} gift items in the queue. Checking those locations");
                     APState.CheckLocations(_giftQueue.ToArray());
                     _giftQueue.Clear();
                 }
@@ -240,7 +232,6 @@ namespace Archipelago.MonsterSanctuary.Client
             [UsedImplicitly]
             private static bool Prefix(ref GrantItemsAction __instance, bool showMessage)
             {
-                Patcher.Logger.LogInfo("GrantItem()");
                 string locName = $"{GameController.Instance.CurrentSceneName}_{__instance.ID}";
 
                 // If we're not connected, we add this location to a list of locations that need to be checked once we are connected
@@ -258,7 +249,6 @@ namespace Archipelago.MonsterSanctuary.Client
 
                 if (!showMessage)
                 {
-                    Patcher.Logger.LogInfo("Skipping. Adding gift to queue");
                     _giftQueue.Add(GameData.ItemChecks[locName]);
                     return false;
                 }
@@ -273,10 +263,7 @@ namespace Archipelago.MonsterSanctuary.Client
 
         public static void SentItem(string item, string player, PopupDelegate confirmCallback)
         {
-            Patcher.Logger.LogInfo("SentItem()");
             var text = string.Format("Sent {0} to {1}", FormatItem(item), FormatPlayer(player));
-            Patcher.Logger.LogInfo("\tText: " + text);
-
             PopupController.Instance.ShowMessage(
                     Utils.LOCA("Archipelago"),
                     text, 

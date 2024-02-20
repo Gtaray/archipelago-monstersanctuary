@@ -209,7 +209,6 @@ namespace Archipelago.MonsterSanctuary.Client
 
         public static void CheckLocations(params long[] locationIds)
         {
-            Patcher.Logger.LogInfo("CheckLocations()");
             foreach (var locationId in locationIds)
             {
                 CheckedLocations.Add(locationId);
@@ -219,9 +218,6 @@ namespace Archipelago.MonsterSanctuary.Client
                 return;
 
             var locationsToCheck = CheckedLocations.Except(Session.Locations.AllLocationsChecked);
-            foreach (var location in locationsToCheck)
-                Patcher.Logger.LogInfo("\tLocation ID: " + location);
-
             Task.Run(() =>
             {
                 Session.Locations.CompleteLocationChecksAsync(
@@ -239,9 +235,7 @@ namespace Archipelago.MonsterSanctuary.Client
         private static async Task ScoutLocations(long[] locationsToCheck)
         {
             // First we go through and 
-            Patcher.Logger.LogInfo("ScoutLocationsAsync()");
             var packet = await Session.Locations.ScoutLocationsAsync(false, locationsToCheck);
-            Patcher.Logger.LogInfo($"\t{packet.Locations.Count()} locations scouted");
             foreach (var location in packet.Locations)
             {
                 if (Session.ConnectionInfo.Slot == location.Player)
@@ -249,7 +243,6 @@ namespace Archipelago.MonsterSanctuary.Client
                     continue;
                 }
 
-                Patcher.Logger.LogInfo("Scouting Location: " + location.Location);
                 // This needs to work without an index (because sent items never have an index.
                 Patcher.QueueItemTransfer(null, location.Item, location.Player, location.Location, ItemTransferType.Sent);
             }

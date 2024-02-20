@@ -405,12 +405,10 @@ namespace Archipelago.MonsterSanctuary.Client
                 
                 if (mon.Name == "Tanuki")
                 {
-                    Patcher.Logger.LogInfo("Replacing Tanuki with " + SlotData.TanukiMonster);
                     __result = GameData.GetMonsterByName(SlotData.TanukiMonster);
                 }
                 else if (mon.Name == "Skorch")
                 {
-                    Patcher.Logger.LogInfo("Replacing Skorch with " + SlotData.BexMonster);
                     __result = GameData.GetMonsterByName(SlotData.BexMonster);
                 }
 
