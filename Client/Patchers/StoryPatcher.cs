@@ -14,32 +14,42 @@ namespace Archipelago.MonsterSanctuary.Client
     public partial class Patcher
     {
         [HarmonyPatch(typeof(GameController), "LoadStartingArea")]
-        private class GameController_SkipStartingCinematic
+        private class GameController_LoadStartingArea
         {
             [UsedImplicitly]
             private static bool Prefix(GameController __instance, bool isNewGamePlus)
             {
-                // new game file started, delete old files so we start fresh.
-                Logger.LogWarning("New Save. Deleting item cache and checked locations");
-                DeleteItemCache();
-                DeleteLocationsChecked();
-                APState.Resync();
+                string startingScene = "MountainPath_Intro";
 
-                // if we're not skipping the intro, call the original function
-                if (!SlotData.SkipIntro)
-                    return true;
-
-                // We have to duplicate the original code here so we can change the current scene name
-                __instance.IsStoryMode = true;
-                if (!isNewGamePlus)
+                if (APState.IsConnected)
                 {
-                    __instance.InitPlayerStartSetup();
+                    // new game file started, delete old files so we start fresh.
+                    Logger.LogWarning("New Save. Deleting item cache and checked locations");
+                    DeleteItemCache();
+                    DeleteLocationsChecked();
+                    APState.Resync();
+
+                    // if we're not skipping the intro, call the original function
+                    if (!SlotData.SkipIntro)
+                        return true;
+
+                    // We have to duplicate the original code here so we can change the current scene name
+                    __instance.IsStoryMode = true;
+                    if (!isNewGamePlus)
+                    {
+                        __instance.InitPlayerStartSetup();
+                    }
+                    startingScene = "MountainPath_North1";
+
+                    var item = GetItemByName("Smoke Bomb");
+                    PlayerController.Instance.Inventory.AddItem(item, 50, 0);
                 }
+                
                 __instance.ChangeType = GameController.SceneChangeType.ToStartScene;
-                __instance.CurrentSceneName = "MountainPath_North1";
+                __instance.CurrentSceneName = startingScene;
                 SceneManager.LoadScene(__instance.CurrentSceneName, LoadSceneMode.Additive);
                 PlayerController.Instance.TimerAvailable = true;
-
+                // End of original code
 
                 return false;
             }

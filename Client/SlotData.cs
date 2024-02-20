@@ -58,6 +58,7 @@ namespace Archipelago.MonsterSanctuary.Client
         public static bool SkipPlot { get; set; } = false;
         public static ShiftFlag MonsterShiftRule { get; set; } = ShiftFlag.Normal;
         public static LockedDoorsFlag LockedDoors { get; set; } = 0;
+        public static bool AddSmokeBombs { get; set; } = false;
         public static bool DeathLink { get; set; } = false;
         public static string TanukiMonster { get; set; }
         public static string BexMonster{ get; set; }
@@ -72,6 +73,7 @@ namespace Archipelago.MonsterSanctuary.Client
             SkipPlot = GetBoolData(options, "skip_plot", false);
             MonsterShiftRule = GetEnumData(options, "monster_shift_rule", ShiftFlag.Normal);
             LockedDoors = GetEnumData(options, "remove_locked_doors", LockedDoorsFlag.All);
+            AddSmokeBombs = GetBoolData(options, "add_smoke_bombs", false);
             DeathLink = GetBoolData(options, "death_link", false);
 
             var monsterData = GetDictionaryData<object>(slotData, "monsters");
@@ -116,6 +118,7 @@ namespace Archipelago.MonsterSanctuary.Client
             Patcher.Logger.LogInfo("Death Link: " + DeathLink);
             Patcher.Logger.LogInfo("Exp Multiplier: " + ExpMultiplier);
             Patcher.Logger.LogInfo("Force Egg Drop: " + AlwaysGetEgg);
+            Patcher.Logger.LogInfo("Add Smoke Bombs: " + AddSmokeBombs);
             Patcher.Logger.LogInfo("Monster Shift Rule: " + Enum.GetName(typeof(ShiftFlag), MonsterShiftRule));
             Patcher.Logger.LogInfo("Locked Doors: " + Enum.GetName(typeof(LockedDoorsFlag), MonsterShiftRule));
             Patcher.Logger.LogInfo("Skip Intro: " + SkipIntro);

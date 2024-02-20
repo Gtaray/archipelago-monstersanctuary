@@ -158,8 +158,7 @@ namespace Archipelago.MonsterSanctuary.Client
         }
 
         private static void AddAbilityToDataStorage(GameObject monsterObj)
-        {
-            Patcher.Logger.LogInfo("AddAbilityToDataStorage()");
+        {;
             var monster = monsterObj.GetComponent<Monster>();
             if (monster == null)
             {
