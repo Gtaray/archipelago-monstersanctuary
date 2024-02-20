@@ -1,4 +1,5 @@
 ﻿using Archipelago.MultiClient.Net.Helpers;
+using Archipelago.MultiClient.Net.Models;
 using BepInEx;
 using BepInEx.Logging;
 using HarmonyLib;
@@ -158,6 +159,7 @@ namespace Archipelago.MonsterSanctuary.Client
 
         private static void AddAbilityToDataStorage(GameObject monsterObj)
         {
+            Patcher.Logger.LogInfo("AddAbilityToDataStorage()");
             var monster = monsterObj.GetComponent<Monster>();
             if (monster == null)
             {
@@ -170,6 +172,11 @@ namespace Archipelago.MonsterSanctuary.Client
             {
                 Patcher.Logger.LogError($"{monster.Name} has a null ExploreAbility component");
                 return;
+            }
+
+            if (APState.ReadBoolFromDataStorage(ability.Name) == false)
+            {
+                APState.SetToDataStorage(ability.Name, (DataStorageElement)true);
             }
         }
     }
