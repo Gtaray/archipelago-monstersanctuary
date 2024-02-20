@@ -152,13 +152,15 @@ namespace Archipelago.MonsterSanctuary.Client
             [UsedImplicitly]
             private static void Postfix(GameObject monsterPrefab)
             {
-                
                 AddAbilityToDataStorage(monsterPrefab);
             }
         }
 
         private static void AddAbilityToDataStorage(GameObject monsterObj)
-        {;
+        {
+            if (!APState.IsConnected)
+                return;
+
             var monster = monsterObj.GetComponent<Monster>();
             if (monster == null)
             {

@@ -24,6 +24,9 @@ namespace Archipelago.MonsterSanctuary.Client
                 if (APState.IsConnected)
                 {
                     // new game file started, delete old files so we start fresh.
+                    // This could cause problems, deleting only if we're connected
+                    // but the other option is to delete even when not connected, and that will break
+                    // if someone wants to do a normal run while also doing a rando.
                     Logger.LogWarning("New Save. Deleting item cache and checked locations");
                     DeleteItemCache();
                     DeleteLocationsChecked();
@@ -33,23 +36,26 @@ namespace Archipelago.MonsterSanctuary.Client
                     if (!SlotData.SkipIntro)
                         return true;
 
-                    // We have to duplicate the original code here so we can change the current scene name
-                    __instance.IsStoryMode = true;
-                    if (!isNewGamePlus)
-                    {
-                        __instance.InitPlayerStartSetup();
-                    }
                     startingScene = "MountainPath_North1";
-
-                    var item = GetItemByName("Smoke Bomb");
-                    PlayerController.Instance.Inventory.AddItem(item, 50, 0);
                 }
-                
+
+                // We have to duplicate the original code here so we can change the current scene name
+                __instance.IsStoryMode = true;
+                if (!isNewGamePlus)
+                {
+                    __instance.InitPlayerStartSetup();
+                }
+
                 __instance.ChangeType = GameController.SceneChangeType.ToStartScene;
                 __instance.CurrentSceneName = startingScene;
                 SceneManager.LoadScene(__instance.CurrentSceneName, LoadSceneMode.Additive);
                 PlayerController.Instance.TimerAvailable = true;
                 // End of original code
+
+                // Do this after InitPlayerStartSetup()
+                if (SlotData.AddSmokeBombs)
+                    PlayerController.Instance.Inventory.AddItem(GetItemByName("Smoke Bomb"), 50, 0);
+                PlayerController.Instance.Gold = SlotData.StartingGold * 100;
 
                 return false;
             }
