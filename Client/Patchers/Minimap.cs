@@ -29,7 +29,6 @@ namespace Archipelago.MonsterSanctuary.Client
                 return;
             }
 
-            Patcher.Logger.LogInfo("AddAndUpdateCheckedLocations(): " + locationId);
             _locations_checked.Add(locationId);
             SaveLocationsChecked();
 

@@ -120,14 +120,12 @@ namespace Archipelago.MonsterSanctuary.Client
             [UsedImplicitly]
             private static bool Prefix(List<InventoryItem> items, BaseItem item, int quantity, int variation)
             {
-
                 foreach (InventoryItem inventoryItem in items) 
                 {
                     // Only ever add one copy of an egg
                     if (inventoryItem.Item == item && item is Egg)
                         return false;
                 }
-
                 return true;
             }
         }
@@ -178,6 +176,47 @@ namespace Archipelago.MonsterSanctuary.Client
             if (APState.ReadBoolFromDataStorage(ability.Name) == false)
             {
                 APState.SetToDataStorage(ability.Name, (DataStorageElement)true);
+            }
+        }
+
+        [HarmonyPatch(typeof(PopupController), "ShowRewards")]
+        private class PopupController_ShowRewards
+        {
+            private static void Prefix(
+                ref List<InventoryItem> commonItems,
+                ref List<InventoryItem> rareItems,
+                ref int gold)
+            {
+                var toRemove = ((gold > 0 ? 1 : 0) + commonItems.Count + rareItems.Count) - 8;
+
+                // In this case, we don't need to remove anything
+                if (toRemove <= 0)
+                    return;
+
+                // The rewards screen is limited to 7 items + gold and a continue button
+                // so we need to truncate items displayed until we're down to that amount
+                while (toRemove > 0)
+                {
+                    if (commonItems.Count > 0)
+                    {
+                        // Start by removing common items
+                        Patcher.Logger.LogWarning("Too many items in reward screen. Truncating " + commonItems.First().GetName());
+                        commonItems.RemoveAt(0);
+                    }
+                    else if (rareItems.Count > 0)
+                    {
+                        // if there aren't any common items to remove, remove rare items
+                        Patcher.Logger.LogWarning("Too many items in reward screen. Truncating " + commonItems.First().GetName());
+                        rareItems.RemoveAt(0);
+                    }
+                    else
+                    {
+                        // this should never happen, but just in case, we clear out gold
+                        Patcher.Logger.LogWarning("Too many items in reward screen. Truncating gold");
+                        gold = 0;
+                    }
+                    toRemove--;
+                }
             }
         }
     }
