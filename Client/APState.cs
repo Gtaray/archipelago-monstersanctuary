@@ -253,27 +253,6 @@ namespace Archipelago.MonsterSanctuary.Client
             }
         }
 
-        public static void ScoutLocations(string[] locationNames, System.Action<NetworkItem> action, Action callback = null, bool createAsHint = false)
-        {
-            var locations = locationNames.Select(l => Session.Locations.GetLocationIdFromName("Monster Sanctuary", l));
-            ScoutLocations(locations.ToArray(), action, callback, createAsHint);
-        }
-
-        public static void ScoutLocations(long[] locations, System.Action<NetworkItem> action, Action callback= null, bool createAsHint = false)
-        {
-            Task.Run(async () => 
-            {
-                var packet = await Session.Locations.ScoutLocationsAsync(createAsHint, locations);
-                foreach (var location in packet.Locations)
-                {
-                    action(location);
-                }
-
-                if (callback != null)
-                    callback();
-            });
-        }
-
         public static void CompleteGame()
         {
             if (!APState.IsConnected)
@@ -294,5 +273,29 @@ namespace Archipelago.MonsterSanctuary.Client
         {
             Session.DataStorage[Scope.Slot, key] = value;
         }
+
+        #region Scouting
+        public static void ScoutLocations(string[] locationNames, System.Action<NetworkItem> action = null, Action callback = null, bool createAsHint = false)
+        {
+            var locations = locationNames.Select(l => Session.Locations.GetLocationIdFromName("Monster Sanctuary", l));
+            ScoutLocations(locations.ToArray(), action, callback, createAsHint);
+        }
+
+        public static void ScoutLocations(long[] locations, System.Action<NetworkItem> action = null, Action callback = null, bool createAsHint = false)
+        {
+            Task.Run(async () =>
+            {
+                var packet = await Session.Locations.ScoutLocationsAsync(createAsHint, locations);
+                foreach (var location in packet.Locations)
+                {
+                    if (action != null)
+                        action(location);
+                }
+
+                if (callback != null)
+                    callback();
+            });
+        }
+        #endregion
     }
 }

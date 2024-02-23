@@ -8,8 +8,8 @@ namespace Archipelago.MonsterSanctuary.Client.Behaviors
 {
     public class ForeignItem : BaseItem
     {
-        public ItemClassification Classification { get; set; }
         public string Player { get; set; }
+        public ItemClassification Classification => GetComponent<RandomizedShopItem>().Classification;
 
         public override string GetIcon()
         {

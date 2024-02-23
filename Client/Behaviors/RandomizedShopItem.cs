@@ -10,5 +10,6 @@ namespace Archipelago.MonsterSanctuary.Client.Behaviors
     public class RandomizedShopItem : MonoBehaviour
     {
         public long LocationId { get; set; }
+        public ItemClassification Classification { get; set; }
     }
 }

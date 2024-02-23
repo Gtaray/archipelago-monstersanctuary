@@ -142,6 +142,15 @@ namespace Archipelago.MonsterSanctuary.Client
                     __instance.PagedMenuList.AddDisplayable(item.GetComponent<BaseItem>());
                 }
 
+                var progressionLocations = shopInventory
+                    .Select(i => i.GetComponent<RandomizedShopItem>())
+                    .Where(i => i.Classification == ItemClassification.Progression)
+                    .Select(i => i.LocationId)
+                    .ToArray();
+
+                // Scout any items in this shop that are progression
+                APState.ScoutLocations(progressionLocations, null, null, true);
+
                 return false;
             }
 
@@ -188,18 +197,19 @@ namespace Archipelago.MonsterSanctuary.Client
                         ? GameData.GetItemByName<BaseItem>(randomizedItem.Name).gameObject
                         : new GameObject($"{randomizedItem.Name} ({randomizedItem.Player})");
 
+                    newItem.GetComponent<BaseItem>().Price = baseItem.Price;
+
+                    var rsi = newItem.AddComponent<RandomizedShopItem>();
+                    rsi.LocationId = randomizedItem.LocationId;
+                    rsi.Classification = randomizedItem.Classification;
+
                     if (!randomizedItem.IsLocal)
                     {
                         // Add the new component. Make sure to pull data from tradeItem or baseItem from here on out
                         var item = newItem.AddComponent<ForeignItem>();
-                        item.Classification = randomizedItem.Classification;
                         item.Player = randomizedItem.Player;
                         item.Name = randomizedItem.Name;
                     }
-
-                    newItem.GetComponent<BaseItem>().Price = baseItem.Price;
-                    var rsi = newItem.AddComponent<RandomizedShopItem>();
-                    rsi.LocationId = randomizedItem.LocationId;
 
                     newInventory.Add(newItem);
                 }
