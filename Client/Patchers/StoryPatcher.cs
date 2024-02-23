@@ -54,7 +54,7 @@ namespace Archipelago.MonsterSanctuary.Client
 
                 // Do this after InitPlayerStartSetup()
                 if (SlotData.AddSmokeBombs)
-                    PlayerController.Instance.Inventory.AddItem(GetItemByName("Smoke Bomb"), 50, 0);
+                    PlayerController.Instance.Inventory.AddItem(GameData.GetItemByName("Smoke Bomb"), 50, 0);
                 PlayerController.Instance.Gold = SlotData.StartingGold * 100;
 
                 return false;

@@ -1,6 +1,7 @@
 ﻿using HarmonyLib;
 using Newtonsoft.Json;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -15,6 +16,44 @@ namespace Archipelago.MonsterSanctuary.Client
     {
         public string Text { get; set; }
         public bool IgnoreRemainingText { get; set; }
+    }
+
+    public class Shop
+    {
+        public ConcurrentDictionary<string, ShopInventoryItem> Inventory { get; set; } = new();
+
+        public void AddItem(string key, ShopInventoryItem item)
+        {
+            Inventory[key] = item;
+        }
+
+        public bool HasItem(string key)
+        {
+            return Inventory.ContainsKey(key);
+        }
+
+        public ShopInventoryItem GetItem(string key)
+        {
+            return Inventory[key];
+        }
+    }
+
+    public class ShopInventoryItem
+    {
+        public bool IsLocal { get; set; }
+        public string Player { get; set; }
+        public string Name { get; set; }
+        public long LocationId { get; set; }
+        public ItemClassification Classification { get; set; }
+        public int? Price { get; set; }
+    }
+
+    public enum ItemClassification
+    {
+        Filler = 0,
+        Progression = 1,
+        Useful = 2,
+        Trap = 4 
     }
 
     public class GameData
@@ -108,6 +147,13 @@ namespace Archipelago.MonsterSanctuary.Client
         }
         #endregion
 
+        #region Shop Location Data
+        public static Dictionary<string, long> ShopChecks = new();
+
+        // Shopsanity entries
+        public static ConcurrentDictionary<string, Shop> Shops = new();
+        #endregion
+
         #region Hints
         public static Dictionary<int, Hint> Hints = new();
         public static void AddHint(int id, string text, bool ignoreRemainingText)
@@ -199,6 +245,24 @@ namespace Archipelago.MonsterSanctuary.Client
                 string json = reader.ReadToEnd();
                 OriginalChampions = JsonConvert.DeserializeObject<Dictionary<string, string>>(json);
             }
+        }
+        #endregion
+
+        #region Item Accessors
+        public static BaseItem GetItemByName(string name)
+        {
+            if (name.EndsWith(" Egg"))
+                return GetItemByName<Egg>(name);
+
+            return GetItemByName<BaseItem>(name);
+        }
+
+        public static BaseItem GetItemByName<T>(string name) where T : BaseItem
+        {
+            return GameController.Instance.WorldData.Referenceables
+                .Where(x => x?.gameObject.GetComponent<T>() != null)
+                .Select(x => x.gameObject.GetComponent<T>())
+                .SingleOrDefault(i => string.Equals(i.GetName(), name, StringComparison.OrdinalIgnoreCase));
         }
         #endregion
 

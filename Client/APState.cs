@@ -100,6 +100,11 @@ namespace Archipelago.MonsterSanctuary.Client
 
                 GameData.LoadMinimap();
                 Patcher.RebuildCheckCounter();
+                Patcher.ClearModifiedShopItems();
+
+                // Scout the shop locations so we have them cached for later.
+                var locations = GameData.ShopChecks.Select(kvp => kvp.Value).ToArray();
+                APState.ScoutLocations(locations, Patcher.AddShopItem);
 
                 // If the player opened chests while not connected, this get those items upon connection
                 if (OfflineChecks.Count() > 0)
@@ -224,7 +229,7 @@ namespace Archipelago.MonsterSanctuary.Client
                     locationsToCheck.ToArray());
             }).ConfigureAwait(false);
 
-            Task.Run(() => ScoutLocations(locationsToCheck.ToArray()));
+            Task.Run(() => ShowMessageForSentItem(locationsToCheck.ToArray()));
         }
 
         public static void CheckLocation(long locationId)
@@ -232,7 +237,7 @@ namespace Archipelago.MonsterSanctuary.Client
             CheckLocations(locationId);
         }
 
-        private static async Task ScoutLocations(long[] locationsToCheck)
+        private static async Task ShowMessageForSentItem(long[] locationsToCheck)
         {
             // First we go through and 
             var packet = await Session.Locations.ScoutLocationsAsync(false, locationsToCheck);
@@ -246,6 +251,27 @@ namespace Archipelago.MonsterSanctuary.Client
                 // This needs to work without an index (because sent items never have an index.
                 Patcher.QueueItemTransfer(null, location.Item, location.Player, location.Location, ItemTransferType.Sent);
             }
+        }
+
+        public static void ScoutLocations(string[] locationNames, System.Action<NetworkItem> action, Action callback = null, bool createAsHint = false)
+        {
+            var locations = locationNames.Select(l => Session.Locations.GetLocationIdFromName("Monster Sanctuary", l));
+            ScoutLocations(locations.ToArray(), action, callback, createAsHint);
+        }
+
+        public static void ScoutLocations(long[] locations, System.Action<NetworkItem> action, Action callback= null, bool createAsHint = false)
+        {
+            Task.Run(async () => 
+            {
+                var packet = await Session.Locations.ScoutLocationsAsync(createAsHint, locations);
+                foreach (var location in packet.Locations)
+                {
+                    action(location);
+                }
+
+                if (callback != null)
+                    callback();
+            });
         }
 
         public static void CompleteGame()

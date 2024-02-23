@@ -92,12 +92,8 @@ namespace Archipelago.MonsterSanctuary.Client
 
             var itemLocations = GetDictionaryData<Dictionary<string, long>>(slotData, "locations");
 
-            //  Have to do this first so we have a list of all rank item ids before we process the rest of the items
-            GameData.ChampionRankIds = new();
-            foreach (var item in itemLocations["ranks"])
-            {
-                GameData.ChampionRankIds.Add(item.Key, item.Value);
-            }
+            GameData.ShopChecks = itemLocations["shops"];
+            GameData.ChampionRankIds = itemLocations["ranks"];
 
             GameData.ItemChecks = new();
             GameData.NumberOfChecks = new();
@@ -129,6 +125,7 @@ namespace Archipelago.MonsterSanctuary.Client
             Patcher.Logger.LogInfo("Monster Locations: " + GameData.MonstersCache.Count());
             Patcher.Logger.LogInfo("Champions: " + GameData.ChampionScenes.Count());
             Patcher.Logger.LogInfo("Item Locations: " + GameData.ItemChecks.Count());
+            Patcher.Logger.LogInfo("Shop Locations: " + GameData.ShopChecks.Count());
             Patcher.Logger.LogInfo("Hints: " + hints.Count());
         }
 

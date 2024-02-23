@@ -287,7 +287,7 @@ namespace Archipelago.MonsterSanctuary.Client
             }
 
             var quantity = GetQuantityOfItem(ref itemName);
-            var newItem = GetItemByName(itemName);
+            var newItem = GameData.GetItemByName(itemName);
 
             if (newItem == null)
             {
@@ -331,22 +331,6 @@ namespace Archipelago.MonsterSanctuary.Client
 
             name = name.Trim();
             return quantity;
-        }
-
-        static BaseItem GetItemByName(string name)
-        {
-            if (name.EndsWith(" Egg"))
-                return GetItemByName<Egg>(name);
-
-            return GetItemByName<BaseItem>(name);
-        }
-
-        static BaseItem GetItemByName<T>(string name) where T : BaseItem
-        {       
-            return GameController.Instance.WorldData.Referenceables
-                .Where(x => x?.gameObject.GetComponent<T>() != null)
-                .Select(x => x.gameObject.GetComponent<T>())
-                .SingleOrDefault(i => string.Equals(i.GetName(), name, StringComparison.OrdinalIgnoreCase));
         }
 
         private static string FormatItemReceivedMessage(string item, int quantity, string player, bool self)
@@ -421,25 +405,25 @@ namespace Archipelago.MonsterSanctuary.Client
         #endregion
 
         #region String Formatting / Coloring
-        private static string FormatItem(string text)
+        public static string FormatItem(string text)
         {
             text = RemoveProblematicCharacters(text);
             return GameDefines.FormatString(GameDefines.ColorCodeTextHighlight, text, true);
         }
 
-        private static string FormatPlayer(string text)
+        public static string FormatPlayer(string text)
         {
             text = RemoveProblematicCharacters(text);
             return GameDefines.FormatString("00ffff", text, true);
         }
 
-        private static string FormatOtherPlayer(string text)
+        public static string FormatOtherPlayer(string text)
         {
             text = RemoveProblematicCharacters(text);
             return GameDefines.FormatString("ff00ff", text, true);
         }
 
-        private static string RemoveProblematicCharacters(string text)
+        public static string RemoveProblematicCharacters(string text)
         {
             return text.Replace("<3", "heart")
                 .Replace("<", "")
