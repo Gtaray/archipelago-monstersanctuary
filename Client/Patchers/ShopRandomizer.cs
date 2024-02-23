@@ -13,9 +13,11 @@ using System.IO;
 using System.Linq;
 using System.Net.Sockets;
 using System.Reflection;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.SocialPlatforms;
 using static System.Net.Mime.MediaTypeNames;
 
 namespace Archipelago.MonsterSanctuary.Client
@@ -58,9 +60,6 @@ namespace Archipelago.MonsterSanctuary.Client
                 Classification = (ItemClassification)((int)packet.Flags)
             };
 
-            Patcher.Logger.LogInfo($"Added item to {shopName}:");
-            Patcher.Logger.LogInfo($"\t{oldItemName} -> {invItem.Name} ({Enum.GetName(typeof(ItemClassification), invItem.Classification)})");
-
             if (shopName == null)
             {
                 Patcher.Logger.LogError($"Shop name '{shopName}' is not recognized");
@@ -84,7 +83,14 @@ namespace Archipelago.MonsterSanctuary.Client
         {
             private static bool Prefix(TradeMenu __instance)
             {
+                Patcher.Logger.LogInfo("UpdateMenuList");
                 if (!APState.IsConnected)
+                {
+                    return true;
+                }
+
+                // Shopsanity is off, end early
+                if (!GameData.Shopsanity)
                 {
                     return true;
                 }
@@ -95,10 +101,8 @@ namespace Archipelago.MonsterSanctuary.Client
 
                 // Don't fuck with selling
                 var sell = Traverse.Create(__instance).Field("sell").GetValue<bool>();
-                Patcher.Logger.LogInfo("sell: " + sell);
                 if (sell)
                 {
-                    Patcher.Logger.LogInfo("Selling");
                     return true;
                 }
 
@@ -124,15 +128,17 @@ namespace Archipelago.MonsterSanctuary.Client
                 foreach (var item in shopInventory)
                 {
                     var rsi = item.GetComponent<RandomizedShopItem>();
-                    var local = item.GetComponent<ForeignItem>() != null;
+                    var local = item.GetComponent<ForeignItem>() == null;
 
                     // Ignore foreign items that have already been checked
                     if (!local && _locations_checked.Contains(rsi.LocationId))
                     {
+                        Patcher.Logger.LogInfo($"Already purchased {item.name} at location '{rsi.LocationId}'");
                         continue;
                     }
 
                     _modified_items.Add(item);
+                    var baseItemComp = item.GetComponent<BaseItem>();
                     __instance.PagedMenuList.AddDisplayable(item.GetComponent<BaseItem>());
                 }
 
@@ -180,12 +186,10 @@ namespace Archipelago.MonsterSanctuary.Client
 
                     GameObject newItem = randomizedItem.IsLocal
                         ? GameData.GetItemByName<BaseItem>(randomizedItem.Name).gameObject
-                        : Instantiate(baseItem.gameObject);
+                        : new GameObject($"{randomizedItem.Name} ({randomizedItem.Player})");
 
                     if (!randomizedItem.IsLocal)
                     {
-                        Destroy(newItem.GetComponent<BaseItem>()); // Destroy the original item component
-
                         // Add the new component. Make sure to pull data from tradeItem or baseItem from here on out
                         var item = newItem.AddComponent<ForeignItem>();
                         item.Classification = randomizedItem.Classification;
@@ -227,16 +231,20 @@ namespace Archipelago.MonsterSanctuary.Client
         {
             // This is specifically to prevent giving a foreign item to the player
             // and to handle eggs (which the base game doesn't handle if it's not randomizer or NG+)
-            // Actually doing the location check will occur in the postfix
-            private static bool Prefix(TradePopup __instance, MenuListItem item)
+            private static bool Prefix(TradePopup __instance, MenuListItem menuItem)
             {
                 if (!APState.IsConnected)
                 {
                     return true;
                 }
 
+                if (!GameData.Shopsanity)
+                {
+                    return true;
+                }
+
                 // Don't muck with canceling out of the menu
-                if (item != __instance.ConfirmItem)
+                if (menuItem != __instance.ConfirmItem)
                     return true;
 
                 // Don't muck with selling
@@ -258,9 +266,17 @@ namespace Archipelago.MonsterSanctuary.Client
                     ProgressManager.Instance.EncounteredMonster(egg.Monster.GetComponent<Monster>());
                 }
 
-                // Don't muck with anything that's not a foreign item
+                // If we're down this far, we know this is a randomized shopsanity location
+                // So we check that location here. Can't do this in the postfix as it has to be done before
+                // the Close() method is called.
+                CheckShopLocation(baseItem);
+
+                // For foreign items, we deduct the gold and mark off the item as being sold
+                // and check the AP location
                 if (baseItem is not ForeignItem)
+                {
                     return true;
+                }
 
                 PlayerController.Instance.Gold -= Traverse.Create(__instance).Method("GetItemPrice").GetValue<int>();
 
@@ -271,11 +287,35 @@ namespace Archipelago.MonsterSanctuary.Client
                         break;
                 }
                 SFXController.Instance.PlaySFX(SFXController.Instance.SFXBuySell, 0.7f);
+
                 __instance.Close();
                 return false;
             }
 
-            private static void Postfix(TradePopup __instance, MenuListItem item)
+            // We mark off this location as checked immediately so that when we get the checked location callback
+            // we don't queue up an item transfer to happen. We don't want a message box pop up in this case.
+            // We want to manually add to our item history list
+            private static void CheckShopLocation(BaseItem item)
+            {
+                var rsi = item.GetComponent<RandomizedShopItem>();
+                if (rsi == null)
+                    return;
+
+                var foreignItem = item.GetComponent<ForeignItem>();
+                var isLocal = foreignItem == null;
+
+                Patcher.Logger.LogInfo($"{item.GetName()} was purchased. Check location {rsi.LocationId}");
+                Patcher.AddAndUpdateCheckedLocations(rsi.LocationId);
+                Patcher.UI.AddItemToHistory(new ItemTransfer()
+                {
+                    PlayerName = isLocal ? "" : foreignItem.Player, // Only need a name if we're sending an item
+                    ItemName = item.GetName(),
+                    Action = isLocal ? ItemTransferType.Aquired : ItemTransferType.Sent
+                });
+                APState.CheckLocation(rsi.LocationId);
+            }
+
+            private static void Postfix(TradePopup __instance, MenuListItem menuItem)
             {
                 if (!APState.IsConnected)
                 {
@@ -283,7 +323,7 @@ namespace Archipelago.MonsterSanctuary.Client
                 }
 
                 // Don't muck with canceling out of the menu
-                if (item != __instance.ConfirmItem)
+                if (menuItem != __instance.ConfirmItem)
                     return;
 
                 // Don't muck with selling
@@ -292,32 +332,7 @@ namespace Archipelago.MonsterSanctuary.Client
 
                 // Don't muck with coupon trader
                 if (UIController.Instance.TradeMenu.CouponTrader)
-                    return;
-
-                var baseItem = Traverse.Create(__instance).Field("Item").GetValue<BaseItem>();
-                if (baseItem == null)
-                    return;
-
-                var rsi = baseItem.GetComponent<RandomizedShopItem>();
-                if (rsi == null)
-                    return;
-
-                var foreignItem = baseItem.GetComponent<ForeignItem>();
-
-                var isLocal = foreignItem != null;
-                Patcher.Logger.LogInfo($"{baseItem.GetName()} was purchased. Check location {rsi.LocationId}");
-
-                // We mark off this location as checked immediately so that when we get the checked location callback
-                // we don't queue up an item transfer to happen. We don't want a message box pop up in this case.
-                // We want to manually add to our item history list
-                Patcher.AddAndUpdateCheckedLocations(rsi.LocationId);
-                Patcher.UI.AddItemToHistory(new ItemTransfer()
-                {
-                    PlayerName = isLocal ? "" : foreignItem.Player, // Only need a name if we're sending an item
-                    ItemName = baseItem.GetName(),
-                    Action = isLocal ? ItemTransferType.Aquired : ItemTransferType.Sent
-                });
-                APState.CheckLocation(rsi.LocationId);
+                    return;                
             }
         }
 

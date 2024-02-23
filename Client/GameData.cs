@@ -148,6 +148,7 @@ namespace Archipelago.MonsterSanctuary.Client
         #endregion
 
         #region Shop Location Data
+        public static bool Shopsanity => ShopChecks.Count > 0;
         public static Dictionary<string, long> ShopChecks = new();
 
         // Shopsanity entries
