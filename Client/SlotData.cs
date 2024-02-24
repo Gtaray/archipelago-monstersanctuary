@@ -60,6 +60,7 @@ namespace Archipelago.MonsterSanctuary.Client
         public static LockedDoorsFlag LockedDoors { get; set; } = 0;
         public static bool AddSmokeBombs { get; set; } = false;
         public static int StartingGold { get; set; } = 1;
+        public static bool ShopsIgnoreRank { get; set; } = false;
         public static bool DeathLink { get; set; } = false;
         public static string TanukiMonster { get; set; }
         public static string BexMonster{ get; set; }
@@ -76,6 +77,7 @@ namespace Archipelago.MonsterSanctuary.Client
             LockedDoors = GetEnumData(options, "remove_locked_doors", LockedDoorsFlag.All);
             AddSmokeBombs = GetBoolData(options, "add_smoke_bombs", false);
             StartingGold = GetIntData(options, "starting_gold", 1);
+            ShopsIgnoreRank = GetBoolData(options, "shops_ignore_rank", false);
             DeathLink = GetBoolData(options, "death_link", false);
 
             var monsterData = GetDictionaryData<object>(slotData, "monsters");
@@ -93,6 +95,7 @@ namespace Archipelago.MonsterSanctuary.Client
             var itemLocations = GetDictionaryData<Dictionary<string, long>>(slotData, "locations");
 
             GameData.ShopChecks = itemLocations["shops"];
+            GameData.ShopPrices = GetDictionaryData<int>(slotData, "prices");
             GameData.ChampionRankIds = itemLocations["ranks"];
 
             GameData.ItemChecks = new();
@@ -122,6 +125,8 @@ namespace Archipelago.MonsterSanctuary.Client
             Patcher.Logger.LogInfo("Locked Doors: " + Enum.GetName(typeof(LockedDoorsFlag), MonsterShiftRule));
             Patcher.Logger.LogInfo("Skip Intro: " + SkipIntro);
             Patcher.Logger.LogInfo("Skip Plot: " + SkipPlot);
+            Patcher.Logger.LogInfo("Randomize Shop Prices: " + (GameData.ShopPrices.Count() > 0));
+            Patcher.Logger.LogInfo("Shops Ignore Rank Requirement: " + ShopsIgnoreRank);
             Patcher.Logger.LogInfo("Monster Locations: " + GameData.MonstersCache.Count());
             Patcher.Logger.LogInfo("Champions: " + GameData.ChampionScenes.Count());
             Patcher.Logger.LogInfo("Item Locations: " + GameData.ItemChecks.Count());

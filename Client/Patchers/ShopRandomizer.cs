@@ -57,8 +57,13 @@ namespace Archipelago.MonsterSanctuary.Client
                 IsLocal = packet.Player == APState.Session.ConnectionInfo.Slot,
                 Name = newItemName,
                 LocationId = packet.Location,
-                Classification = (ItemClassification)((int)packet.Flags)
+                Classification = (ItemClassification)((int)packet.Flags),
             };
+
+            if (GameData.ShopPrices.ContainsKey(locationName))
+            {
+                invItem.Price = GameData.ShopPrices[locationName];
+            }
 
             if (shopName == null)
             {
@@ -74,6 +79,24 @@ namespace Archipelago.MonsterSanctuary.Client
             }
 
             GameData.Shops[shopName].AddItem(oldItemName, invItem);
+        }
+
+        [HarmonyPatch(typeof(TradeInventory), "IsAvailable")]
+        private class TradeInventory_IsAvailable
+        {
+            private static bool Prefix(TradeInventory __instance, ref bool __result)
+            {
+                if ((__instance.RequiredBool != string.Empty && !ProgressManager.Instance.GetBool(__instance.RequiredBool)) 
+                    || (!SlotData.ShopsIgnoreRank && __instance.RequiredRank > PlayerController.Instance.Rank.GetKeeperRank())
+                    || (__instance.RandomizerOnly && (!GameModeManager.Instance.RandomizerMode || GameModeManager.Instance.BraveryMode)))
+                {
+                    __result = false;
+                    return false;
+                }
+
+                __result = !__instance.RelicOnly || GameModeManager.Instance.RelicMode;
+                return false;
+            }
         }
 
         // This probably won't work, because we can't return a game object for 
@@ -176,6 +199,7 @@ namespace Archipelago.MonsterSanctuary.Client
 
             private static List<GameObject> SwapInventory(List<GameObject> shopInventory, string shop)
             {
+                Patcher.Logger.LogInfo("SwapInventory()");
                 List<GameObject> newInventory = new List<GameObject>();
                 var randomizedInventory = GameData.Shops[shop];
 
@@ -183,6 +207,7 @@ namespace Archipelago.MonsterSanctuary.Client
                 foreach (var shopItem in shopInventory)
                 {
                     var baseItem = shopItem.GetComponent<BaseItem>();
+                    Patcher.Logger.LogInfo("Item: " + baseItem.GetName());
 
                     // Sanity check to make sure the item we're replacing is actually in the shop
                     if (!randomizedInventory.HasItem(baseItem.GetName()))
@@ -192,16 +217,25 @@ namespace Archipelago.MonsterSanctuary.Client
                     }
 
                     var randomizedItem = randomizedInventory.GetItem(baseItem.GetName());
+                    Patcher.Logger.LogInfo("Randomized Item: " + randomizedItem.Name);
 
                     GameObject newItem = randomizedItem.IsLocal
-                        ? GameData.GetItemByName<BaseItem>(randomizedItem.Name).gameObject
+                        ? GameData.GetItemByName<BaseItem>(randomizedItem.Name)?.gameObject
                         : new GameObject($"{randomizedItem.Name} ({randomizedItem.Player})");
 
-                    newItem.GetComponent<BaseItem>().Price = baseItem.Price;
+                    if (newItem == null)
+                    {
+                        Patcher.Logger.LogError($"Could not get item '{randomizedItem.Name}' by name.");
+                        continue;
+                    }
+
+                    Patcher.Logger.LogInfo("Generated new game object");
 
                     var rsi = newItem.AddComponent<RandomizedShopItem>();
                     rsi.LocationId = randomizedItem.LocationId;
                     rsi.Classification = randomizedItem.Classification;
+
+                    Patcher.Logger.LogInfo("Generated randomized shop item component");
 
                     if (!randomizedItem.IsLocal)
                     {
@@ -209,7 +243,14 @@ namespace Archipelago.MonsterSanctuary.Client
                         var item = newItem.AddComponent<ForeignItem>();
                         item.Player = randomizedItem.Player;
                         item.Name = randomizedItem.Name;
+
+                        Patcher.Logger.LogInfo("Added ForeignItem component");
                     }
+
+                    Patcher.Logger.LogInfo("Adjusting Price: " + randomizedItem.Price);
+                    newItem.GetComponent<BaseItem>().Price = randomizedItem.Price.HasValue
+                        ? randomizedItem.Price.Value
+                        : baseItem.Price;
 
                     newInventory.Add(newItem);
                 }

@@ -57,6 +57,10 @@ namespace Archipelago.MonsterSanctuary.Client
                     PlayerController.Instance.Inventory.AddItem(GameData.GetItemByName("Smoke Bomb"), 50, 0);
                 PlayerController.Instance.Gold = SlotData.StartingGold * 100;
 
+                // Check off the two merchants with restock flags
+                ProgressManager.Instance.SetBool("AlchemistShopRestocked", true, true);
+                ProgressManager.Instance.SetBool("GoblinTraderRestock", true, true);
+
                 return false;
             }
         }

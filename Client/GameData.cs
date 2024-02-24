@@ -150,6 +150,7 @@ namespace Archipelago.MonsterSanctuary.Client
         #region Shop Location Data
         public static bool Shopsanity => ShopChecks.Count > 0;
         public static Dictionary<string, long> ShopChecks = new();
+        public static Dictionary<string, int> ShopPrices = new();
 
         // Shopsanity entries
         public static ConcurrentDictionary<string, Shop> Shops = new();
