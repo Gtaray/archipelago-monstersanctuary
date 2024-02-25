@@ -117,7 +117,7 @@ namespace Archipelago.MonsterSanctuary.Client
             Patcher.Logger.LogInfo("Exp Multiplier: " + ExpMultiplier);
             Patcher.Logger.LogInfo("Force Egg Drop: " + AlwaysGetEgg);
             Patcher.Logger.LogInfo("Monster Shift Rule: " + Enum.GetName(typeof(ShiftFlag), MonsterShiftRule));
-            Patcher.Logger.LogInfo("Locked Doors: " + Enum.GetName(typeof(LockedDoorsFlag), MonsterShiftRule));
+            Patcher.Logger.LogInfo("Locked Doors: " + Enum.GetName(typeof(LockedDoorsFlag), LockedDoors));
             Patcher.Logger.LogInfo("Skip Intro: " + SkipIntro);
             Patcher.Logger.LogInfo("Skip Plot: " + SkipPlot);
             Patcher.Logger.LogInfo("Monster Locations: " + GameData.MonstersCache.Count());

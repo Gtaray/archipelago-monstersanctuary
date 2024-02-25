@@ -17,6 +17,14 @@ namespace Archipelago.MonsterSanctuary.Client
         public bool IgnoreRemainingText { get; set; }
     }
 
+    public enum ItemClassification
+    {
+        Filler = 0,
+        Progression = 1,
+        Useful = 2,
+        Trap = 4
+    }
+
     public class GameData
     {
         #region Monster Location Data

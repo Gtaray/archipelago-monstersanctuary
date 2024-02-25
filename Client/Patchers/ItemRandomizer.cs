@@ -68,7 +68,7 @@ namespace Archipelago.MonsterSanctuary.Client
         // until the player is able to move again, then check all of them at once.
         private static List<long> _giftQueue = new();
 
-        public static void QueueItemTransfer(int? itemIndex, long itemId, int playerId, long locationId, ItemTransferType action)
+        public static void QueueItemTransfer(int? itemIndex, long itemId, int playerId, long locationId, ItemClassification classification, ItemTransferType action)
         {
             var itemName = APState.Session.Items.GetItemName(itemId);
 
@@ -101,6 +101,7 @@ namespace Archipelago.MonsterSanctuary.Client
                 PlayerName = APState.Session.Players.GetPlayerName(playerId),
                 LocationID = locationId,
                 LocationName = APState.Session.Locations.GetLocationNameFromId(locationId),
+                Classification = classification,
                 Action = action
             };
 
@@ -171,6 +172,7 @@ namespace Archipelago.MonsterSanctuary.Client
                         SentItem(
                             nextItem.ItemName,
                             nextItem.PlayerName,
+                            nextItem.Classification,
                             callback);
                     }
                     else
@@ -178,6 +180,7 @@ namespace Archipelago.MonsterSanctuary.Client
                         ReceiveItem(
                             nextItem.ItemName,
                             nextItem.PlayerName,
+                            nextItem.Classification,
                             nextItem.Action == ItemTransferType.Aquired,
                             callback);
 
@@ -193,7 +196,7 @@ namespace Archipelago.MonsterSanctuary.Client
                 // If we're in the intro, then don't send items
                 if (!ProgressManager.Instance.GetBool("FinishedIntro"))
                     return false;
-                return GameStateManager.Instance.IsExploring();
+                return GameStateManager.Instance.IsExploring() && !PlayerController.Instance.IsFalling();
             }
         }
 
@@ -261,16 +264,16 @@ namespace Archipelago.MonsterSanctuary.Client
         }
         #endregion
 
-        public static void SentItem(string item, string player, PopupDelegate confirmCallback)
+        public static void SentItem(string item, string player, ItemClassification classification, PopupDelegate confirmCallback)
         {
-            var text = string.Format("Sent {0} to {1}", FormatItem(item), FormatPlayer(player));
+            var text = string.Format("Sent {0} to {1}", FormatItem(item, classification), FormatPlayer(player));
             PopupController.Instance.ShowMessage(
                     Utils.LOCA("Archipelago"),
                     text, 
                     confirmCallback);
         }
 
-        public static void ReceiveItem(string itemName, string player, bool self, PopupDelegate confirmCallback)
+        public static void ReceiveItem(string itemName, string player, ItemClassification classification, bool self, PopupDelegate confirmCallback)
         {
             // Handle if you send someone else and item and show a message box for that.
             if (itemName == null)
@@ -296,11 +299,11 @@ namespace Archipelago.MonsterSanctuary.Client
                 return;
             }
 
-            GiveItem(newItem, player, self, quantity, confirmCallback);
+            GiveItem(newItem, player, classification, self, quantity, confirmCallback);
         }        
 
         #region Give Items
-        static void GiveItem(BaseItem item, string player, bool self, int quantity = 1, PopupDelegate callback = null)
+        static void GiveItem(BaseItem item, string player, ItemClassification classification, bool self, int quantity = 1, PopupDelegate callback = null)
         {
             if (item != null)
             {
@@ -308,7 +311,7 @@ namespace Archipelago.MonsterSanctuary.Client
 
                 PopupController.Instance.ShowMessage(
                     Utils.LOCA("Treasure"),
-                    FormatItemReceivedMessage(item.GetName(), quantity, player, self),
+                    FormatItemReceivedMessage(item.GetName(), quantity, player, classification, self),
                     callback);
 
                 PlayerController.Instance.Inventory.AddItem(item, quantity, 0);
@@ -349,20 +352,20 @@ namespace Archipelago.MonsterSanctuary.Client
                 .SingleOrDefault(i => string.Equals(i.GetName(), name, StringComparison.OrdinalIgnoreCase));
         }
 
-        private static string FormatItemReceivedMessage(string item, int quantity, string player, bool self)
+        private static string FormatItemReceivedMessage(string item, int quantity, string player, ItemClassification classification, bool self)
         {
-            item = FormatItem(item);
+            item = FormatItem(item, classification);
 
             if (self)
             {
                 if (quantity > 1)
                     return string.Format("{0} found {1} of your {2}", 
-                        FormatPlayer("You"),
+                        FormatSelf("You"),
                         quantity, 
                         item);
 
                 return string.Format("{0} found your {1}", 
-                    FormatPlayer("You"),
+                    FormatSelf("You"),
                     item);
             }
             else
@@ -372,7 +375,7 @@ namespace Archipelago.MonsterSanctuary.Client
 
                 return string.Format("Received {0} from {1}", 
                     item, 
-                    FormatOtherPlayer(player));
+                    FormatPlayer(player));
             }
         }
         #endregion
@@ -407,39 +410,58 @@ namespace Archipelago.MonsterSanctuary.Client
 
         private static string FormatGoldReceivedMessage(int quantity, string player, bool self)
         {
-            string gold = FormatItem(string.Format("{0} Gold", quantity));
+            string gold = FormatItem(string.Format("{0} Gold", quantity), ItemClassification.Filler);
 
             if (self)
                 return string.Format("{0} found {1}", 
-                    FormatPlayer("You"), 
+                    FormatSelf("You"), 
                     gold);
             else
                 return string.Format("Received {0} from {1}", 
                     gold, 
-                    FormatOtherPlayer(player));
+                    FormatPlayer(player));
         }
         #endregion
 
         #region String Formatting / Coloring
-        private static string FormatItem(string text)
+        public static string GetItemColor(ItemClassification classification)
         {
-            text = RemoveProblematicCharacters(text);
-            return GameDefines.FormatString(GameDefines.ColorCodeTextHighlight, text, true);
+            if (classification == ItemClassification.Progression)
+            {
+                return Colors.ProgressionItem;
+            }
+            else if (classification == ItemClassification.Useful)
+            {
+                return Colors.UsefulItem;
+            }
+            else if (classification == ItemClassification.Trap)
+            {
+                return Colors.TrapItem;
+            }
+
+            return Colors.FillerItem;
         }
 
-        private static string FormatPlayer(string text)
+        public static string FormatItem(string text, ItemClassification classification)
         {
             text = RemoveProblematicCharacters(text);
-            return GameDefines.FormatString("00ffff", text, true);
+            
+            return GameDefines.FormatString(GetItemColor(classification), text, true);
         }
 
-        private static string FormatOtherPlayer(string text)
+        public static string FormatSelf(string text)
         {
             text = RemoveProblematicCharacters(text);
-            return GameDefines.FormatString("ff00ff", text, true);
+            return GameDefines.FormatString(Colors.Self, text, true);
         }
 
-        private static string RemoveProblematicCharacters(string text)
+        public static string FormatPlayer(string text)
+        {
+            text = RemoveProblematicCharacters(text);
+            return GameDefines.FormatString(Colors.OtherPlayer, text, true);
+        }
+
+        public static string RemoveProblematicCharacters(string text)
         {
             return text.Replace("<3", "heart")
                 .Replace("<", "")
