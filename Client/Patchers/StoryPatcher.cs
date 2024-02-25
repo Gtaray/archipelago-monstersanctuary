@@ -125,6 +125,13 @@ namespace Archipelago.MonsterSanctuary.Client
                     return;
                 }
 
+                if (name == "MozzieQuestStarted")
+                {
+                    ProgressManager.Instance.SetBool(name, true);
+                    __result = true;
+                    return;
+                }
+
                 if (SlotData.SkipPlot && GameData.Plotless.Contains(name) && __result == false)
                 {
                     ProgressManager.Instance.SetBool(name, true);

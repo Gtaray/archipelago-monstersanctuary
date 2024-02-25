@@ -122,7 +122,7 @@ namespace Archipelago.MonsterSanctuary.Client
             Patcher.Logger.LogInfo("Add Smoke Bombs: " + AddSmokeBombs);
             Patcher.Logger.LogInfo("Starting Gold: " + StartingGold * 100);
             Patcher.Logger.LogInfo("Monster Shift Rule: " + Enum.GetName(typeof(ShiftFlag), MonsterShiftRule));
-            Patcher.Logger.LogInfo("Locked Doors: " + Enum.GetName(typeof(LockedDoorsFlag), MonsterShiftRule));
+            Patcher.Logger.LogInfo("Locked Doors: " + Enum.GetName(typeof(LockedDoorsFlag), LockedDoors));
             Patcher.Logger.LogInfo("Skip Intro: " + SkipIntro);
             Patcher.Logger.LogInfo("Skip Plot: " + SkipPlot);
             Patcher.Logger.LogInfo("Randomize Shop Prices: " + (GameData.ShopPrices.Count() > 0));

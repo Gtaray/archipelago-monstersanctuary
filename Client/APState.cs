@@ -19,6 +19,7 @@ using static MonoMod.Cil.RuntimeILReferenceBag.FastDelegateInvokers;
 using Archipelago.MultiClient.Net.BounceFeatures.DeathLink;
 using System.Net;
 using System.Data.SqlTypes;
+using System.Net.Sockets;
 
 namespace Archipelago.MonsterSanctuary.Client
 {
@@ -197,7 +198,8 @@ namespace Archipelago.MonsterSanctuary.Client
                 var action = Session.ConnectionInfo.Slot == item.Player
                     ? ItemTransferType.Aquired // We found our own item
                     : ItemTransferType.Received; // Someone else found our item
-                Patcher.QueueItemTransfer(i, item.Item, item.Player, item.Location, action);
+                var classification = (ItemClassification)((int)item.Flags);
+                Patcher.QueueItemTransfer(i, item.Item, item.Player, item.Location, classification, action);
             }
         }
         
@@ -208,8 +210,9 @@ namespace Archipelago.MonsterSanctuary.Client
             var action = Session.ConnectionInfo.Slot == item.Player
                 ? ItemTransferType.Aquired // We found our own item
                 : ItemTransferType.Received; // Someone else found our item
+            var classification = (ItemClassification)((int)item.Flags);
 
-            Patcher.QueueItemTransfer(helper.Index, item.Item, item.Player, item.Location, action);
+            Patcher.QueueItemTransfer(helper.Index, item.Item, item.Player, item.Location, classification, action);
         }
 
         public static void CheckLocations(params long[] locationIds)
@@ -241,15 +244,15 @@ namespace Archipelago.MonsterSanctuary.Client
         {
             // First we go through and 
             var packet = await Session.Locations.ScoutLocationsAsync(false, locationsToCheck);
-            foreach (var location in packet.Locations)
+            foreach (var scout in packet.Locations)
             {
-                if (Session.ConnectionInfo.Slot == location.Player)
+                if (Session.ConnectionInfo.Slot == scout.Player)
                 {
                     continue;
                 }
-
+                var classification = (ItemClassification)((int)scout.Flags);
                 // This needs to work without an index (because sent items never have an index.
-                Patcher.QueueItemTransfer(null, location.Item, location.Player, location.Location, ItemTransferType.Sent);
+                Patcher.QueueItemTransfer(null, scout.Item, scout.Player, scout.Location, classification, ItemTransferType.Sent);
             }
         }
 

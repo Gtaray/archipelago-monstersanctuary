@@ -29,9 +29,6 @@ namespace Archipelago.MonsterSanctuary.Client
         public float FadeOutTime = 2f;
 
         private GUIStyle _style = new() { richText = true };
-        private string _playerColor = "#00ffffff";
-        private string _itemColor = "#ffbb00ff";
-        private string _otherPlayerColor = "#ff00ffff";
         private List<ItemHistoryEntry> _itemHistory = new();
 
         public void Awake()
@@ -80,7 +77,7 @@ namespace Archipelago.MonsterSanctuary.Client
         {
             var entry = new ItemHistoryEntry()
             {
-                Text = GetEntryText(itemTransfer.PlayerName, itemTransfer.ItemName, itemTransfer.Action)
+                Text = GetEntryText(itemTransfer.PlayerName, itemTransfer.ItemName, itemTransfer.Classification, itemTransfer.Action)
             };
 
             if (string.IsNullOrEmpty(entry.Text))
@@ -93,19 +90,20 @@ namespace Archipelago.MonsterSanctuary.Client
             }
         }
 
-        private string GetEntryText(string playerName, string itemName, ItemTransferType action)
+        private string GetEntryText(string playerName, string itemName, ItemClassification classification, ItemTransferType action)
         {
+            var itemColor = Patcher.GetItemColor(classification);
             if (action == ItemTransferType.Aquired)
             {
-                return $"<color={_playerColor}>You</color> found your <color={_itemColor}>{itemName}</color>";
+                return $"<color=#{Colors.Self}ff>You</color> found your <color=#{itemColor}ff>{itemName}</color>";
             }
             else if (action == ItemTransferType.Received)
             {
-                return $"<color={_otherPlayerColor}>{playerName}</color> sent you <color={_itemColor}>{itemName}</color>";
+                return $"<color=#{Colors.OtherPlayer}ff>{playerName}</color> sent you <color=#{itemColor}ff>{itemName}</color>";
             }
             else if (action == ItemTransferType.Sent)
             {
-                return $"<color={_playerColor}>You</color> sent <color={_itemColor}>{itemName}</color> to <color={_otherPlayerColor}>{playerName}</color>";
+                return $"<color=#{Colors.Self}ff>You</color> sent <color=#{itemColor}ff>{itemName}</color> to <color=#{Colors.OtherPlayer}ff>{playerName}</color>";
             }
 
             return "";
