@@ -32,10 +32,6 @@ namespace Archipelago.MonsterSanctuary.Client
                     DeleteLocationsChecked();
                     APState.Resync();
 
-                    // if we're not skipping the intro, call the original function
-                    if (!SlotData.SkipIntro)
-                        return true;
-
                     startingScene = "MountainPath_North1";
                 }
 
@@ -65,6 +61,63 @@ namespace Archipelago.MonsterSanctuary.Client
             }
         }
 
+        [HarmonyPatch(typeof(KeepersIntro), "Start")]
+        private class KeepersIntro_Start
+        {
+            private static bool Prefix(ref KeepersIntro __instance)
+            {
+                if (!APState.IsConnected)
+                    return true;
+
+                // Regardless whether we're auto-selecting familar or not, we set these flags so we can skip the intro
+                ProgressManager.Instance.SetBool("FinishedFirstEncounter", true, true);
+                ProgressManager.Instance.SetBool("TriggerOnce17", true, true); // Skip post tutorial fight dialog
+                ProgressManager.Instance.SetBool("TriggerOnce495", true, true); // Skip post familiar naming dialog
+                ProgressManager.Instance.SetBool("TriggerOnce68", true, true); // Skip dialog after hatching first egg
+                ProgressManager.Instance.SetBool("TriggerOnce143", true, true); // Skip post second fight dialog
+                ProgressManager.Instance.SetBool("TriggerOnce1009", true, true); // Skip post second fight dialog
+
+                SlotData.StartingFamiliar = 1; // Debugging
+
+                Patcher.Logger.LogWarning(SlotData.StartingFamiliar);
+                if (SlotData.StartingFamiliar < 0)
+                    return true;
+
+                if (ProgressManager.Instance.GetBool("FamiliarChoiceCompleted"))
+                    return true;
+
+
+                GameObject familiarPrefab = __instance.FamiliarButtons[SlotData.StartingFamiliar].FamiliarPrefab;
+                Patcher.Logger.LogInfo("Starter: " + familiarPrefab.name);
+
+                PlayerController.Instance.Monsters.Familiar = PlayerController.Instance.Monsters.AddMonsterByPrefab(familiarPrefab, EShift.Normal);
+                PlayerController.Instance.Follower.Monster = PlayerController.Instance.Monsters.Familiar;
+
+                ProgressManager.Instance.SetBool("StartFamiliarChoice");
+                ProgressManager.Instance.SetBool("FamiliarChoiceCompleted");
+                ProgressManager.Instance.SetBool("TriggerOnce0");
+                ProgressManager.Instance.SetBool("TriggerOnce68");
+                ProgressManager.Instance.SetBool("TriggerOnce491");
+
+                return false;
+            }
+
+            private static void Postfix(KeepersIntro __instance)
+            {
+                if (!APState.IsConnected)
+                    return;
+
+                // If familiar is auto-selected, remove the buttons to select them
+                if (SlotData.StartingFamiliar >= 0)
+                {
+                    foreach (Component familiarButton in __instance.FamiliarButtons)
+                        familiarButton.gameObject.SetActive(false);
+
+                    Traverse.Create(__instance).Method("Skip").GetValue();
+                }
+            }
+        }
+
         [HarmonyPatch(typeof(KeepersIntro), "ShowKeepers")]
         private class KeepersIntro_ShowKeepers
         {
@@ -73,42 +126,78 @@ namespace Archipelago.MonsterSanctuary.Client
             {
                 if (!APState.IsConnected)
                     return true;
-                if (!SlotData.SkipIntro)
-                    return true;
 
-                ProgressManager.Instance.SetBool("FinishedFirstEncounter", true, true);
-                ProgressManager.Instance.SetBool("TriggerOnce17", true, true); // Skip post tutorial fight dialog
-                ProgressManager.Instance.SetBool("TriggerOnce495", true, true); // Skip post familiar naming dialog
-                ProgressManager.Instance.SetBool("TriggerOnce68", true, true); // Skip dialog after hatching first egg
-                ProgressManager.Instance.SetBool("TriggerOnce143", true, true); // Skip post second fight dialog
-                ProgressManager.Instance.SetBool("TriggerOnce1009", true, true); // Skip post second fight dialog
-                var method = __instance.GetType().GetMethod("Skip", BindingFlags.NonPublic | BindingFlags.Instance);
-                method.Invoke(__instance, null);
+                Traverse.Create(__instance).Method("Skip").GetValue();
 
                 return false;
             }
         }
 
-        //[HarmonyPatch(typeof(KeepersIntro), "Start")]
-        //private class KeepersIntro_Update
-        //{
-        //    private static void Prefix(ref KeepersIntro __instance)
-        //    {
-        //        SlotData.SpectralFamiliar = 0; // Debugging
+        [HarmonyPatch(typeof(KeepersIntro), "HideOtherKeepers", new Type[] { typeof(bool) })]
+        private class KeepersIntro_HideOtherKeepers
+        {
+            // To prevent the first encounter from double-spawning, we need to cut out the last section of this method.
+            private static bool Prefix(KeepersIntro __instance, bool triggerTweens)
+            {
+                if (!APState.IsConnected)
+                    return true;
 
-        //        Patcher.Logger.LogWarning(SlotData.SpectralFamiliar);
-        //        if (SlotData.SpectralFamiliar < 0)
-        //            return;
+                if (SlotData.StartingFamiliar < 0)
+                    return true;
 
-        //        GameObject familiarPrefab = __instance.FamiliarButtons[SlotData.SpectralFamiliar].FamiliarPrefab;
-        //        Patcher.Logger.LogInfo("Starter: " + familiarPrefab.name);
+                Traverse.Create(__instance).Field("keepersHidden").SetValue(true);
+                ProgressManager.Instance.SetBool("IntroPlayed");
+                foreach (GameObject keeper in __instance.Keepers)
+                    ColorTween.StartTween(keeper, GameDefines.Gray, GameDefines.GrayZeroA, 1f);
 
-        //        PlayerController.Instance.Monsters.AddMonsterByPrefab(familiarPrefab, EShift.Normal);
-        //        PlayerController.Instance.Follower.Monster = PlayerController.Instance.Monsters.Familiar;
-        //        ProgressManager.Instance.SetBool("FamiliarChoiceCompleted");
-        //        __instance.IntroScript.ClearImpulses();
-        //    }
-        //}
+                foreach (GameObject familiar in __instance.Familiars)
+                {
+                    ColorTween.StartTween(familiar, GameDefines.Gray, GameDefines.GrayZeroA, 1f);
+                    foreach (ParticleSystem componentsInChild in familiar.transform.GetComponentsInChildren<ParticleSystem>())
+                        componentsInChild.Stop();
+                }
+                if (PlayerController.Instance.Monsters.Familiar.GetComponent<MonsterFamiliar>().FamiliarType == EFamiliar.Wolf)
+                {
+                    __instance.FamiliarBig.GetComponent<tk2dSprite>().SetSprite("Spectral Wolf");
+                    __instance.FamiliarBig.transform.localPosition = Utils.VectorChangeY(__instance.FamiliarBig.transform.localPosition, -140f);
+                    __instance.FamiliarBig.transform.localScale = new Vector3(1f, 1f, 1f);
+                }
+                else if (PlayerController.Instance.Monsters.Familiar.GetComponent<MonsterFamiliar>().FamiliarType == EFamiliar.Lion)
+                {
+                    __instance.FamiliarBig.GetComponent<tk2dSprite>().SetSprite("Spectral Lion");
+                    __instance.FamiliarBig.transform.localPosition = Utils.VectorChangeY(__instance.FamiliarBig.transform.localPosition, -120f);
+                    __instance.FamiliarBig.transform.localScale = new Vector3(-1f, 1f, 1f);
+                }
+                else if (PlayerController.Instance.Monsters.Familiar.GetComponent<MonsterFamiliar>().FamiliarType == EFamiliar.Eagle)
+                {
+                    __instance.FamiliarBig.GetComponent<tk2dSprite>().SetSprite("Spectral Eagle");
+                    __instance.FamiliarBig.transform.localPosition = Utils.VectorChangeY(__instance.FamiliarBig.transform.localPosition, -45f);
+                    __instance.FamiliarBig.transform.localScale = new Vector3(1f, 1f, 1f);
+                }
+                else
+                {
+                    __instance.FamiliarBig.GetComponent<tk2dSprite>().SetSprite("Spectral Toad");
+                    __instance.FamiliarBig.transform.localPosition = Utils.VectorChangeY(__instance.FamiliarBig.transform.localPosition, -120f);
+                    __instance.FamiliarBig.transform.localScale = new Vector3(-1f, 1f, 1f);
+                }
+                __instance.ProtagonistBig.GetComponent<tk2dSprite>().SetSprite(PlayerController.Instance.CharacterGender == ECharacterGender.Male ? "Characters_Male" : "Characters_Female");
+
+                if (triggerTweens)
+                {
+                    PositionTween.StartTween(__instance.ProtagonistBig, __instance.ProtagonistBig.transform.localPosition, __instance.ProtagonistBig.transform.localPosition + Vector3.left * 220f, 0.5f, PositionTween.Type.Decelerated, 1f);
+                    __instance.FamiliarBig.SetActive(true);
+                    PositionTween.StartTween(__instance.FamiliarBig, __instance.FamiliarBig.transform.localPosition, __instance.FamiliarBig.transform.localPosition + Vector3.left * 220f, 0.5f, PositionTween.Type.Decelerated, 1.2f);
+                    ColorTween.StartTween(__instance.FamiliarBig, GameDefines.Gray, GameDefines.GrayZeroA, 1f, delay: 14f);
+                    ColorTween.StartTween(__instance.ProtagonistBig, GameDefines.Gray, GameDefines.GrayZeroA, 1f, delay: 14.5f);
+                    ColorTween.StartTween(__instance.BlackLayer, GameDefines.Black, GameDefines.BlackZeroA, 1f, delay: 15f);
+
+                    var namingStarted = Traverse.Create(__instance).Method("NamingStarted");
+                    Timer.StartTimer(__instance.gameObject, 14f, new Timer.TimeoutFunction(() => namingStarted.GetValue()));
+                }
+
+                return false;
+            }
+        }
 
         [HarmonyPatch(typeof(ProgressManager), "GetBool")]
         private class ProgressManager_GetBool
@@ -176,7 +265,7 @@ namespace Archipelago.MonsterSanctuary.Client
                     && __instance.ID == 18)
                 {
                     // Skipping intro should disable the touch trigger in the first room
-                    return !SlotData.SkipIntro;
+                    return false;
                 }
 
                 if (GameController.Instance.CurrentSceneName == "MountainPath_North5"

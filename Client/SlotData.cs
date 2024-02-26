@@ -47,15 +47,14 @@ namespace Archipelago.MonsterSanctuary.Client
     public class SlotData
     {
         // UNUSED
-        public static int SpectralFamiliar { get; set; } = -1;
         public static bool SkipKeeperBattles { get; set; } = false;
         // END UNUSED
 
+        public static int StartingFamiliar { get; set; } = -1;
         public static CompletionEvent Goal { get; set; } = CompletionEvent.MadLord;
         public static bool IncludeChaosRelics { get; set; } = false;
         public static int ExpMultiplier { get; set; } = 1;
         public static bool AlwaysGetEgg { get; set; } = false;
-        public static bool SkipIntro { get; set; } = false;
         public static bool SkipPlot { get; set; } = false;
         public static ShiftFlag MonsterShiftRule { get; set; } = ShiftFlag.Normal;
         public static LockedDoorsFlag LockedDoors { get; set; } = 0;
@@ -69,11 +68,11 @@ namespace Archipelago.MonsterSanctuary.Client
         public static void LoadSlotData(Dictionary<string, object> slotData)
         {
             var options = GetDictionaryData<object>(slotData, "options");
+            StartingFamiliar = GetIntData(options, "starting_familiar", -1);
             Goal = GetEnumData(options, "goal", CompletionEvent.MadLord);
             IncludeChaosRelics = GetBoolData(options, "include_chaos_relics", false);
             ExpMultiplier = GetIntData(options, "exp_multiplier", 1);
             AlwaysGetEgg = GetBoolData(options, "monsters_always_drop_egg", false);
-            SkipIntro = GetBoolData(options, "skip_intro", false);
             SkipPlot = GetBoolData(options, "skip_plot", false);
             MonsterShiftRule = GetEnumData(options, "monster_shift_rule", ShiftFlag.Normal);
             LockedDoors = GetEnumData(options, "remove_locked_doors", LockedDoorsFlag.All);
@@ -126,7 +125,6 @@ namespace Archipelago.MonsterSanctuary.Client
             Patcher.Logger.LogInfo("Starting Gold: " + StartingGold * 100);
             Patcher.Logger.LogInfo("Monster Shift Rule: " + Enum.GetName(typeof(ShiftFlag), MonsterShiftRule));
             Patcher.Logger.LogInfo("Locked Doors: " + Enum.GetName(typeof(LockedDoorsFlag), LockedDoors));
-            Patcher.Logger.LogInfo("Skip Intro: " + SkipIntro);
             Patcher.Logger.LogInfo("Skip Plot: " + SkipPlot);
             Patcher.Logger.LogInfo("Randomize Shop Prices: " + (GameData.ShopPrices.Count() > 0));
             Patcher.Logger.LogInfo("Shops Ignore Rank Requirement: " + ShopsIgnoreRank);
