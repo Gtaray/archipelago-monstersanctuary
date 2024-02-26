@@ -361,7 +361,8 @@ namespace Archipelago.MonsterSanctuary.Client
                 {
                     PlayerName = isLocal ? "" : foreignItem.Player, // Only need a name if we're sending an item
                     ItemName = item.GetName(),
-                    Action = isLocal ? ItemTransferType.Aquired : ItemTransferType.Sent
+                    Action = isLocal ? ItemTransferType.Aquired : ItemTransferType.Sent,
+                    Classification = rsi.Classification
                 });
                 APState.CheckLocation(rsi.LocationId);
             }
