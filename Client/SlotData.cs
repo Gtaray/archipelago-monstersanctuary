@@ -52,6 +52,7 @@ namespace Archipelago.MonsterSanctuary.Client
         // END UNUSED
 
         public static CompletionEvent Goal { get; set; } = CompletionEvent.MadLord;
+        public static bool IncludeChaosRelics { get; set; } = false;
         public static int ExpMultiplier { get; set; } = 1;
         public static bool AlwaysGetEgg { get; set; } = false;
         public static bool SkipIntro { get; set; } = false;
@@ -69,6 +70,7 @@ namespace Archipelago.MonsterSanctuary.Client
         {
             var options = GetDictionaryData<object>(slotData, "options");
             Goal = GetEnumData(options, "goal", CompletionEvent.MadLord);
+            IncludeChaosRelics = GetBoolData(options, "include_chaos_relics", false);
             ExpMultiplier = GetIntData(options, "exp_multiplier", 1);
             AlwaysGetEgg = GetBoolData(options, "monsters_always_drop_egg", false);
             SkipIntro = GetBoolData(options, "skip_intro", false);
@@ -118,6 +120,7 @@ namespace Archipelago.MonsterSanctuary.Client
 
             Patcher.Logger.LogInfo("Death Link: " + DeathLink);
             Patcher.Logger.LogInfo("Exp Multiplier: " + ExpMultiplier);
+            Patcher.Logger.LogInfo("Include Chaos Relics: " + IncludeChaosRelics);
             Patcher.Logger.LogInfo("Force Egg Drop: " + AlwaysGetEgg);
             Patcher.Logger.LogInfo("Add Smoke Bombs: " + AddSmokeBombs);
             Patcher.Logger.LogInfo("Starting Gold: " + StartingGold * 100);

@@ -1,6 +1,7 @@
 ﻿using HarmonyLib;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.Remoting.Messaging;
@@ -16,6 +17,7 @@ namespace Archipelago.MonsterSanctuary.Client
 {
     public partial class Patcher
     {
+        #region Return to Start menu options
         /// <summary>
         /// Replaces the Talk menu option with "Return to Start" 
         /// </summary>
@@ -110,6 +112,95 @@ namespace Archipelago.MonsterSanctuary.Client
                 return true;
             }
         }
+        #endregion
+
+        #region Main Menu
+        [HarmonyPatch(typeof(MainMenu), "OnItemSelected")]
+        public static class MainMenu_OnItemSelected
+        {
+            public static bool Prefix(MainMenu __instance, MenuListItem item)
+            {
+                if (APState.IsConnected)
+                    return true;
+
+                // We only want to handle the New Game button, everything else goes through the normal flow
+                if (item != __instance.ButtonNewGame)
+                {
+                    return true;
+                }
+
+                PromptConnectToArchipelago(
+                    __instance.gameObject,
+                    __instance.MenuList,
+                    () => OpenNewGameMenu(__instance),
+                    () => ConfirmWithoutArchipelago(
+                        __instance.gameObject,
+                        __instance.MenuList,
+                        "Create a new save file while not connected to Archipelago?",
+                        () => OpenNewGameMenu(__instance)));
+
+                __instance.MenuList.SetLocked(true);
+
+                return false;
+            }
+
+            private static void OpenNewGameMenu(MainMenu __instance)
+            {
+                if (__instance.SaveGameMenu.NewGamePlusAvailable || OptionsManager.Instance.OptionsData.AlternateGameModes)
+                {
+                    Traverse.Create(__instance).Method("OpenNewGamePopup").GetValue();
+                }
+                else
+                {
+                    PlayerController.Instance.TimerEnabled = false;
+                    GameModeManager.Instance.BraveryMode = false;
+                    GameModeManager.Instance.RandomizerMode = false;
+                    GameModeManager.Instance.PermadeathMode = false;
+                    GameModeManager.Instance.RelicMode = false;
+                    __instance.SaveGameMenu.Open(SaveGameMenu.EOpenType.NewGame);
+                    __instance.MenuList.SetLocked(true);
+                }
+            }
+        }
+
+        [HarmonyPatch(typeof(NewGameMenu), "UpdateButtonText")]
+        public static class NewGameMenu_UpdateButtonText
+        {
+            private static void Prefix(NewGameMenu __instance)
+            {
+                if (!APState.IsConnected)
+                    return;
+
+                var traverse = Traverse.Create(__instance);
+                Patcher.Logger.LogInfo("UpdateButtonText");
+                traverse.Field("relicMode").SetValue(SlotData.IncludeChaosRelics);
+                Patcher.Logger.LogInfo("Relic Mode: " + traverse.Field("relicMode").GetValue<bool>());
+            }
+        }
+
+        [HarmonyPatch(typeof(NewGameMenu), "Open")]
+        public static class NewGameMenu_Open
+        {
+            private static void Postfix(NewGameMenu __instance)
+            {
+                if (!APState.IsConnected)
+                    return;
+
+                __instance.BraveryItem.SetDisabled(true);
+                __instance.RandomizerItem.SetDisabled(true);
+                __instance.RelicItem.SetDisabled(true);
+                __instance.NewGamePlusItem.SetDisabled(true);
+
+                // Force timer to be on by default, but don't disable it.
+                Traverse.Create(__instance).Field("timer").SetValue(true);
+                __instance.TimerItem.Text.text = GetOnOffText(true);
+            }
+
+            private static string GetOnOffText(bool on)
+            {
+                return !on ? Utils.LOCA("Off") : GameDefines.FormatTextAsGreen(Utils.LOCA("On"), false);
+            }
+        }
 
         [HarmonyPatch(typeof(SaveGameMenu), "OnItemSelected")]
         public static class SaveGameMenu_OnItemSelected
@@ -136,31 +227,7 @@ namespace Archipelago.MonsterSanctuary.Client
                 }
                 else if (openType == EOpenType.NewGame)
                 {
-                    if (component.SaveData != null)
-                    {
-                        // Holy shit this is an absolute travesty of delegates, but it works
-                        PopupController.Instance.ShowRequest(Utils.LOCA("Delete?"), Utils.LOCA("Delete existing progress?"),
-                            () => PromptConnectToArchipelago(__instance,
-                                () => menu.Method("StartNewGame").GetValue(),
-                                () => ConfirmWithoutArchipelago(
-                                    __instance,
-                                    "Create a new save file while not connected to Archipelago?",
-                                    () => menu.Method("StartNewGame").GetValue()), 
-                                true),
-                            () => menu.Method("OnNewGameCancelled").GetValue());
-                        __instance.MenuList.SetLocked(locked: true);
-                    }
-                    else
-                    {
-                        PromptConnectToArchipelago(__instance,
-                            () => menu.Method("StartNewGame").GetValue(),
-                            () => ConfirmWithoutArchipelago(
-                                __instance,
-                                "Create a new save file while not connected to Archipelago?",
-                                () => menu.Method("StartNewGame").GetValue()),
-                            true);
-                        __instance.MenuList.SetLocked(locked: true);
-                    }
+                    return true;
                 }
                 else if (openType == EOpenType.NewGamePlus)
                 {
@@ -170,79 +237,80 @@ namespace Archipelago.MonsterSanctuary.Client
                 {
                     // Either we load the game after connect to AP
                     // Or we prompt the user to load 
-                    PromptConnectToArchipelago(__instance,
+                    PromptConnectToArchipelago(
+                        __instance.gameObject,
+                        __instance.MenuList,
                         () => LoadGame(__instance),
                         () => ConfirmWithoutArchipelago(
-                            __instance,
+                            __instance.gameObject,
+                            __instance.MenuList,
                             "Load this save file while not connected to Archipelago?",
-                            () => LoadGame(__instance)),
-                        false);
+                            () => LoadGame(__instance)));
                     __instance.MenuList.SetLocked(locked: true);
                 }
 
                 return false;
             }
+        }
 
-            private static void PromptConnectToArchipelago(SaveGameMenu __instance, PopupController.PopupDelegate postConnectionAction, PopupController.PopupDelegate disconnectedAction, bool withTimer = false)
+        private static void PromptConnectToArchipelago(GameObject __instance, MenuList menuList, PopupController.PopupDelegate postConnectionAction, PopupController.PopupDelegate disconnectedAction, bool withTimer = false)
+        {
+            if (withTimer)
             {
-                if (withTimer)
-                {
-                    Timer.StartTimer(__instance.MainMenu.gameObject, 0.25f, () => PopupController.Instance.ShowRequest(
-                        "Connect to Archipleago", 
-                        "You are not connected to archipelago. Would you like to connect with your current info?",
-                        () => ConnectToArchipelago(__instance, postConnectionAction),
-                        () => disconnectedAction.Invoke()));
-                    return;
-                }
-
-                Timer.StartTimer(__instance.MainMenu.gameObject, 0.25f, () => PopupController.Instance.ShowRequest(
+                Timer.StartTimer(__instance, 0.25f, () => PopupController.Instance.ShowRequest(
                     "Connect to Archipleago",
                     "You are not connected to archipelago. Would you like to connect with your current info?",
-                    () => ConnectToArchipelago(__instance, postConnectionAction),
+                    () => ConnectToArchipelago(__instance, menuList, postConnectionAction),
                     () => disconnectedAction.Invoke()));
-
+                return;
             }
 
-            private static void ConfirmWithoutArchipelago(SaveGameMenu __instance, string message, PopupController.PopupDelegate confirm)
+            Timer.StartTimer(__instance, 0.25f, () => PopupController.Instance.ShowRequest(
+                "Connect to Archipleago",
+                "You are not connected to archipelago. Would you like to connect with your current info?",
+                () => ConnectToArchipelago(__instance, menuList, postConnectionAction),
+                () => disconnectedAction.Invoke()));
+
+        }
+
+        private static void ConfirmWithoutArchipelago(GameObject __instance, MenuList menuList, string message, PopupController.PopupDelegate confirm)
+        {
+            Timer.StartTimer(__instance, 0.3f, () => PopupController.Instance.ShowRequest("Disconnected", message,
+                () => confirm.Invoke(),
+                () => menuList.SetLocked(false),
+                true));
+        }
+
+        private static void ConnectToArchipelago(GameObject __instance, MenuList menuList, PopupController.PopupDelegate postConnectionAction)
+        {
+            if (APState.Connect())
             {
-                Timer.StartTimer(__instance.MainMenu.gameObject, 0.3f, () => PopupController.Instance.ShowRequest("Disconnected", message,
-                    () => confirm.Invoke(),
-                    () => __instance.MenuList.SetLocked(false),
-                    true));
+                postConnectionAction.Invoke();
+                return;
             }
 
-            private static void ConnectToArchipelago(SaveGameMenu __instance, PopupController.PopupDelegate postConnectionAction)
-            {
-                if (APState.Connect())
-                {
-                    postConnectionAction.Invoke();
-                    return;
-                }
+            PopupController.Instance.Close();
+            Timer.StartTimer(__instance, 0.3f, () => ShowConnectionFailedMessage(menuList));
+            // If we failed, just throw up an error and then return back to the load game screen
 
-                PopupController.Instance.Close();
-                Timer.StartTimer(__instance.MainMenu.gameObject, 0.3f, () => ShowConnectionFailedMessage(__instance));
-                // If we failed, just throw up an error and then return back to the load game screen
-                
-                __instance.MenuList.SetLocked(false);
-            }
+            menuList.SetLocked(false);
+        }
 
-            private static void ShowConnectionFailedMessage(SaveGameMenu __instance)
-            {
-                __instance.MenuList.SetLocked(true);
-                PopupController.Instance.ShowMessage("Connection Failed", "Failed to connect to Archipelago. Check your connection settings and try again.",
-                    () => __instance.MenuList.SetLocked(false));
-            }
+        private static void ShowConnectionFailedMessage(MenuList menuList)
+        {
+            menuList.SetLocked(true);
+            PopupController.Instance.ShowMessage("Connection Failed", "Failed to connect to Archipelago. Check your connection settings and try again.",
+                () => menuList.SetLocked(false));
+        }
 
-            private static void LoadGame(SaveGameMenu __instance)
-            {
-                // If we connected, then simply load the game.
-                var menu = Traverse.Create(__instance);
-                Timer.StartTimer(__instance.MainMenu.gameObject, 1f, () => menu.Method("LoadGame").GetValue());
-                OverlayController.Instance.StartFadeOut(Color.black, 1f);
-                menu.Method("Close").GetValue();
-                __instance.MainMenu.MenuList.Close();
-            }
-
+        private static void LoadGame(SaveGameMenu __instance)
+        {
+            // If we connected, then simply load the game.
+            var menu = Traverse.Create(__instance);
+            Timer.StartTimer(__instance.MainMenu.gameObject, 1f, () => menu.Method("LoadGame").GetValue());
+            OverlayController.Instance.StartFadeOut(Color.black, 1f);
+            menu.Method("Close").GetValue();
+            __instance.MainMenu.MenuList.Close();
         }
 
         [HarmonyPatch(typeof(SaveGameMenu), "ConfirmHeroVisuals")]
@@ -288,6 +356,7 @@ namespace Archipelago.MonsterSanctuary.Client
                 }
             }
         }
+        #endregion
 
         [HarmonyPatch(typeof(IngameBaseMenu), "GoBackToMainMenu")]
         public static class IngameBaseMenu_GoBackToMainMenu

@@ -268,12 +268,22 @@ namespace Archipelago.MonsterSanctuary.Client
 
         public static bool ReadBoolFromDataStorage(string key)
         {
+            if (!APState.IsConnected)
+            {
+                return true;
+            }
+
             var value = Session.DataStorage[Scope.Slot, key].To<bool?>();
             return value.HasValue ? value.Value : false;
         }
 
         public static void SetToDataStorage(string key, DataStorageElement value)
         {
+            if (!APState.IsConnected)
+            {
+                return;
+            }
+
             Session.DataStorage[Scope.Slot, key] = value;
         }
 

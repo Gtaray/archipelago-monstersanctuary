@@ -40,7 +40,7 @@ namespace Archipelago.MonsterSanctuary.Client.Behaviors
 
         public override string GetTooltip(int variation)
         {
-            return $"{Patcher.FormatOtherPlayer(Player)}'s {Patcher.FormatItem(Name)}";
+            return $"{Patcher.FormatPlayer(Player)}'s {Patcher.FormatItem(Name, Classification)}";
         }
     }
 }
