@@ -77,6 +77,9 @@ namespace Archipelago.MonsterSanctuary.Client
                 ProgressManager.Instance.SetBool("TriggerOnce143", true, true); // Skip post second fight dialog
                 ProgressManager.Instance.SetBool("TriggerOnce1009", true, true); // Skip post second fight dialog
 
+                ProgressManager.Instance.SetBool("TriggerOnce42700080", true, true); // Vertraag talking in Eternity's End
+                ProgressManager.Instance.SetBool("EndOfTimeDoorActivated", true, true); // open the door to eternity's end
+
                 SlotData.StartingFamiliar = 1; // Debugging
 
                 Patcher.Logger.LogWarning(SlotData.StartingFamiliar);
