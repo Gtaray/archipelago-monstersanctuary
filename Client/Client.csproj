@@ -17,6 +17,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="data\explore_action_items.json" />
     <None Remove="data\map_pins.json" />
     <None Remove="data\minimal_locked_doors.json" />
     <None Remove="data\monster_names.json" />
@@ -24,6 +25,10 @@
     <None Remove="data\original_champions.json" />
     <None Remove="data\plotless_flags.json" />
     <None Remove="data\script_nodes.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="data\explore_action_items.json" />
   </ItemGroup>
 
   <ItemGroup>

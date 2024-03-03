@@ -1,4 +1,5 @@
-﻿using HarmonyLib;
+﻿using Archipelago.MonsterSanctuary.Client.Behaviors;
+using HarmonyLib;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Concurrent;
@@ -54,6 +55,14 @@ namespace Archipelago.MonsterSanctuary.Client
         public long LocationId { get; set; }
         public ItemClassification Classification { get; set; }
         public int? Price { get; set; }
+    }
+
+    public class ExploreActionUnlockItem
+    {
+        public string Name { get; set; }
+        public string Tooltip { get; set; }
+        public List<string> Monsters { get; set; }
+        public BaseItem Item { get; set; }
     }
 
     public class GameData
@@ -178,6 +187,34 @@ namespace Archipelago.MonsterSanctuary.Client
         }
         #endregion
 
+        #region New Items
+        public static Dictionary<ExploreAbilityLockType, List<ExploreActionUnlockItem>> ExploreActionUnlockItems = new();
+
+        public static ExploreActionUnlockItem GetExploreItem(string itemName)
+        {
+            if (!APState.IsConnected)
+                return null;
+
+            if (SlotData.ExploreAbilityLock == ExploreAbilityLockType.Off)
+                return null;
+
+            var list = ExploreActionUnlockItems[SlotData.ExploreAbilityLock];
+            return list.FirstOrDefault(i => i.Name == itemName);
+        }
+
+        public static bool HasExploreItem(string itemName)
+        {
+            if (!APState.IsConnected)
+                return true;
+
+            if (SlotData.ExploreAbilityLock == ExploreAbilityLockType.Off)
+                return true;
+
+            var list = ExploreActionUnlockItems[SlotData.ExploreAbilityLock];
+            return list.Any(i => i.Name == itemName);
+        }
+        #endregion
+
         #region Json Files
         // This dictionary is required to map game room names to AP location ids
         // because champion monsters have a visual element that isn't attached to an encounter id
@@ -247,6 +284,8 @@ namespace Archipelago.MonsterSanctuary.Client
                 string json = reader.ReadToEnd();
                 OriginalChampions = JsonConvert.DeserializeObject<Dictionary<string, string>>(json);
             }
+
+           
         }
         #endregion
 
@@ -256,11 +295,21 @@ namespace Archipelago.MonsterSanctuary.Client
             if (name.EndsWith(" Egg"))
                 return GetItemByName<Egg>(name);
 
+            var exploreItem = GetExploreItem(name);
+            if (exploreItem != null)
+            {
+                Patcher.Logger.LogInfo("Got explore item: " + name);
+                return exploreItem.Item;
+            }
+
             return GetItemByName<BaseItem>(name);
         }
 
-        public static BaseItem GetItemByName<T>(string name) where T : BaseItem
+        public static T GetItemByName<T>(string name) where T : BaseItem
         {
+            if (GameController.Instance == null)
+                return null;
+
             return GameController.Instance.WorldData.Referenceables
                 .Where(x => x?.gameObject.GetComponent<T>() != null)
                 .Select(x => x.gameObject.GetComponent<T>())

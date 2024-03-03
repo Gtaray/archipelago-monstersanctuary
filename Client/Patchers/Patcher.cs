@@ -148,9 +148,51 @@ namespace Archipelago.MonsterSanctuary.Client
         private class MonsterManager_AddMonsterByPrefab
         {
             [UsedImplicitly]
-            private static void Postfix(GameObject monsterPrefab)
+            private static void Postfix(GameObject monsterPrefab, bool loadingSaveGame)
             {
+                if (!APState.IsConnected)
+                    return;
+
+                // If we're loading a save game, don't check any locations
+                if (loadingSaveGame)
+                    return;
+
+                // If the goal is to complete the monster journal, and we've got 111 monsters, complete the game.
+                if (SlotData.Goal == CompletionEvent.Monsterpedia)
+                {
+                    if (PlayerController.Instance.Monsters.AllMonster.Select(m => m.ID).Distinct().Count() == 111)
+                        APState.CompleteGame();
+                }
+
+                if (SlotData.Eggsanity)
+                {
+                    var monster = monsterPrefab.GetComponent<Monster>();
+                    var location_name = $"eggsanity_{monster.Name.Replace(" ", "_").Replace("'", "").ToLower()}";
+
+                    Patcher.Logger.LogInfo("Checking Eggsanity Location " + location_name);
+                    APState.CheckLocation(GameData.ItemChecks[location_name]);
+                }
+
+                AddMonsterToDataStorage(monsterPrefab);
                 AddAbilityToDataStorage(monsterPrefab);
+            }
+        }
+
+        private static void AddMonsterToDataStorage(GameObject monsterObj)
+        {
+            if (!APState.IsConnected)
+                return;
+
+            var monster = monsterObj.GetComponent<Monster>();
+            if (monster == null)
+            {
+                Patcher.Logger.LogWarning($"No monster component found for game object '{monsterObj.name}'");
+                return;
+            }
+
+            if (APState.ReadBoolFromDataStorage(monster.Name) == false)
+            {
+                APState.SetToDataStorage(monster.Name, (DataStorageElement)true);
             }
         }
 

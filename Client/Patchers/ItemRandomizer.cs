@@ -78,6 +78,14 @@ namespace Archipelago.MonsterSanctuary.Client
                 return;
             }
 
+            // If this is a shop location and we've already checked it, we updatea the index and move on
+            // This is so we receive items we've bought.
+            if (itemIndex != null && GameData.ShopChecks.ContainsValue(locationId) && _locations_checked.Contains(locationId))
+            {
+                AddToItemCache(itemIndex.Value);
+                return;
+            }
+
             // We need to do this here so that we know for sure when a check is done the map is updated
             // If the item action is either sent or acquired, we want to update the minimap. If we received the item then its not from us at all.
             if (action != ItemTransferType.Received)
@@ -289,6 +297,7 @@ namespace Archipelago.MonsterSanctuary.Client
                 return;
             }
 
+            Patcher.Logger.LogInfo("ReceiveItem(): " + itemName);
             var quantity = GetQuantityOfItem(ref itemName);
             var newItem = GameData.GetItemByName(itemName);
 

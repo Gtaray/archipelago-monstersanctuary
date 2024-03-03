@@ -106,7 +106,6 @@ namespace Archipelago.MonsterSanctuary.Client
         {
             private static bool Prefix(TradeMenu __instance)
             {
-                Patcher.Logger.LogInfo("UpdateMenuList");
                 if (!APState.IsConnected)
                 {
                     return true;
@@ -156,7 +155,6 @@ namespace Archipelago.MonsterSanctuary.Client
                     // Ignore foreign items that have already been checked
                     if (!local && _locations_checked.Contains(rsi.LocationId))
                     {
-                        Patcher.Logger.LogInfo($"Already purchased {item.name} at location '{rsi.LocationId}'");
                         continue;
                     }
 
@@ -199,7 +197,6 @@ namespace Archipelago.MonsterSanctuary.Client
 
             private static List<GameObject> SwapInventory(List<GameObject> shopInventory, string shop)
             {
-                Patcher.Logger.LogInfo("SwapInventory()");
                 List<GameObject> newInventory = new List<GameObject>();
                 var randomizedInventory = GameData.Shops[shop];
 
@@ -207,7 +204,6 @@ namespace Archipelago.MonsterSanctuary.Client
                 foreach (var shopItem in shopInventory)
                 {
                     var baseItem = shopItem.GetComponent<BaseItem>();
-                    Patcher.Logger.LogInfo("Item: " + baseItem.GetName());
 
                     // Sanity check to make sure the item we're replacing is actually in the shop
                     if (!randomizedInventory.HasItem(baseItem.GetName()))
@@ -217,7 +213,6 @@ namespace Archipelago.MonsterSanctuary.Client
                     }
 
                     var randomizedItem = randomizedInventory.GetItem(baseItem.GetName());
-                    Patcher.Logger.LogInfo("Randomized Item: " + randomizedItem.Name);
 
                     GameObject newItem = randomizedItem.IsLocal
                         ? GameData.GetItemByName<BaseItem>(randomizedItem.Name)?.gameObject
@@ -229,13 +224,9 @@ namespace Archipelago.MonsterSanctuary.Client
                         continue;
                     }
 
-                    Patcher.Logger.LogInfo("Generated new game object");
-
                     var rsi = newItem.AddComponent<RandomizedShopItem>();
                     rsi.LocationId = randomizedItem.LocationId;
                     rsi.Classification = randomizedItem.Classification;
-
-                    Patcher.Logger.LogInfo("Generated randomized shop item component");
 
                     if (!randomizedItem.IsLocal)
                     {
@@ -243,11 +234,8 @@ namespace Archipelago.MonsterSanctuary.Client
                         var item = newItem.AddComponent<ForeignItem>();
                         item.Player = randomizedItem.Player;
                         item.Name = randomizedItem.Name;
-
-                        Patcher.Logger.LogInfo("Added ForeignItem component");
                     }
 
-                    Patcher.Logger.LogInfo("Adjusting Price: " + randomizedItem.Price);
                     newItem.GetComponent<BaseItem>().Price = randomizedItem.Price.HasValue
                         ? randomizedItem.Price.Value
                         : baseItem.Price;
@@ -351,6 +339,12 @@ namespace Archipelago.MonsterSanctuary.Client
                 var rsi = item.GetComponent<RandomizedShopItem>();
                 if (rsi == null)
                     return;
+
+                // Don't do anything if we've already checked this location
+                if (_locations_checked.Contains(rsi.LocationId))
+                {
+                    return;
+                }
 
                 var foreignItem = item.GetComponent<ForeignItem>();
                 var isLocal = foreignItem == null;

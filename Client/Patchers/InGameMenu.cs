@@ -172,9 +172,7 @@ namespace Archipelago.MonsterSanctuary.Client
                     return;
 
                 var traverse = Traverse.Create(__instance);
-                Patcher.Logger.LogInfo("UpdateButtonText");
                 traverse.Field("relicMode").SetValue(SlotData.IncludeChaosRelics);
-                Patcher.Logger.LogInfo("Relic Mode: " + traverse.Field("relicMode").GetValue<bool>());
             }
         }
 

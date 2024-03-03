@@ -259,5 +259,37 @@ namespace Archipelago.MonsterSanctuary.Client
                 }
             }
         }
+
+        [HarmonyPatch(typeof(MapMenu), "CheckAllAreas")]
+        private class MapMenu_CheckAllAreas
+        { 
+            private static bool Prefix(MapMenu __instance)
+            {
+                return ShowMonsterpediaCompletion(__instance);
+            }
+        }
+
+        [HarmonyPatch(typeof(MapMenu), "CheckCurrentArea")]
+        private class MapMenu_CheckCurrentArea
+        {
+            private static bool Prefix(MapMenu __instance)
+            {
+                return ShowMonsterpediaCompletion(__instance);
+            }
+        }
+
+        private static bool ShowMonsterpediaCompletion(MapMenu __instance)
+        {
+            if (SlotData.Goal != CompletionEvent.Monsterpedia)
+                return true;
+            if (!SlotData.Eggsanity)
+                return true;
+
+            var label = SlotData.Goal == CompletionEvent.Monsterpedia ? "Monsterpedia Completion" : "Monsters Acquired";
+
+            var numberOfMonsters = PlayerController.Instance.Monsters.AllMonster.Select(m => m.ID).Distinct().Count();
+            __instance.AreaPercentText.text = $"{label}: {numberOfMonsters} / 111";
+            return false;
+        }
     }
 }

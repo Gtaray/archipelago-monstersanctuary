@@ -29,7 +29,16 @@ namespace Archipelago.MonsterSanctuary.Client
     public enum CompletionEvent
     {
         MadLord = 0,
-        Champions = 1
+        Champions = 1,
+        Monsterpedia = 2
+    }
+
+    public enum ExploreAbilityLockType
+    {
+        Off = 0,
+        Type = 1,
+        Ability = 2,
+        Species = 3
     }
 
     public class HintData
@@ -64,6 +73,8 @@ namespace Archipelago.MonsterSanctuary.Client
         public static bool DeathLink { get; set; } = false;
         public static string TanukiMonster { get; set; }
         public static string BexMonster{ get; set; }
+        public static bool Eggsanity { get; set; }
+        public static ExploreAbilityLockType ExploreAbilityLock { get; set; }
 
         public static void LoadSlotData(Dictionary<string, object> slotData)
         {
@@ -79,6 +90,8 @@ namespace Archipelago.MonsterSanctuary.Client
             AddSmokeBombs = GetBoolData(options, "add_smoke_bombs", false);
             StartingGold = GetIntData(options, "starting_gold", 1);
             ShopsIgnoreRank = GetBoolData(options, "shops_ignore_rank", false);
+            Eggsanity = GetBoolData(options, "eggsanity", false);
+            ExploreAbilityLock = GetEnumData(options, "lock_explore_abilities", ExploreAbilityLockType.Off);
             DeathLink = GetBoolData(options, "death_link", false);
 
             var monsterData = GetDictionaryData<object>(slotData, "monsters");
@@ -118,6 +131,8 @@ namespace Archipelago.MonsterSanctuary.Client
                 GameData.AddHint(hint.ID, hint.Text, hint.IgnoreRemainingText);
 
             Patcher.Logger.LogInfo("Death Link: " + DeathLink);
+            Patcher.Logger.LogInfo("Locked Explore Abilities: " + Enum.GetName(typeof(ExploreAbilityLockType), ExploreAbilityLock));
+            Patcher.Logger.LogInfo("Eggsanity: " + Eggsanity);
             Patcher.Logger.LogInfo("Exp Multiplier: " + ExpMultiplier);
             Patcher.Logger.LogInfo("Include Chaos Relics: " + IncludeChaosRelics);
             Patcher.Logger.LogInfo("Force Egg Drop: " + AlwaysGetEgg);
@@ -133,6 +148,9 @@ namespace Archipelago.MonsterSanctuary.Client
             Patcher.Logger.LogInfo("Item Locations: " + GameData.ItemChecks.Count());
             Patcher.Logger.LogInfo("Shop Locations: " + GameData.ShopChecks.Count());
             Patcher.Logger.LogInfo("Hints: " + hints.Count());
+
+            // Lastly, we update tooltips for explore items that are not new items
+            Patcher.UpdateExploreItemTooltips();
         }
 
         private static string GetStringData(Dictionary<string, object> data, string key)
