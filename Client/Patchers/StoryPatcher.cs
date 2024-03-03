@@ -82,7 +82,6 @@ namespace Archipelago.MonsterSanctuary.Client
 
                 SlotData.StartingFamiliar = 1; // Debugging
 
-                Patcher.Logger.LogWarning(SlotData.StartingFamiliar);
                 if (SlotData.StartingFamiliar < 0)
                     return true;
 

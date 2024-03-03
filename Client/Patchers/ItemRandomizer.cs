@@ -43,6 +43,8 @@ namespace Archipelago.MonsterSanctuary.Client
                 var bytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(_itemsReceivedIndex));
                 File.WriteAllBytes(Path.Combine(rawPath, ITEM_CACHE_FILENAME), bytes);
             }
+
+            SaveExploreItemsReceived();
         }
 
         private static void LoadItemsReceived()
@@ -70,6 +72,8 @@ namespace Archipelago.MonsterSanctuary.Client
 
         public static void QueueItemTransfer(int? itemIndex, long itemId, int playerId, long locationId, ItemClassification classification, ItemTransferType action)
         {
+            Patcher.Logger.LogInfo("Queue Item Transfer");
+            Patcher.Logger.LogInfo("Item index: " + itemIndex);
             var itemName = APState.Session.Items.GetItemName(itemId);
 
             // If item index is null (meaning this is someone else's item), we can only rely on whether the location ID is checked.
@@ -82,6 +86,7 @@ namespace Archipelago.MonsterSanctuary.Client
             // This is so we receive items we've bought.
             if (itemIndex != null && GameData.ShopChecks.ContainsValue(locationId) && _locations_checked.Contains(locationId))
             {
+                Patcher.Logger.LogInfo("Shop item: " + itemName);
                 AddToItemCache(itemIndex.Value);
                 return;
             }

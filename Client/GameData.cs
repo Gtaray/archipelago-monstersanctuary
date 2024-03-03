@@ -295,12 +295,12 @@ namespace Archipelago.MonsterSanctuary.Client
             if (name.EndsWith(" Egg"))
                 return GetItemByName<Egg>(name);
 
-            var exploreItem = GetExploreItem(name);
-            if (exploreItem != null)
-            {
-                Patcher.Logger.LogInfo("Got explore item: " + name);
-                return exploreItem.Item;
-            }
+            //var exploreItem = GetExploreItem(name);
+            //if (exploreItem != null)
+            //{
+            //    Patcher.Logger.LogInfo("Got explore item: " + name);
+            //    return exploreItem.Item;
+            //}
 
             return GetItemByName<BaseItem>(name);
         }

@@ -14,6 +14,83 @@ namespace Archipelago.MonsterSanctuary.Client
 {
     public partial class Patcher
     {
+        #region Persistence
+        private const string EXPLORE_ITEMS_FILENAME = "archipelago_explore_items.json";
+
+        public static void DeleteExploreItemCache()
+        {
+            if (File.Exists(EXPLORE_ITEMS_FILENAME))
+                File.Delete(EXPLORE_ITEMS_FILENAME);
+        }
+
+        private static void SaveExploreItemsReceived()
+        {
+            string rawPath = Environment.CurrentDirectory;
+            if (rawPath != null)
+            {
+                var items = PlayerController.Instance.Inventory.Uniques
+                    .Where(i => i.Item is ExploreAbilityItem)
+                    .Select(i => i.GetName());
+
+                var bytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(items));
+                File.WriteAllBytes(Path.Combine(rawPath, EXPLORE_ITEMS_FILENAME), bytes);
+            }
+        }
+
+        private static void LoadExploreItemsReceived()
+        {
+            if (File.Exists(EXPLORE_ITEMS_FILENAME))
+            {
+                Patcher.Logger.LogInfo("LoadExploreItemsReceived()");
+                var reader = File.OpenText(EXPLORE_ITEMS_FILENAME);
+                var content = reader.ReadToEnd();
+                reader.Close();
+                List<string> items = JsonConvert.DeserializeObject<List<string>>(content);
+
+                foreach (var itemName in items)
+                {
+                    Patcher.Logger.LogInfo("\tLoaded item: " + itemName);
+                    var item = GameData.GetItemByName<ExploreAbilityItem>(itemName);
+
+                    if (item == null)
+                    {
+                        Patcher.Logger.LogWarning("\tItem not found in World Data");
+                        continue;
+                    }
+
+                    // Don't add the same item twice
+                    if (PlayerController.Instance.Inventory.Uniques.Any(i => i.GetName() == item.GetName()))
+                        continue;
+
+                    PlayerController.Instance.Inventory.AddItem(item);
+                }
+            }
+        }
+
+        [HarmonyPatch(typeof(InventoryManager), "SaveGame")]
+        private static class InventoryManager_SaveGame
+        {
+            private static void Postfix(SaveGameData saveGameData)
+            {
+                SaveExploreItemsReceived();
+
+                // Go through the save game inventory and remove any new items.
+                // We'll add them back to the player when they connect and resync
+                saveGameData.Inventory.RemoveAll(i => i.Item is ExploreAbilityItem);
+            }
+        }
+
+        [HarmonyPatch(typeof(InventoryManager), "LoadGame")]
+        private static class InventoryManager_LoadGame
+        {
+            private static void Postfix()
+            {
+                LoadExploreItemsReceived();
+            }
+        }
+        #endregion
+
+        #region Data Initialization
         public static void UpdateExploreItemTooltips()
         {
             if (SlotData.ExploreAbilityLock == ExploreAbilityLockType.Off)
@@ -67,6 +144,7 @@ namespace Archipelago.MonsterSanctuary.Client
                             var itemComp = go.AddComponent<ExploreAbilityItem>();
                             itemComp.Name = item.Name;
                             itemComp.Tooltip = item.Tooltip;
+                            itemComp.Monsters = item.Monsters;
 
                             GameController.Instance.WorldData.Referenceables.Add(itemComp);
 
@@ -86,20 +164,38 @@ namespace Archipelago.MonsterSanctuary.Client
                     __result = __instance.Uniques;
             }
         }
+        #endregion
+
+        private static IEnumerable<string> GetAvailableMonsterAbilities()
+        {
+            var monsters = PlayerController.Instance.Inventory.Uniques
+                .Where(i => i.Item is ExploreAbilityItem)
+                .Select(i => i.Item as ExploreAbilityItem)
+                .SelectMany(i => i.Monsters)
+                .ToList();
+
+            if (PlayerController.Instance.Inventory.HasUniqueItem(EUniqueItemId.Ahrimaaya))
+            {
+                var ahrimaaya = GameData.ExploreActionUnlockItems[SlotData.ExploreAbilityLock].First(i => i.Name == "Ahrimaaya");
+                monsters.AddRange(ahrimaaya.Monsters);
+            }
+
+            return monsters;
+        }
 
         [HarmonyPatch(typeof(PlayerFollower), "CanUseAction")]
         private static class PlayerFollower_CanUseAction
         {
             private static void Postfix(PlayerFollower __instance, ref bool __result)
             {
-                //if (!APState.IsConnected)
-                //    return;
+                if (!APState.IsConnected)
+                    return;
 
-                //if (SlotData.ExploreAbilityLock == ExploreAbilityLockType.Off)
-                //    return;
+                if (SlotData.ExploreAbilityLock == ExploreAbilityLockType.Off)
+                    return;
 
-                Patcher.Logger.LogInfo($"{__instance.Monster.Name} - CanBeUsed()");
-                __result = false;
+                __result = GetAvailableMonsterAbilities().Contains(__instance.Monster.Name);
+                Patcher.Logger.LogInfo($"{__instance.Monster.Name} - CanBeUsed(): " + __result);
             }
         }
 
@@ -108,11 +204,11 @@ namespace Archipelago.MonsterSanctuary.Client
         {
             private static bool Prefix(InvisiblePlatform __instance)
             {
-                //if (!APState.IsConnected)
-                //    return true;
+                if (!APState.IsConnected)
+                    return true;
 
-                //if (SlotData.ExploreAbilityLock == ExploreAbilityLockType.Off)
-                //    return true;
+                if (SlotData.ExploreAbilityLock == ExploreAbilityLockType.Off)
+                    return true;
 
                 var ability = PlayerController.Instance.Follower.Monster.ExploreAction.GetComponent<ExploreAbility>();
                 if (ability is not SecretVisionAbility)
@@ -120,8 +216,8 @@ namespace Archipelago.MonsterSanctuary.Client
 
                 // Rather than trying to control the state of the invisible platform, we're simply going to suppress
                 // the platforms updates. This effectively means it'll never turn on, and avoids having to make a reflection
-                // call in an update loop.
-                return false;
+                // call in an update loop
+                return GetAvailableMonsterAbilities().Contains(PlayerController.Instance.Follower.Monster.GetName());
             }
         }
 
@@ -130,17 +226,17 @@ namespace Archipelago.MonsterSanctuary.Client
         {
             private static bool Prefix(DarkRoomLightManager __instance, Vector3 position)
             {
-                //if (!APState.IsConnected)
-                //    return true;
+                if (!APState.IsConnected)
+                    return true;
 
-                //if (SlotData.ExploreAbilityLock == ExploreAbilityLockType.Off)
-                //    return true;
+                if (SlotData.ExploreAbilityLock == ExploreAbilityLockType.Off)
+                    return true;
 
                 //  Only disable the follower's light source, nothing else.
                 if (position != PlayerController.Instance.Follower.transform.position)
                     return true;
 
-                return false;
+                return GetAvailableMonsterAbilities().Contains(PlayerController.Instance.Follower.Monster.GetName());
             }
         }
     }

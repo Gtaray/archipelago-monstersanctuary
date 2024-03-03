@@ -14,6 +14,8 @@ namespace Archipelago.MonsterSanctuary.Client.Behaviors
         }
 
         public string Tooltip { get; set; }
+        public List<string> Monsters { get; set; }
+
         public override string GetName()
         {
             return base.GetName();
