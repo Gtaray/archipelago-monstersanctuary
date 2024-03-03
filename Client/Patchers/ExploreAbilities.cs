@@ -41,7 +41,6 @@ namespace Archipelago.MonsterSanctuary.Client
         {
             if (File.Exists(EXPLORE_ITEMS_FILENAME))
             {
-                Patcher.Logger.LogInfo("LoadExploreItemsReceived()");
                 var reader = File.OpenText(EXPLORE_ITEMS_FILENAME);
                 var content = reader.ReadToEnd();
                 reader.Close();
@@ -49,7 +48,6 @@ namespace Archipelago.MonsterSanctuary.Client
 
                 foreach (var itemName in items)
                 {
-                    Patcher.Logger.LogInfo("\tLoaded item: " + itemName);
                     var item = GameData.GetItemByName<ExploreAbilityItem>(itemName);
 
                     if (item == null)
@@ -166,6 +164,7 @@ namespace Archipelago.MonsterSanctuary.Client
         }
         #endregion
 
+        #region Locking Abilities
         private static IEnumerable<string> GetAvailableMonsterAbilities()
         {
             var monsters = PlayerController.Instance.Inventory.Uniques
@@ -183,6 +182,11 @@ namespace Archipelago.MonsterSanctuary.Client
             return monsters;
         }
 
+        private static bool IsMonsterAbilityAvailable(string monsterName)
+        {
+            return GetAvailableMonsterAbilities().Contains(monsterName);
+        }
+
         [HarmonyPatch(typeof(PlayerFollower), "CanUseAction")]
         private static class PlayerFollower_CanUseAction
         {
@@ -194,8 +198,7 @@ namespace Archipelago.MonsterSanctuary.Client
                 if (SlotData.ExploreAbilityLock == ExploreAbilityLockType.Off)
                     return;
 
-                __result = GetAvailableMonsterAbilities().Contains(__instance.Monster.Name);
-                Patcher.Logger.LogInfo($"{__instance.Monster.Name} - CanBeUsed(): " + __result);
+                __result = IsMonsterAbilityAvailable(__instance.Monster.Name);
             }
         }
 
@@ -217,7 +220,7 @@ namespace Archipelago.MonsterSanctuary.Client
                 // Rather than trying to control the state of the invisible platform, we're simply going to suppress
                 // the platforms updates. This effectively means it'll never turn on, and avoids having to make a reflection
                 // call in an update loop
-                return GetAvailableMonsterAbilities().Contains(PlayerController.Instance.Follower.Monster.GetName());
+                return IsMonsterAbilityAvailable(PlayerController.Instance.Follower.Monster.GetName());
             }
         }
 
@@ -236,8 +239,76 @@ namespace Archipelago.MonsterSanctuary.Client
                 if (position != PlayerController.Instance.Follower.transform.position)
                     return true;
 
-                return GetAvailableMonsterAbilities().Contains(PlayerController.Instance.Follower.Monster.GetName());
+                return IsMonsterAbilityAvailable(PlayerController.Instance.Follower.Monster.GetName());
             }
         }
+        #endregion
+
+        #region Monster Selector Menu
+        [HarmonyPatch(typeof(MonsterSelector), "UpdateDisabledStatus")]
+        private class MonsterSelector_UpdateDisabledStatus
+        {
+            private static void Postfix(MonsterSelector __instance, MonsterSelectorView monsterView)
+            {
+                if (!APState.IsConnected)
+                    return;
+
+                if (SlotData.ExploreAbilityLock == ExploreAbilityLockType.Off)
+                    return;
+
+                if (__instance.CurrentSelectType != MonsterSelector.MonsterSelectType.SelectFollower)
+                    return;
+
+                bool avail = IsMonsterAbilityAvailable(monsterView.Monster.GetName());
+                monsterView.SetDisabled(!avail);
+            }
+        }
+
+        [HarmonyPatch(typeof(MonsterSelector), "OnItemSelected")]
+        private class MonsterSelector_ShowMonsters
+        {
+            private static bool Prefix(MonsterSelector __instance, MenuListItem item)
+            {
+                if (!APState.IsConnected)
+                    return true;
+
+                if (SlotData.ExploreAbilityLock == ExploreAbilityLockType.Off)
+                    return true;
+
+                if (__instance.CurrentSelectType != MonsterSelector.MonsterSelectType.SelectFollower)
+                    return true;
+
+                var msv = item.GetComponent<MonsterSelectorView>();
+                if (!msv.IsDisabled)
+                    return true;
+
+                var itemName = GameData.GetItemRequiredForMonsterExploreAbility(msv.Monster.GetName());
+
+                SFXController.Instance.PlaySFX(SFXController.Instance.SFXMenuCancel);
+                __instance.MenuList.SetLocked(true);
+                PopupController.Instance.ShowMessage(
+                    Utils.LOCA("Can't use ability"),
+                    Utils.LOCA("You cannot have this monster follow you until you acquire the item {" + itemName + "}"),
+                    new PopupController.PopupDelegate(() => __instance.MenuList.SetLocked(false)));
+
+                return false;
+            }
+        }
+        [HarmonyPatch(typeof(FollowerTooltip), "Open")]
+        private class FollowerTooltip_Open
+        {
+            private static void Postfix(FollowerTooltip __instance, Monster monster)
+            {
+                if (!APState.IsConnected)
+                    return;
+
+                if (SlotData.ExploreAbilityLock == ExploreAbilityLockType.Off)
+                    return;
+
+                var itemName = GameData.GetItemRequiredForMonsterExploreAbility(monster.GetName());
+                __instance.AbilityName.text += "\n" + FormatItem(itemName, ItemClassification.Progression);
+            }
+        }
+        #endregion
     }
 }

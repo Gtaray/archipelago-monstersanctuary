@@ -169,7 +169,6 @@ namespace Archipelago.MonsterSanctuary.Client
                     var monster = monsterPrefab.GetComponent<Monster>();
                     var location_name = $"eggsanity_{monster.Name.Replace(" ", "_").Replace("'", "").ToLower()}";
 
-                    Patcher.Logger.LogInfo("Checking Eggsanity Location " + location_name);
                     APState.CheckLocation(GameData.ItemChecks[location_name]);
                 }
 

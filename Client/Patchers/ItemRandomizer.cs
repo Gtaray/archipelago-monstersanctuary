@@ -72,8 +72,6 @@ namespace Archipelago.MonsterSanctuary.Client
 
         public static void QueueItemTransfer(int? itemIndex, long itemId, int playerId, long locationId, ItemClassification classification, ItemTransferType action)
         {
-            Patcher.Logger.LogInfo("Queue Item Transfer");
-            Patcher.Logger.LogInfo("Item index: " + itemIndex);
             var itemName = APState.Session.Items.GetItemName(itemId);
 
             // If item index is null (meaning this is someone else's item), we can only rely on whether the location ID is checked.
@@ -84,10 +82,16 @@ namespace Archipelago.MonsterSanctuary.Client
 
             // If this is a shop location and we've already checked it, we updatea the index and move on
             // This is so we receive items we've bought.
+            // This runs into the issue where resyncing will not give store items. 
+            // We could avoid the need for this entirely if we make it so purchased items aren't given when bought
+            // but instead use the normal randomized item rails. That might be better depending on how playtesting goes.
             if (itemIndex != null && GameData.ShopChecks.ContainsValue(locationId) && _locations_checked.Contains(locationId))
             {
-                Patcher.Logger.LogInfo("Shop item: " + itemName);
-                AddToItemCache(itemIndex.Value);
+                // Have to do this check, becuase otherwise when resyncing this will reset the item received index back to
+                // an earlier value when a store item comes up in the list. This ensures that we only update the item cache
+                // for store items IF it was just purchased. Resyncing will skip these items entirely.
+                if (itemIndex > _itemsReceivedIndex)
+                    AddToItemCache(itemIndex.Value);
                 return;
             }
 
@@ -302,7 +306,6 @@ namespace Archipelago.MonsterSanctuary.Client
                 return;
             }
 
-            Patcher.Logger.LogInfo("ReceiveItem(): " + itemName);
             var quantity = GetQuantityOfItem(ref itemName);
             var newItem = GameData.GetItemByName(itemName);
 

@@ -213,6 +213,17 @@ namespace Archipelago.MonsterSanctuary.Client
             var list = ExploreActionUnlockItems[SlotData.ExploreAbilityLock];
             return list.Any(i => i.Name == itemName);
         }
+
+        public static string GetItemRequiredForMonsterExploreAbility(string monsterName)
+        {
+            if (!APState.IsConnected)
+                return null;
+
+            if (SlotData.ExploreAbilityLock == ExploreAbilityLockType.Off)
+                return null;
+
+            return ExploreActionUnlockItems[SlotData.ExploreAbilityLock].FirstOrDefault(i => i.Monsters.Contains(monsterName))?.Name;
+        }
         #endregion
 
         #region Json Files
