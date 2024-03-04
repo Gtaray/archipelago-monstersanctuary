@@ -122,7 +122,14 @@ namespace Archipelago.MonsterSanctuary.Client
                 Action = action
             };
 
-            _itemQueue.Enqueue(transfer);
+            if (_combatTraps.Contains(itemName))
+            {
+                _trapQueue.Enqueue(transfer);
+            }
+            else
+            {
+                _itemQueue.Enqueue(transfer);
+            }
         }
         #endregion
 
@@ -296,6 +303,12 @@ namespace Archipelago.MonsterSanctuary.Client
             if (itemName == null)
             {
                 Logger.LogError("Null item was received");
+                return;
+            }
+
+            if (IsNonCombatTrap(itemName))
+            {
+                ProcessTrap(itemName, player, self, confirmCallback);
                 return;
             }
 

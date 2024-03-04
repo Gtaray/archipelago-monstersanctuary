@@ -228,7 +228,7 @@ namespace Archipelago.MonsterSanctuary.Client
                 ref List<InventoryItem> rareItems,
                 ref int gold)
             {
-                var toRemove = ((gold > 0 ? 1 : 0) + commonItems.Count + rareItems.Count) - 8;
+                var toRemove = ((gold > 0 ? 1 : 0) + (commonItems == null ? 0 : commonItems.Count) + (rareItems == null ? 0 : rareItems.Count)) - 8;
 
                 // In this case, we don't need to remove anything
                 if (toRemove <= 0)
