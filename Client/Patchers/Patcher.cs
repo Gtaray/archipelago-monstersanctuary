@@ -136,6 +136,9 @@ namespace Archipelago.MonsterSanctuary.Client
             [UsedImplicitly]
             private static void Postfix(InventoryManager __instance, BaseItem item) 
             {
+                if (!APState.IsConnected)
+                    return;
+
                 if (item is not Egg)
                     return;
 
@@ -148,16 +151,26 @@ namespace Archipelago.MonsterSanctuary.Client
         private class MonsterManager_AddMonsterByPrefab
         {
             [UsedImplicitly]
-            private static void Postfix(GameObject monsterPrefab)
+            private static void Postfix(GameObject monsterPrefab, bool loadingSaveGame)
             {
-                
+
+                if (!APState.IsConnected)
+                    return;
+
+                // If we're loading a save game, don't check any locations
+                if (loadingSaveGame)
+                    return;
+
+                AddMonsterToDataStorage(monsterPrefab);
                 AddAbilityToDataStorage(monsterPrefab);
             }
         }
 
         private static void AddAbilityToDataStorage(GameObject monsterObj)
         {
-            Patcher.Logger.LogInfo("AddAbilityToDataStorage()");
+            if (!APState.IsConnected)
+                return;
+
             var monster = monsterObj.GetComponent<Monster>();
             if (monster == null)
             {
@@ -175,6 +188,24 @@ namespace Archipelago.MonsterSanctuary.Client
             if (APState.ReadBoolFromDataStorage(ability.Name) == false)
             {
                 APState.SetToDataStorage(ability.Name, (DataStorageElement)true);
+            }
+        }
+
+        private static void AddMonsterToDataStorage(GameObject monsterObj)
+        {
+            if (!APState.IsConnected)
+                return;
+
+            var monster = monsterObj.GetComponent<Monster>();
+            if (monster == null)
+            {
+                Patcher.Logger.LogWarning($"No monster component found for game object '{monsterObj.name}'");
+                return;
+            }
+
+            if (APState.ReadBoolFromDataStorage(monster.Name) == false)
+            {
+                APState.SetToDataStorage(monster.Name, (DataStorageElement)true);
             }
         }
 

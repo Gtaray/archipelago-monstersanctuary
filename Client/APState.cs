@@ -40,6 +40,7 @@ namespace Archipelago.MonsterSanctuary.Client
         public static ArchipelagoConnectionInfo ConnectionInfo = new ArchipelagoConnectionInfo();
         public static ArchipelagoSession Session;
         public static bool Authenticated;
+        public static bool Completed = false;
         public static HashSet<string> OfflineChecks = new HashSet<string>(); // Keeps track of locations that were checked while offline
         public static HashSet<long> CheckedLocations = new HashSet<long>(); // Keeps track of checked locations for the current session. Does not persist
 
@@ -259,6 +260,7 @@ namespace Archipelago.MonsterSanctuary.Client
             var statusUpdatePacket = new StatusUpdatePacket();
             statusUpdatePacket.Status = ArchipelagoClientState.ClientGoal;
             Session.Socket.SendPacket(statusUpdatePacket);
+            Completed = true;
         }
 
         public static bool ReadBoolFromDataStorage(string key)
