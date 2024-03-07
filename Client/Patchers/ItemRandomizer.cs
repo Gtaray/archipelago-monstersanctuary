@@ -31,8 +31,11 @@ namespace Archipelago.MonsterSanctuary.Client
 
         public static void AddToItemCache(int id)
         {
-            _itemsReceivedIndex = id;
-            SaveItemsReceived();
+            if (_itemsReceivedIndex < id)
+            {
+                _itemsReceivedIndex = id;
+                SaveItemsReceived();
+            }
         }
 
         private static void SaveItemsReceived()
@@ -90,8 +93,7 @@ namespace Archipelago.MonsterSanctuary.Client
                 // Have to do this check, becuase otherwise when resyncing this will reset the item received index back to
                 // an earlier value when a store item comes up in the list. This ensures that we only update the item cache
                 // for store items IF it was just purchased. Resyncing will skip these items entirely.
-                if (itemIndex > _itemsReceivedIndex)
-                    AddToItemCache(itemIndex.Value);
+                AddToItemCache(itemIndex.Value);
                 return;
             }
 
