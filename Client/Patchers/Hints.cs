@@ -15,6 +15,15 @@ namespace Archipelago.MonsterSanctuary.Client.Patchers
         {
             private static void Prefix(DialogueAction __instance)
             {
+                if (!APState.IsConnected)
+                    return;
+
+                // If the player loses the duel with will in the duel circle, end early
+                if (__instance.ID == 699 || __instance.ID == 6800021)
+                {
+                    __instance.Connections.Clear();
+                }
+
                 var hint = GameData.GetHint(__instance.ID);
                 if (string.IsNullOrEmpty(hint))
                     return;

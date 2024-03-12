@@ -262,34 +262,49 @@ namespace Archipelago.MonsterSanctuary.Client
 
         [HarmonyPatch(typeof(MapMenu), "CheckAllAreas")]
         private class MapMenu_CheckAllAreas
-        { 
-            private static bool Prefix(MapMenu __instance)
+        {
+            private static void Postfix(MapMenu __instance)
             {
-                return ShowMonsterpediaCompletion(__instance);
+                if (!APState.IsConnected)
+                    return;
+
+                __instance.AreaPercentText.maxChars = 150;
+                ShowGoalProgress(__instance);
             }
         }
 
         [HarmonyPatch(typeof(MapMenu), "CheckCurrentArea")]
         private class MapMenu_CheckCurrentArea
         {
-            private static bool Prefix(MapMenu __instance)
+            private static void Postfix(MapMenu __instance)
             {
-                return ShowMonsterpediaCompletion(__instance);
+                if (!APState.IsConnected)
+                    return;
+
+                __instance.AreaPercentText.maxChars = 150;
+                ShowGoalProgress(__instance);
             }
         }
 
-        private static bool ShowMonsterpediaCompletion(MapMenu __instance)
+        private static void ShowGoalProgress(MapMenu __instance)
         {
-            if (SlotData.Goal != CompletionEvent.Monsterpedia)
-                return true;
-            if (!SlotData.Eggsanity)
-                return true;
+            string goalText = "";
+            if (SlotData.Goal == CompletionEvent.MadLord)
+                goalText = "Defeat the Mad Lord";
+            else if (SlotData.Goal == CompletionEvent.Champions)
+                goalText = $"Defeat All Champions - {APState.ChampionsDefeated} / 27";
 
-            var label = SlotData.Goal == CompletionEvent.Monsterpedia ? "Monsterpedia Completion" : "Monsters Acquired";
+            if (APState.Completed)
+            {
+                // Formats the text to be green
+                goalText = FormatItem(goalText, ItemClassification.Useful);
+            }
 
-            var numberOfMonsters = PlayerController.Instance.Monsters.AllMonster.Select(m => m.ID).Distinct().Count();
-            __instance.AreaPercentText.text = $"{label}: {numberOfMonsters} / 111";
-            return false;
+            __instance.AreaPercentText.text = string.Format(
+                "{0}\nGoal: {1}",
+                __instance.AreaPercentText.text,
+                goalText
+                );
         }
     }
 }
