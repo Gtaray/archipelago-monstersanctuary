@@ -20,6 +20,8 @@ using Archipelago.MultiClient.Net.BounceFeatures.DeathLink;
 using System.Net;
 using System.Data.SqlTypes;
 using System.Net.Sockets;
+using System.Collections.Concurrent;
+using Team17.Online;
 
 namespace Archipelago.MonsterSanctuary.Client
 {
@@ -45,6 +47,7 @@ namespace Archipelago.MonsterSanctuary.Client
 
         private static DeathLinkService _deathLink;
 
+        #region Connecting
         public static bool Connect()
         {
             if (Authenticated)
@@ -90,32 +93,7 @@ namespace Archipelago.MonsterSanctuary.Client
 
             if (loginResult is LoginSuccessful loginSuccess)
             {
-                Authenticated = true;
-                
-                State = ConnectionState.Connected;
-
-                SlotData.LoadSlotData(loginSuccess.SlotData);
-
-                if (SlotData.DeathLink)
-                    _deathLink.EnableDeathLink();
-
-                GameData.LoadMinimap();
-                Patcher.RebuildCheckCounter();
-                Patcher.ClearModifiedShopItems();
-
-                // Scout the shop locations so we have them cached for later.
-                var locations = GameData.ShopChecks.Select(kvp => kvp.Value).ToArray();
-                APState.ScoutLocations(locations, Patcher.AddShopItem);
-
-                // If the player opened chests while not connected, this get those items upon connection
-                if (OfflineChecks.Count() > 0)
-                {
-                    Patcher.Logger.LogInfo("Number of Locations Checked While Offline: " + OfflineChecks.Count());
-                    var ids = OfflineChecks.Select(loc => GameData.ItemChecks[loc]).ToArray();
-                    CheckLocations(ids);
-                }
-
-                Resync();
+                OnConnect(loginSuccess);
             }
             else if (loginResult is LoginFailure loginFailure)
             {
@@ -126,6 +104,48 @@ namespace Archipelago.MonsterSanctuary.Client
             }
 
             return loginResult.Successful;
+        }
+
+        static void OnConnect(LoginSuccessful loginSuccess)
+        {
+            Authenticated = true;
+
+            State = ConnectionState.Connected;
+
+            SlotData.LoadSlotData(loginSuccess.SlotData);
+
+            if (SlotData.DeathLink)
+                _deathLink.EnableDeathLink();
+
+            GameData.LoadMinimap();
+            Patcher.RebuildCheckCounter();
+            Patcher.ClearModifiedShopItems();
+
+            // Scout all locations we care about
+            var locations = GameData.ShopChecks.Select(kvp => kvp.Value).ToArray();
+            APState.ScoutLocations(locations, false, Patcher.AddShopItem);
+
+            // Scout Starting Monster
+            APState.ScoutLocation("Menu_0_0", false, (item) =>
+            {
+                SlotData.TanukiMonster = Session.Items.GetItemName(item.Item);
+            });
+            // Scout Tanuki
+            APState.ScoutLocation("Menu_1_0", false, (item) =>
+            {
+                SlotData.TanukiMonster = Session.Items.GetItemName(item.Item);
+            });
+            // need to figure out how to do Skorch, it's not a normal encounter
+
+            // If the player opened chests while not connected, this get those items upon connection
+            if (OfflineChecks.Count() > 0)
+            {
+                Patcher.Logger.LogInfo("Number of Locations Checked While Offline: " + OfflineChecks.Count());
+                var ids = OfflineChecks.Select(loc => GameData.ItemChecks[loc]).ToArray();
+                CheckLocations(ids);
+            }
+
+            Resync();
         }
 
         static void Session_PacketReceived(ArchipelagoPacketBase packet)
@@ -185,7 +205,9 @@ namespace Archipelago.MonsterSanctuary.Client
 
             // Nothing to do here
         }
+        #endregion
 
+        #region Item Checks
         public static void Resync()
         {
             if (!APState.IsConnected)
@@ -255,7 +277,9 @@ namespace Archipelago.MonsterSanctuary.Client
                 Patcher.QueueItemTransfer(null, scout.Item, scout.Player, scout.Location, classification, ItemTransferType.Sent);
             }
         }
+        #endregion
 
+        #region Game State
         public static void CompleteGame()
         {
             if (!APState.IsConnected)
@@ -286,29 +310,75 @@ namespace Archipelago.MonsterSanctuary.Client
 
             Session.DataStorage[Scope.Slot, key] = value;
         }
+        #endregion
 
         #region Scouting
-        public static void ScoutLocations(string[] locationNames, System.Action<NetworkItem> action = null, Action callback = null, bool createAsHint = false)
+        private static ConcurrentQueue<ScoutRequest> _scoutQueue = new ConcurrentQueue<ScoutRequest>();
+
+        public static void ScoutLocation(string locationName, bool scoutAsHint = false, System.Action<NetworkItem> action = null)
+        {
+            var locations = Session.Locations.GetLocationIdFromName("Monster Sanctuary", locationName);
+            ScoutLocations(new long[] { locations }, scoutAsHint, action);
+        }
+
+        public static void ScoutLocations(string[] locationNames, bool scoutAsHint = false, System.Action<NetworkItem> action = null)
         {
             var locations = locationNames.Select(l => Session.Locations.GetLocationIdFromName("Monster Sanctuary", l));
-            ScoutLocations(locations.ToArray(), action, callback, createAsHint);
+            ScoutLocations(locations.ToArray(), scoutAsHint, action);
         }
 
-        public static void ScoutLocations(long[] locations, System.Action<NetworkItem> action = null, Action callback = null, bool createAsHint = false)
+        public static void ScoutLocations(long[] locations, bool scoutAsHint = false, System.Action<NetworkItem> action = null)
         {
-            Task.Run(async () =>
+            QueueScoutRequest(locations, scoutAsHint, action);
+        }
+
+        private static void QueueScoutRequest(long[] locations, bool scoutAsHint = false, System.Action<NetworkItem> action = null)
+        {
+            var request = new ScoutRequest()
             {
-                var packet = await Session.Locations.ScoutLocationsAsync(createAsHint, locations);
+                Locations = locations,
+                CallbackAction = action,
+                ScoutAsHint = scoutAsHint
+            };
+
+            _scoutQueue.Enqueue(request);
+
+            // If the queue contains exactly 1 request (the one we just put in there), spin up the background task to handle it.
+            if (_scoutQueue.Count == 0)
+            {
+                Task.Run(ProcessNextScoutRequest);
+            }
+        }
+
+        private static async Task ProcessNextScoutRequest()
+        {
+            // Peek because we don't want to dequeue until we're actually done with the request
+            if (_scoutQueue.TryPeek(out ScoutRequest request))
+            {
+                var packet = await Session.Locations.ScoutLocationsAsync(request.ScoutAsHint, request.Locations);
                 foreach (var location in packet.Locations)
                 {
-                    if (action != null)
-                        action(location);
+                    if (request.CallbackAction != null)
+                        request.CallbackAction(location);
                 }
 
-                if (callback != null)
-                    callback();
-            });
+                // Once we're done with the request, do the dequeue
+                _scoutQueue.TryDequeue(out _);
+            }
+
+            // After dequeing, we check if there are more scouts to process. If there are, call this method again.
+            if (_scoutQueue.Count() > 0)
+            {
+                await ProcessNextScoutRequest();
+            }
         }
         #endregion
+    }
+
+    class ScoutRequest
+    {
+        public long[] Locations { get; set; }
+        public System.Action<NetworkItem> CallbackAction { get; set; }
+        public bool ScoutAsHint { get; set; } = false;
     }
 }
