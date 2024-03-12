@@ -103,7 +103,7 @@ This connection info is saved and will re-populate when you run the game in the 
   	- 1: Yes
 - `goal`:
 	- Victory condition for the game
-	- 0: Defeat Mard Lord
+	- 0: Defeat Mad Lord
 	- 1: Defeat all champions
 
 ### Note on Drop Chance Settings

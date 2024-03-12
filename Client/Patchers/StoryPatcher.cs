@@ -173,5 +173,60 @@ namespace Archipelago.MonsterSanctuary.Client
                 return true;
             }
         }
+
+        [HarmonyPatch(typeof(BoolSwitchLever), "Interact")]
+        private class BoolSwitchLever_Interact
+        {
+            private static bool Prefix(BoolSwitchLever __instance)
+            {
+                if (!APState.IsConnected)
+                    return true;
+
+                
+                // Lowers sun palace water by the first stage
+                if (__instance.BoolSwitchName == "SunPalaceWaterSwitch1")
+                {
+                    if (!ProgressManager.Instance.GetBool("SunPalaceTowerSwitch1Completed"))
+                    {
+                        ShowPlayerWarningMessage();
+                        return false;
+                    }
+                }
+                // Raises the sun palace tower by the second stage
+                if (__instance.BoolSwitchName == "SunPalaceTowerSwitch2")
+                {
+                    if (!ProgressManager.Instance.GetBool("SunPalaceWaterSwitch1Completed"))
+                    {
+                        ShowPlayerWarningMessage();
+                        return false;
+                    }
+                }
+                // Lowers sun palace water by the second stage
+                if (__instance.BoolSwitchName == "SunPalaceWaterSwitch2")
+                {
+                    if (!ProgressManager.Instance.GetBool("SunPalaceTowerSwitch2Completed"))
+                    {
+                        ShowPlayerWarningMessage();
+                        return false;
+                    }
+                }
+                // Raise the sun palace center by its third stage
+                if (__instance.BoolSwitchName == "SunPalaceTowerSwitch3")
+                {
+                    if (!ProgressManager.Instance.GetBool("SunPalaceWaterSwitch2Completed"))
+                    {
+                        ShowPlayerWarningMessage();
+                        return false;
+                    }
+                }
+
+                return true;
+            }
+
+            private static void ShowPlayerWarningMessage()
+            {
+                PopupController.Instance.ShowMessage("Warning", "This lever doesn't appear to work right now. Looks like you need to do something else first.");
+            }
+        }
     }
 }
