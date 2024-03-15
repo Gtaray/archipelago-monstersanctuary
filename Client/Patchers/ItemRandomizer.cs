@@ -19,7 +19,7 @@ namespace Archipelago.MonsterSanctuary.Client
     public partial class Patcher
     {
         private static ConcurrentDictionary<long, GrantItemsAction> _giftActions = new();
-        private static List<string> _monsterArmyRewards = new();
+        private static List<long> _monsterArmyRewards = new();
 
         #region Persistence
         private const string ITEM_CACHE_FILENAME = "archipelago_items_received.json";
@@ -195,20 +195,18 @@ namespace Archipelago.MonsterSanctuary.Client
                             _giftActions.TryRemove(nextItem.LocationID, out var action);
                         };
                     }
-                    if (_monsterArmyRewards.Contains(nextItem.LocationName))
+                    if (_monsterArmyRewards.Contains(nextItem.LocationID))
                     {
                         callback = () =>
                         {
-                            _monsterArmyRewards.Remove(nextItem.LocationName);
+                            _monsterArmyRewards.Remove(nextItem.LocationID);
 
                             // If we've claimed all army rewards, go back and CheckReward again
                             // This will give us the next tier if we've earned it
                             // or it will unlock the MenuList if not.
-                            Patcher.Logger.LogInfo("Monster Callback");
-                            Patcher.Logger.LogInfo("Number of Rewards left: " + _monsterArmyRewards.Count());
                             if (_monsterArmyRewards.Count() == 0)
                             {
-                                Traverse.Create(UIController.Instance.MonsterArmy).Method("CheckReward").GetValue();
+                                CheckArmyRewards();
                             }
                         };
                     }
@@ -246,7 +244,9 @@ namespace Archipelago.MonsterSanctuary.Client
                 // If the monster army menu is up, then we want items to be received if and only if 
                 // the menu is locked (i.e. we've already donated and are waiting for the donation reward)
                 if (UIController.Instance.MonsterArmy.MenuList.IsOpenOrLocked && _monsterArmyRewards.Count() > 0)
-                    return UIController.Instance.MonsterArmy.MenuList.IsLocked;
+                {
+                    return !PopupController.Instance.IsOpen && UIController.Instance.MonsterArmy.MenuList.IsLocked;
+                }
 
                 return GameStateManager.Instance.IsExploring() && !PlayerController.Instance.IsFalling();
             }
@@ -321,7 +321,6 @@ namespace Archipelago.MonsterSanctuary.Client
             [UsedImplicitly]
             private static bool Prefix(MonsterArmyMenu __instance)
             {
-                Patcher.Logger.LogInfo("GrandReward()");
                 var rewardData = Traverse.Create(__instance).Method("GetCurrentReward").GetValue<RewardData>();
                 int rewardIndex = __instance.Rewards.IndexOf(rewardData);
                 int rewardOffset = 0; // Used to handle the endgame rewards
@@ -363,26 +362,38 @@ namespace Archipelago.MonsterSanctuary.Client
 
                 locNames = locNames.Except(toRemove).ToList();
 
-                foreach (var name in locNames)
-                    Patcher.Logger.LogInfo(name);
-
                 if (locNames.Count == 0)
-                {
                     return true;
-                }
 
-                // Queue up this location so that we know if we're handling monster army rewards
-                _monsterArmyRewards.AddRange(locNames);
-
-                APState.CheckLocations(locNames.Select(l => GameData.ItemChecks[l]).ToArray());
-
+                // At this point we know we're supposed to have received a reward, so we can handle these bits
                 ++ProgressManager.Instance.MonsterArmyRewardsClaimed;
                 AchievementsManager.Instance.OnMonsterArmyRewardClaimed();
+
+                var locIds = locNames.Select(l => GameData.ItemChecks[l]).Except(_locations_checked);
+
+                // Queue up this location so that we know if we're handling monster army rewards
+                _monsterArmyRewards.AddRange(locIds);
+
+                if (locIds.Count() == 0)
+                {
+                    CheckArmyRewards();
+                }
+                else
+                {
+                    APState.CheckLocations(locIds.ToArray());
+                }
 
                 return false;
             }
         }
         #endregion
+
+        public static void CheckArmyRewards()
+        {
+            Traverse.Create(UIController.Instance.MonsterArmy)
+                .Method("CheckReward")
+                .GetValue();
+        }
 
         public static void SentItem(string item, string player, ItemClassification classification, PopupDelegate confirmCallback)
         {

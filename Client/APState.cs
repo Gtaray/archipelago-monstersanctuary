@@ -227,10 +227,8 @@ namespace Archipelago.MonsterSanctuary.Client
 
         public static void CheckLocations(params long[] locationIds)
         {
-            Patcher.Logger.LogInfo("CheckLocations()");
             foreach (var locationId in locationIds)
             {
-                Patcher.Logger.LogInfo(locationId);
                 CheckedLocations.Add(locationId);
             };
 
