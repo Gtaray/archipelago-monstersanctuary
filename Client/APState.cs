@@ -171,6 +171,9 @@ namespace Archipelago.MonsterSanctuary.Client
             if (!APState.IsConnected)
                 return;
 
+            if (!SlotData.DeathLink)
+                return;
+
             _deathLink.SendDeathLink(new DeathLink(Session.Players.GetPlayerName(Session.ConnectionInfo.Slot), "lost a combat"));
         }
 
