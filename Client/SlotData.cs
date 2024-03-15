@@ -30,7 +30,8 @@ namespace Archipelago.MonsterSanctuary.Client
     {
         MadLord = 0,
         Champions = 1,
-        Monsterpedia = 2
+        Monsterpedia = 2,
+        Mozzie = 3
     }
 
     public enum ExploreAbilityLockType
@@ -74,12 +75,12 @@ namespace Archipelago.MonsterSanctuary.Client
         public static string TanukiMonster { get; set; }
         public static string BexMonster{ get; set; }
         public static bool Eggsanity { get; set; }
+        public static bool MonsterArmy { get; set; }
         public static ExploreAbilityLockType ExploreAbilityLock { get; set; }
 
         public static void LoadSlotData(Dictionary<string, object> slotData)
         {
             var options = GetDictionaryData<object>(slotData, "options");
-            StartingFamiliar = GetIntData(options, "starting_familiar", -1);
             Goal = GetEnumData(options, "goal", CompletionEvent.MadLord);
             IncludeChaosRelics = GetBoolData(options, "include_chaos_relics", false);
             ExpMultiplier = GetIntData(options, "exp_multiplier", 1);
@@ -91,12 +92,13 @@ namespace Archipelago.MonsterSanctuary.Client
             StartingGold = GetIntData(options, "starting_gold", 1);
             ShopsIgnoreRank = GetBoolData(options, "shops_ignore_rank", false);
             Eggsanity = GetBoolData(options, "eggsanity", false);
+            MonsterArmy = GetBoolData(options, "monster_army", false);
             ExploreAbilityLock = GetEnumData(options, "lock_explore_abilities", ExploreAbilityLockType.Off);
             DeathLink = GetBoolData(options, "death_link", false);
 
             var monsterData = GetDictionaryData<object>(slotData, "monsters");
-            TanukiMonster = GetStringData(monsterData, "tanuki");
             BexMonster = GetStringData(monsterData, "bex_monster");
+            TanukiMonster = GetStringData(monsterData, "tanuki");
 
             GameData.MonstersCache = new();
             var monsterLocations = GetDictionaryData<string>(monsterData, "monster_locations");
@@ -120,8 +122,13 @@ namespace Archipelago.MonsterSanctuary.Client
                 // where the key is the area name, and the value is a dictionary of all item checks in that area
                 foreach (var check in locationGroup.Value)
                 {
-                    if (!GameData.ChampionRankIds.ContainsKey(check.Key))
-                        GameData.AddItemCheck(check.Key, check.Value, locationGroup.Key);
+                    // Skip over monster army, ranks, and shop stuff
+                    if (GameData.ShopChecks.ContainsKey(check.Key))
+                        continue;
+                    if (GameData.ChampionRankIds.ContainsKey(check.Key))
+                        continue;
+
+                    GameData.AddItemCheck(check.Key, check.Value, locationGroup.Key);
                 }
             }
 

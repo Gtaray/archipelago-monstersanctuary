@@ -21,9 +21,6 @@ namespace Archipelago.MonsterSanctuary.Client
 
                 string id = $"{GameController.Instance.CurrentSceneName}_{__instance.ID}";
 
-                Patcher.Logger.LogInfo("CheckIfDoorWasOpen");
-                Patcher.Logger.LogInfo("Flag: " + Enum.GetName(typeof(LockedDoorsFlag), SlotData.LockedDoors));
-                Patcher.Logger.LogInfo("Is minimal door: " + GameData.LockedDoors.Contains(id));
                 if (SlotData.LockedDoors == LockedDoorsFlag.None 
                     || (SlotData.LockedDoors == LockedDoorsFlag.Minimal && !GameData.LockedDoors.Contains(id)))
                 {

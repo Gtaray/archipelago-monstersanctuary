@@ -187,24 +187,6 @@ namespace Archipelago.MonsterSanctuary.Client
             }
         }
 
-        private static void AddMonsterToDataStorage(GameObject monsterObj)
-        {
-            if (!APState.IsConnected)
-                return;
-
-            var monster = monsterObj.GetComponent<Monster>();
-            if (monster == null)
-            {
-                Patcher.Logger.LogWarning($"No monster component found for game object '{monsterObj.name}'");
-                return;
-            }
-
-            if (APState.ReadBoolFromDataStorage(monster.Name) == false)
-            {
-                APState.SetToDataStorage(monster.Name, (DataStorageElement)true);
-            }
-        }
-
         private static void AddAbilityToDataStorage(GameObject monsterObj)
         {
             if (!APState.IsConnected)

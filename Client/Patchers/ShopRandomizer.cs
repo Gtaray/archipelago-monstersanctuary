@@ -170,7 +170,7 @@ namespace Archipelago.MonsterSanctuary.Client
                     .ToArray();
 
                 // Scout any items in this shop that are progression
-                APState.ScoutLocations(progressionLocations, null, null, true);
+                APState.ScoutLocations(progressionLocations, true);
 
                 return false;
             }
@@ -349,7 +349,6 @@ namespace Archipelago.MonsterSanctuary.Client
                 var foreignItem = item.GetComponent<ForeignItem>();
                 var isLocal = foreignItem == null;
 
-                Patcher.Logger.LogInfo($"{item.GetName()} was purchased. Check location {rsi.LocationId}");
                 Patcher.AddAndUpdateCheckedLocations(rsi.LocationId);
                 Patcher.UI.AddItemToHistory(new ItemTransfer()
                 {

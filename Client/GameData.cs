@@ -1,4 +1,5 @@
 ﻿using Archipelago.MonsterSanctuary.Client.Behaviors;
+using Archipelago.MultiClient.Net.Models;
 using HarmonyLib;
 using Newtonsoft.Json;
 using System;

@@ -1,4 +1,5 @@
-﻿using HarmonyLib;
+﻿using Archipelago.MultiClient.Net.Models;
+using HarmonyLib;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
 using System;
@@ -8,6 +9,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Xml;
 using UnityEngine;
 using static PopupController;
 using static System.Net.Mime.MediaTypeNames;
@@ -17,6 +19,7 @@ namespace Archipelago.MonsterSanctuary.Client
     public partial class Patcher
     {
         private static ConcurrentDictionary<long, GrantItemsAction> _giftActions = new();
+        private static List<string> _monsterArmyRewards = new();
 
         #region Persistence
         private const string ITEM_CACHE_FILENAME = "archipelago_items_received.json";
@@ -192,6 +195,23 @@ namespace Archipelago.MonsterSanctuary.Client
                             _giftActions.TryRemove(nextItem.LocationID, out var action);
                         };
                     }
+                    if (_monsterArmyRewards.Contains(nextItem.LocationName))
+                    {
+                        callback = () =>
+                        {
+                            _monsterArmyRewards.Remove(nextItem.LocationName);
+
+                            // If we've claimed all army rewards, go back and CheckReward again
+                            // This will give us the next tier if we've earned it
+                            // or it will unlock the MenuList if not.
+                            Patcher.Logger.LogInfo("Monster Callback");
+                            Patcher.Logger.LogInfo("Number of Rewards left: " + _monsterArmyRewards.Count());
+                            if (_monsterArmyRewards.Count() == 0)
+                            {
+                                Traverse.Create(UIController.Instance.MonsterArmy).Method("CheckReward").GetValue();
+                            }
+                        };
+                    }
 
                     if (nextItem.Action == ItemTransferType.Sent)
                     {
@@ -222,6 +242,12 @@ namespace Archipelago.MonsterSanctuary.Client
                 // If we're in the intro, then don't send items
                 if (!ProgressManager.Instance.GetBool("FinishedIntro"))
                     return false;
+
+                // If the monster army menu is up, then we want items to be received if and only if 
+                // the menu is locked (i.e. we've already donated and are waiting for the donation reward)
+                if (UIController.Instance.MonsterArmy.MenuList.IsOpenOrLocked && _monsterArmyRewards.Count() > 0)
+                    return UIController.Instance.MonsterArmy.MenuList.IsLocked;
+
                 return GameStateManager.Instance.IsExploring() && !PlayerController.Instance.IsFalling();
             }
         }
@@ -284,6 +310,74 @@ namespace Archipelago.MonsterSanctuary.Client
 
                 APState.CheckLocation(GameData.ItemChecks[locName]);
                 _giftActions.TryAdd(GameData.ItemChecks[locName], __instance);
+
+                return false;
+            }
+        }
+
+        [HarmonyPatch(typeof(MonsterArmyMenu), "GrandReward")]
+        private class MonsterArmyMenu_GrandReward
+        {
+            [UsedImplicitly]
+            private static bool Prefix(MonsterArmyMenu __instance)
+            {
+                Patcher.Logger.LogInfo("GrandReward()");
+                var rewardData = Traverse.Create(__instance).Method("GetCurrentReward").GetValue<RewardData>();
+                int rewardIndex = __instance.Rewards.IndexOf(rewardData);
+                int rewardOffset = 0; // Used to handle the endgame rewards
+
+                // This is only the case if the rewardData is not contained in Rewards, 
+                // which means that the reward is one of the repeatable endgame rewards.
+                if (rewardIndex == -1)
+                {
+                    rewardOffset = 31;
+                    rewardIndex = __instance.EndgameRewards.IndexOf(rewardData);
+                }
+                if (rewardIndex == -1)
+                {
+                    Patcher.Logger.LogError($"Monster army reward data was not found for a point threshold of {rewardData.PointsRequired}");
+                    return true;
+                }
+
+                var locNames = rewardData.Rewards
+                    .Select(i => $"KeeperStronghold_MonsterArmy_{rewardOffset + rewardIndex}_{rewardData.Rewards.IndexOf(i)}")
+                    .ToList();
+
+                if (!APState.IsConnected)
+                {
+                    foreach (var name in locNames)
+                        APState.OfflineChecks.Add(name);
+
+                    return true;
+                }
+
+                List<string> toRemove = new();
+                foreach (var locName in locNames)
+                {
+                    if (!GameData.ItemChecks.ContainsKey(locName))
+                    {
+                        Patcher.Logger.LogWarning($"Location '{locName}' does not have a location ID assigned to it");
+                        toRemove.Add(locName);
+                    }
+                }
+
+                locNames = locNames.Except(toRemove).ToList();
+
+                foreach (var name in locNames)
+                    Patcher.Logger.LogInfo(name);
+
+                if (locNames.Count == 0)
+                {
+                    return true;
+                }
+
+                // Queue up this location so that we know if we're handling monster army rewards
+                _monsterArmyRewards.AddRange(locNames);
+
+                APState.CheckLocations(locNames.Select(l => GameData.ItemChecks[l]).ToArray());
+
+                ++ProgressManager.Instance.MonsterArmyRewardsClaimed;
+                AchievementsManager.Instance.OnMonsterArmyRewardClaimed();
 
                 return false;
             }

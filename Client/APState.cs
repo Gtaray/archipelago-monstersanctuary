@@ -122,21 +122,8 @@ namespace Archipelago.MonsterSanctuary.Client
             Patcher.RebuildCheckCounter();
             Patcher.ClearModifiedShopItems();
 
-            // Scout all locations we care about
-            var locations = GameData.ShopChecks.Select(kvp => kvp.Value).ToArray();
-            APState.ScoutLocations(locations, false, Patcher.AddShopItem);
-
-            // Scout Starting Monster
-            APState.ScoutLocation("Menu_0_0", false, (item) =>
-            {
-                SlotData.TanukiMonster = Session.Items.GetItemName(item.Item);
-            });
-            // Scout Tanuki
-            APState.ScoutLocation("Menu_1_0", false, (item) =>
-            {
-                SlotData.TanukiMonster = Session.Items.GetItemName(item.Item);
-            });
-            // need to figure out how to do Skorch, it's not a normal encounter
+            // Scout shops
+            APState.ScoutLocations(GameData.ShopChecks.Values.ToArray(), false, Patcher.AddShopItem);
 
             // If the player opened chests while not connected, this get those items upon connection
             if (OfflineChecks.Count() > 0)
@@ -240,8 +227,10 @@ namespace Archipelago.MonsterSanctuary.Client
 
         public static void CheckLocations(params long[] locationIds)
         {
+            Patcher.Logger.LogInfo("CheckLocations()");
             foreach (var locationId in locationIds)
             {
+                Patcher.Logger.LogInfo(locationId);
                 CheckedLocations.Add(locationId);
             };
 
@@ -317,12 +306,6 @@ namespace Archipelago.MonsterSanctuary.Client
         #region Scouting
         private static ConcurrentQueue<ScoutRequest> _scoutQueue = new ConcurrentQueue<ScoutRequest>();
 
-        public static void ScoutLocation(string locationName, bool scoutAsHint = false, System.Action<NetworkItem> action = null)
-        {
-            var locations = Session.Locations.GetLocationIdFromName("Monster Sanctuary", locationName);
-            ScoutLocations(new long[] { locations }, scoutAsHint, action);
-        }
-
         public static void ScoutLocations(string[] locationNames, bool scoutAsHint = false, System.Action<NetworkItem> action = null)
         {
             var locations = locationNames.Select(l => Session.Locations.GetLocationIdFromName("Monster Sanctuary", l));
@@ -346,7 +329,7 @@ namespace Archipelago.MonsterSanctuary.Client
             _scoutQueue.Enqueue(request);
 
             // If the queue contains exactly 1 request (the one we just put in there), spin up the background task to handle it.
-            if (_scoutQueue.Count == 0)
+            if (_scoutQueue.Count == 1)
             {
                 Task.Run(ProcessNextScoutRequest);
             }
