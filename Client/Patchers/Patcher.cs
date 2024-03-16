@@ -160,13 +160,6 @@ namespace Archipelago.MonsterSanctuary.Client
                 if (loadingSaveGame)
                     return;
 
-                // If the goal is to complete the monster journal, and we've got 111 monsters, complete the game.
-                if (SlotData.Goal == CompletionEvent.Monsterpedia)
-                {
-                    if (PlayerController.Instance.Monsters.AllMonster.Select(m => m.ID).Distinct().Count() == 111)
-                        APState.CompleteGame();
-                }
-
                 if (SlotData.Eggsanity)
                 {
                     var monster = monsterPrefab.GetComponent<Monster>();
@@ -174,13 +167,6 @@ namespace Archipelago.MonsterSanctuary.Client
 
                     APState.CheckLocation(GameData.ItemChecks[location_name]);
                 }
-
-                AddMonsterToDataStorage(monsterPrefab);
-                    return;
-
-                // If we're loading a save game, don't check any locations
-                if (loadingSaveGame)
-                    return;
 
                 AddMonsterToDataStorage(monsterPrefab);
                 AddAbilityToDataStorage(monsterPrefab);

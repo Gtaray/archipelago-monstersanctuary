@@ -62,6 +62,7 @@ namespace Archipelago.MonsterSanctuary.Client
 
         public static int StartingFamiliar { get; set; } = -1;
         public static CompletionEvent Goal { get; set; } = CompletionEvent.MadLord;
+        public static int MozzieSoulPieces { get; set; } = 7;
         public static bool IncludeChaosRelics { get; set; } = false;
         public static int ExpMultiplier { get; set; } = 1;
         public static bool AlwaysGetEgg { get; set; } = false;
@@ -82,6 +83,7 @@ namespace Archipelago.MonsterSanctuary.Client
         {
             var options = GetDictionaryData<object>(slotData, "options");
             Goal = GetEnumData(options, "goal", CompletionEvent.MadLord);
+            MozzieSoulPieces = GetIntData(options, "mozzie_pieces", 7);
             IncludeChaosRelics = GetBoolData(options, "include_chaos_relics", false);
             ExpMultiplier = GetIntData(options, "exp_multiplier", 1);
             AlwaysGetEgg = GetBoolData(options, "monsters_always_drop_egg", false);

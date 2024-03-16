@@ -218,8 +218,8 @@ namespace Archipelago.MonsterSanctuary.Client
 
                 if (name == "MozzieQuestStarted")
                 {
-                    ProgressManager.Instance.SetBool(name, true);
-                    __result = true;
+                    __result = PlayerController.Instance.Inventory.HasUniqueItem(EUniqueItemId.Mozzie);
+                    ProgressManager.Instance.SetBool(name, __result);
                     return;
                 }
 

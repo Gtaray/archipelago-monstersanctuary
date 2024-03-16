@@ -35,12 +35,6 @@ namespace Archipelago.MonsterSanctuary.Client
                 if (!__instance.CurrentEncounter.IsChampion)
                     return;
 
-                // if victory condition is to beat the mad lord, check to see if we've done that
-                if (SlotData.Goal == CompletionEvent.MadLord && GameController.Instance.CurrentSceneName == "AbandonedTower_Final")
-                {
-                    APState.CompleteGame();
-                }
-
                 // We only want to operate on champion encounters
                 string locName = $"{GameController.Instance.CurrentSceneName}_Champion";
                 if (!GameData.ChampionRankIds.ContainsKey(locName))
