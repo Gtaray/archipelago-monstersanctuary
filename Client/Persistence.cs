@@ -32,6 +32,14 @@ namespace Archipelago.MonsterSanctuary.Client
         public Dictionary<string, int> CheckCounter = new Dictionary<string, int>();  // does NOT include champion rank up items
         public List<string> ChampionsDefeated = new List<string>(); // Tracks which champions have been defeated
 
+        public static void PrintData()
+        {
+            Patcher.Logger.LogInfo("Persistence:");
+            Patcher.Logger.LogInfo("\tItems Received: " + Instance.ItemsReceived.Count());
+            Patcher.Logger.LogInfo("\tILocations Checked: " + Instance.LocationsChecked.Count());
+            Patcher.Logger.LogInfo("\tChampions Defeated: " + Instance.ChampionsDefeated.Count());
+        }
+
         public static void AddToItemCache(int id)
         {
             if (Instance.ItemsReceived.Contains(id)) 
@@ -92,12 +100,11 @@ namespace Archipelago.MonsterSanctuary.Client
 
         public static void DeleteFile()
         {
+            Patcher.Logger.LogInfo("DeleteFile");
             if (File.Exists(PERSISTENCE_FILENAME))
                 File.Delete(PERSISTENCE_FILENAME);
 
-            Instance.ItemsReceived = new();
-            Instance.LocationsChecked = new();
-            Instance.CheckCounter = new();
+            Instance = new Persistence();
         }
 
         private static void SaveFile()

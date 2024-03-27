@@ -167,7 +167,7 @@ namespace Archipelago.MonsterSanctuary.Client
                 // If we're in the intro, then don't send items
                 if (!ProgressManager.Instance.GetBool("FinishedIntro"))
                     return false;
-                return GameStateManager.Instance.IsExploring() && !PlayerController.Instance.IsFalling();
+                return GameStateManager.Instance.IsExploring() && PlayerController.Instance.Physics.PhysObject.Collisions.below;
             }
         }
 
