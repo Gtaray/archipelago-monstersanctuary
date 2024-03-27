@@ -14,48 +14,29 @@ using static System.Net.Mime.MediaTypeNames;
 
 namespace Archipelago.MonsterSanctuary.Client
 {
+    public enum ItemTransferType
+    {
+        Aquired = 0,
+        Received = 1,
+        Sent = 2
+    }
+    public class ItemTransfer
+    {
+        public string ItemName { get; set; }
+        public string PlayerName { get; set; }
+        public ItemTransferType Action { get; set; }
+
+        public int? ItemIndex { get; set; }
+        public long ItemID { get; set; }
+        public int PlayerID { get; set; }
+        public long LocationID { get; set; }
+        public string LocationName { get; set; }
+        public ItemClassification Classification { get; set; }
+    }
+
     public partial class Patcher
     {
         private static ConcurrentDictionary<long, GrantItemsAction> _giftActions = new();
-
-        #region Persistence
-        private const string ITEM_CACHE_FILENAME = "archipelago_items_received.json";
-        private static int _itemsReceivedIndex = -1;
-
-        public static void DeleteItemCache()
-        {
-            if (File.Exists(ITEM_CACHE_FILENAME))
-                File.Delete(ITEM_CACHE_FILENAME);
-            _itemsReceivedIndex = -1;
-        }
-
-        public static void AddToItemCache(int id)
-        {
-            _itemsReceivedIndex = id;
-            SaveItemsReceived();
-        }
-
-        private static void SaveItemsReceived()
-        {
-            string rawPath = Environment.CurrentDirectory;
-            if (rawPath != null)
-            {
-                var bytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(_itemsReceivedIndex));
-                File.WriteAllBytes(Path.Combine(rawPath, ITEM_CACHE_FILENAME), bytes);
-            }
-        }
-
-        private static void LoadItemsReceived()
-        {
-            if (File.Exists(ITEM_CACHE_FILENAME))
-            {
-                var reader = File.OpenText(ITEM_CACHE_FILENAME);
-                var content = reader.ReadToEnd();
-                reader.Close();
-                _itemsReceivedIndex = JsonConvert.DeserializeObject<int>(content);
-            }
-        }
-        #endregion
 
         #region Queue Functions
         // Because both items sent and received use the same pop up system to inform the player
@@ -73,7 +54,7 @@ namespace Archipelago.MonsterSanctuary.Client
             var itemName = APState.Session.Items.GetItemName(itemId);
 
             // If item index is null (meaning this is someone else's item), we can only rely on whether the location ID is checked.
-            if (itemIndex == null && _locations_checked.Contains(locationId))
+            if (itemIndex == null && Persistence.Instance.LocationsChecked.Contains(locationId))
             {
                 return;
             }
@@ -82,12 +63,12 @@ namespace Archipelago.MonsterSanctuary.Client
             // If the item action is either sent or acquired, we want to update the minimap. If we received the item then its not from us at all.
             if (action != ItemTransferType.Received)
             {
-                Patcher.AddAndUpdateCheckedLocations(locationId);
+                Persistence.AddAndUpdateCheckedLocations(locationId);
             }   
 
             // Do not queue a new item if we've already received that item.
             // Do not queue an item if the queue already contains that index.
-            if (itemIndex != null && (itemIndex <= _itemsReceivedIndex || _itemQueue.Any(i => i.ItemIndex == itemIndex)))
+            if (itemIndex != null && (Persistence.Instance.ItemsReceived.Contains(itemIndex.Value) || _itemQueue.Any(i => i.ItemIndex == itemIndex)))
             {
                 return;
             }
@@ -129,26 +110,12 @@ namespace Archipelago.MonsterSanctuary.Client
                     _giftQueue.Clear();
                 }
 
-                if (_itemQueue.Count() == 0)
-                {
-                    // if the item queue is empty and we have gift actions that need solving
-                    // we simply complete them so we can move on
-                    if (_giftActions.Count() > 0)
-                    {
-                        var kvp = _giftActions.First();
-                        kvp.Value.Finish();
-                        _giftActions.TryRemove(kvp.Key, out var action);
-                    }
-                    return;
-                }
-
                 if (_itemQueue.TryDequeue(out ItemTransfer nextItem))
                 {
                     // For these, we just want to increment the counter and move on. Nothing else.
                     if (nextItem.ItemName == "Champion Defeated")
                     {
-                        APState.ChampionsDefeated++;
-                        if (APState.ChampionsDefeated >= 27 && SlotData.Goal == CompletionEvent.Champions)
+                        if (Persistence.Instance.ChampionsDefeated.Count() >= 27 && SlotData.Goal == CompletionEvent.Champions)
                         {
                             APState.CompleteGame();
                         }
@@ -158,8 +125,11 @@ namespace Archipelago.MonsterSanctuary.Client
                     Patcher.UI.AddItemToHistory(nextItem);
 
                     PopupController.PopupDelegate callback = null;
+                    EShift eggShift = EShift.Normal;
                     if (_giftActions.ContainsKey(nextItem.LocationID))
                     {
+                        eggShift = _giftActions[nextItem.LocationID].EggShift;
+
                         callback = () =>
                         {
                             _giftActions[nextItem.LocationID].Finish();
@@ -182,11 +152,12 @@ namespace Archipelago.MonsterSanctuary.Client
                             nextItem.PlayerName,
                             nextItem.Classification,
                             nextItem.Action == ItemTransferType.Aquired,
+                            eggShift,
                             callback);
 
                         // We only want to save items to the item cache if we're receiving the item. 
                         // Do not cache items we send to other people
-                        AddToItemCache(nextItem.ItemIndex.Value);
+                        Persistence.AddToItemCache(nextItem.ItemIndex.Value);
                     }
                 }
             }
@@ -250,14 +221,16 @@ namespace Archipelago.MonsterSanctuary.Client
                     return true;
                 }
 
+                _giftActions.TryAdd(GameData.ItemChecks[locName], __instance);
+
                 if (!showMessage)
                 {
                     _giftQueue.Add(GameData.ItemChecks[locName]);
-                    return false;
                 }
-
-                APState.CheckLocation(GameData.ItemChecks[locName]);
-                _giftActions.TryAdd(GameData.ItemChecks[locName], __instance);
+                else
+                {
+                    APState.CheckLocation(GameData.ItemChecks[locName]);
+                }
 
                 return false;
             }
@@ -273,7 +246,7 @@ namespace Archipelago.MonsterSanctuary.Client
                     confirmCallback);
         }
 
-        public static void ReceiveItem(string itemName, string player, ItemClassification classification, bool self, PopupDelegate confirmCallback)
+        public static void ReceiveItem(string itemName, string player, ItemClassification classification, bool self, EShift eggShift, PopupDelegate confirmCallback)
         {
             // Handle if you send someone else and item and show a message box for that.
             if (itemName == null)
@@ -299,11 +272,11 @@ namespace Archipelago.MonsterSanctuary.Client
                 return;
             }
 
-            GiveItem(newItem, player, classification, self, quantity, confirmCallback);
+            GiveItem(newItem, player, classification, self, quantity, confirmCallback, eggShift);
         }        
 
         #region Give Items
-        static void GiveItem(BaseItem item, string player, ItemClassification classification, bool self, int quantity = 1, PopupDelegate callback = null)
+        static void GiveItem(BaseItem item, string player, ItemClassification classification, bool self, int quantity = 1, PopupDelegate callback = null, EShift eggShift = EShift.Normal)
         {
             if (item != null)
             {
@@ -314,7 +287,7 @@ namespace Archipelago.MonsterSanctuary.Client
                     FormatItemReceivedMessage(item.GetName(), quantity, player, classification, self),
                     callback);
 
-                PlayerController.Instance.Inventory.AddItem(item, quantity, 0);
+                PlayerController.Instance.Inventory.AddItem(item, quantity, (int) eggShift);
             }
         }
 

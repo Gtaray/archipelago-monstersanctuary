@@ -21,8 +21,7 @@ namespace Archipelago.MonsterSanctuary.Client
             {
                 // new game file started, delete old files so we start fresh.
                 Logger.LogWarning("New Save. Deleting item cache and checked locations");
-                DeleteItemCache();
-                DeleteLocationsChecked();
+                Persistence.DeleteFile();
                 APState.Resync();
 
                 // if we're not skipping the intro, call the original function
@@ -107,8 +106,15 @@ namespace Archipelago.MonsterSanctuary.Client
 
                 if (name == "MozzieQuestStarted")
                 {
-                    ProgressManager.Instance.SetBool(name, true);
-                    __result = true;
+                    __result = PlayerController.Instance.Inventory.HasUniqueItem(EUniqueItemId.Mozzie);
+                    ProgressManager.Instance.SetBool(name, __result);
+                    return;
+                }
+
+                if (name == "TrevisanQuestAazerach")
+                {
+                    __result = PlayerController.Instance.Inventory.HasUniqueItem(EUniqueItemId.Ahrimaaya);
+                    ProgressManager.Instance.SetBool("TrevisanQuestAazerach", __result);
                     return;
                 }
 
@@ -148,9 +154,8 @@ namespace Archipelago.MonsterSanctuary.Client
                     // if mad lord is the current goal, then we allow aazerach to be fought before postgame
                     if (SlotData.Goal == CompletionEvent.MadLord)
                     {
-                        ProgressManager.Instance.SetBool("TrevisanQuestAazerach", true, true);
+                        return ProgressManager.Instance.GetBool("TrevisanQuestAazerach");
                     }
-                    return true;
                 }
                 if (GameController.Instance.CurrentSceneName == "MountainPath_North1" 
                     && __instance.ID == 18)

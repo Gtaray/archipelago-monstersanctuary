@@ -18,90 +18,13 @@ namespace Archipelago.MonsterSanctuary.Client
 {
     public partial class Patcher
     {
-        private const string LOCATIONS_CHECKED_FILENAME = "archipelago_locations_checked.json";
-        private static List<long> _locations_checked = new List<long>();  // Includes champion rank up items
-        private static Dictionary<string, int> _check_counter = new Dictionary<string, int>();  // does NOT include champion rank up items
-
-        public static void AddAndUpdateCheckedLocations(long locationId)
-        {
-            if (_locations_checked.Contains(locationId))
-            {
-                return;
-            }
-
-            _locations_checked.Add(locationId);
-            SaveLocationsChecked();
-
-            // If the item we just recieved is a rank up item, we don't increment the counter
-            if (GameData.ChampionRankIds.ContainsValue(locationId))
-                return;
-
-            IncrementCheckCounter(locationId);
-        }
-
-        public static void DeleteLocationsChecked()
-        {
-            if (File.Exists(LOCATIONS_CHECKED_FILENAME))
-                File.Delete(LOCATIONS_CHECKED_FILENAME);
-            _locations_checked = new();
-            _check_counter = new();
-        }
-
-        public static void SaveLocationsChecked()
-        {
-            string rawPath = Environment.CurrentDirectory;
-            if (rawPath != null)
-            {
-                var bytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(_locations_checked));
-                File.WriteAllBytes(Path.Combine(rawPath, LOCATIONS_CHECKED_FILENAME), bytes);
-            }
-        }
-
-        public static void LoadLocationsChecked()
-        {
-            if (File.Exists(LOCATIONS_CHECKED_FILENAME))
-            {
-                var reader = File.OpenText(LOCATIONS_CHECKED_FILENAME);
-                var content = reader.ReadToEnd();
-                reader.Close();
-                _locations_checked = JsonConvert.DeserializeObject<List<long>>(content);
-
-                RebuildCheckCounter();                
-            }
-        }
-
-        public static void RebuildCheckCounter()
-        {
-            if (!APState.IsConnected)
-                return;
-
-            _check_counter = new();
-            var locations = _locations_checked.Except(GameData.ChampionRankIds.Values);
-
-            foreach (var location in locations)
-                IncrementCheckCounter(location);
-        }
-
-        public static void IncrementCheckCounter(long locationId)
-        {
-            if (!APState.IsConnected)
-                return;
-
-            // Add a check to our check counter base don the area
-            var locationName = APState.Session.Locations.GetLocationNameFromId(locationId);
-            var regionName = locationName.Replace(" ", "").Split('-').First();
-            if (!_check_counter.ContainsKey(regionName))
-                _check_counter[regionName] = 0;
-            _check_counter[regionName] += 1;
-        }
-
         private static string GetCheckString(string region)
         {
             int collected = 0;
             int max = 0;
 
-            if (_check_counter.ContainsKey(region))
-                collected = _check_counter[region];
+            if (Persistence.Instance.CheckCounter.ContainsKey(region))
+                collected = Persistence.Instance.CheckCounter[region];
 
             if (GameData.NumberOfChecks.ContainsKey(region))
                 max = GameData.NumberOfChecks[region];
@@ -199,7 +122,7 @@ namespace Archipelago.MonsterSanctuary.Client
                     return;
                 }
 
-                var checks = GameData.MapPins[key].Except(_locations_checked).Count();
+                var checks = GameData.MapPins[key].Except(Persistence.Instance.LocationsChecked).Count();
 
                 // If all map pins for this tile are contained within the _itemcache, then we can delete the marker
                 if (checks == 0)
@@ -241,7 +164,7 @@ namespace Archipelago.MonsterSanctuary.Client
                     if (!GameData.MapPins.ContainsKey(key))
                         continue;
 
-                    var checks = GameData.MapPins[key].Except(_locations_checked).Count();
+                    var checks = GameData.MapPins[key].Except(Persistence.Instance.LocationsChecked).Count();
                     if (checks == 0)
                     {
                         tile.MinimapEntry.DeleteMinimapMarker(tile.MinimapEntry.GetTileViewIndex(tile));
@@ -292,7 +215,7 @@ namespace Archipelago.MonsterSanctuary.Client
             if (SlotData.Goal == CompletionEvent.MadLord)
                 goalText = "Defeat the Mad Lord";
             else if (SlotData.Goal == CompletionEvent.Champions)
-                goalText = $"Defeat All Champions - {APState.ChampionsDefeated} / 27";
+                goalText = $"Defeat All Champions - {Persistence.Instance.ChampionsDefeated.Count()} / 27";
 
             if (APState.Completed)
             {

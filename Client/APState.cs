@@ -35,7 +35,6 @@ namespace Archipelago.MonsterSanctuary.Client
         public static int[] AP_VERSION = new int[] { 0, 4, 4 };
         public static ConnectionState State = ConnectionState.Disconnected;
         public static bool IsConnected => State == ConnectionState.Connected;
-        public static int ChampionsDefeated { get; set; } = 0;
 
         public static ArchipelagoConnectionInfo ConnectionInfo = new ArchipelagoConnectionInfo();
         public static ArchipelagoSession Session;
@@ -101,7 +100,7 @@ namespace Archipelago.MonsterSanctuary.Client
                     _deathLink.EnableDeathLink();
 
                 GameData.LoadMinimap();
-                Patcher.RebuildCheckCounter();
+                Persistence.RebuildCheckCounter();
 
                 // If the player opened chests while not connected, this get those items upon connection
                 if (OfflineChecks.Count() > 0)

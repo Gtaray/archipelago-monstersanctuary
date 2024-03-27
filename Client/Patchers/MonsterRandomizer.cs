@@ -30,28 +30,7 @@ namespace Archipelago.MonsterSanctuary.Client
                 if (!GameData.ChampionScenes.ContainsKey(GameController.Instance.CurrentSceneName))
                     return;
 
-                var name = GameData.ChampionScenes[GameController.Instance.CurrentSceneName];
-                var go = GameData.GetMonsterByName(name);
-                if (go == null)
-                {
-                    Patcher.Logger.LogError($"Failed to find monster with name '{name}'");
-                    return;
-                }
-
-                var monster = go.GetComponent<Monster>();
-
-                for (int i = 0; i < __instance.ChampionScores.Count; i++)
-                {
-                    if (__instance.ChampionScores[i].ChampionId == monster.ID)
-                    {
-                        __result = true;
-                        return;
-                    }
-                }
-
-                // If we got down here, then we didn't find any scores for the randomized champ
-                // which means we haven't fought it yet.
-                __result = false;
+                __result = Persistence.Instance.ChampionsDefeated.Contains(GameController.Instance.CurrentSceneName);
             }
         }
 
