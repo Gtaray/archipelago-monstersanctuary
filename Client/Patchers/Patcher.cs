@@ -13,6 +13,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading;
+using System.Threading.Tasks;
 using Team17.Online;
 using UnityEngine;
 
@@ -33,8 +34,7 @@ namespace Archipelago.MonsterSanctuary.Client
             // Plugin startup logic
             new Harmony(MyPluginInfo.PLUGIN_GUID).PatchAll(Assembly.GetExecutingAssembly());
 
-            LoadItemsReceived();
-            LoadLocationsChecked();
+            Persistence.LoadFile();
         }
 
         [HarmonyPatch(typeof(MainMenu))]
@@ -101,7 +101,10 @@ namespace Archipelago.MonsterSanctuary.Client
                         .FirstOrDefault(i => i is Egg);
 
                     if (egg != null)
+                    {
+                        Patcher.Logger.LogInfo($"Adding Egg: {egg.Name} ({(int)enemy.Shift})");
                         __instance.AddRewardItem(items, egg, 1, (int)enemy.Shift);
+                    }
                 }
 
                 var rareField = Traverse.Create(__instance).Field("rareRewards");
@@ -120,13 +123,10 @@ namespace Archipelago.MonsterSanctuary.Client
             [UsedImplicitly]
             private static bool Prefix(List<InventoryItem> items, BaseItem item, int quantity, int variation)
             {
-                foreach (InventoryItem inventoryItem in items) 
-                {
-                    // Only ever add one copy of an egg
-                    if (inventoryItem.Item == item && item is Egg)
-                        return false;
-                }
-                return true;
+                if (item is not Egg)
+                    return true;
+
+                return items.All(i => i.Item != item);
             }
         }
 
@@ -143,7 +143,10 @@ namespace Archipelago.MonsterSanctuary.Client
                     return;
 
                 var egg = (Egg)item;
-                AddAbilityToDataStorage(egg.Monster);
+                Task.Run(() =>
+                {
+                    AddAbilityToDataStorage(egg.Monster);
+                });
             }
         }
 
@@ -168,8 +171,11 @@ namespace Archipelago.MonsterSanctuary.Client
                     APState.CheckLocation(GameData.ItemChecks[location_name]);
                 }
 
-                AddMonsterToDataStorage(monsterPrefab);
-                AddAbilityToDataStorage(monsterPrefab);
+                Task.Run(() =>
+                {
+                    AddMonsterToDataStorage(monsterPrefab);
+                    AddAbilityToDataStorage(monsterPrefab);
+                });
             }
         }
 

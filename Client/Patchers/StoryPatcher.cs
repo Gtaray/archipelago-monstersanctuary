@@ -28,8 +28,7 @@ namespace Archipelago.MonsterSanctuary.Client
                     // but the other option is to delete even when not connected, and that will break
                     // if someone wants to do a normal run while also doing a rando.
                     Logger.LogWarning("New Save. Deleting item cache and checked locations");
-                    DeleteItemCache();
-                    DeleteLocationsChecked();
+                Persistence.DeleteFile();
                     APState.Resync();
 
                     startingScene = "MountainPath_North1";
@@ -223,6 +222,13 @@ namespace Archipelago.MonsterSanctuary.Client
                     return;
                 }
 
+                if (name == "TrevisanQuestAazerach")
+                {
+                    __result = PlayerController.Instance.Inventory.HasUniqueItem(EUniqueItemId.Ahrimaaya);
+                    ProgressManager.Instance.SetBool("TrevisanQuestAazerach", __result);
+                    return;
+                }
+
                 if (SlotData.SkipPlot && GameData.Plotless.Contains(name) && __result == false)
                 {
                     ProgressManager.Instance.SetBool(name, true);
@@ -259,9 +265,8 @@ namespace Archipelago.MonsterSanctuary.Client
                     // if mad lord is the current goal, then we allow aazerach to be fought before postgame
                     if (SlotData.Goal == CompletionEvent.MadLord)
                     {
-                        ProgressManager.Instance.SetBool("TrevisanQuestAazerach", true, true);
+                        return ProgressManager.Instance.GetBool("TrevisanQuestAazerach");
                     }
-                    return true;
                 }
                 if (GameController.Instance.CurrentSceneName == "MountainPath_North1" 
                     && __instance.ID == 18)

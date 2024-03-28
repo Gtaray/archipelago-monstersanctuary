@@ -37,7 +37,6 @@ namespace Archipelago.MonsterSanctuary.Client
         public static int[] AP_VERSION = new int[] { 0, 4, 4 };
         public static ConnectionState State = ConnectionState.Disconnected;
         public static bool IsConnected => State == ConnectionState.Connected;
-        public static int ChampionsDefeated { get; set; } = 0;
 
         public static ArchipelagoConnectionInfo ConnectionInfo = new ArchipelagoConnectionInfo();
         public static ArchipelagoSession Session;
@@ -119,7 +118,7 @@ namespace Archipelago.MonsterSanctuary.Client
                 _deathLink.EnableDeathLink();
 
             GameData.LoadMinimap();
-            Patcher.RebuildCheckCounter();
+            Persistence.RebuildCheckCounter();
             Patcher.ClearModifiedShopItems();
 
             // Scout shops
@@ -183,6 +182,9 @@ namespace Archipelago.MonsterSanctuary.Client
             if (!APState.IsConnected)
                 return;
 
+            if (!SlotData.DeathLink)
+                return;
+
             _deathLink.SendDeathLink(new DeathLink(Session.Players.GetPlayerName(Session.ConnectionInfo.Slot), "lost a combat"));
         }
 
@@ -201,7 +203,7 @@ namespace Archipelago.MonsterSanctuary.Client
             if (!APState.IsConnected)
                 return;
 
-            for (int i = 0; i < Session.Items.AllItemsReceived.Count();  i++)
+            for (int i = 1; i < Session.Items.AllItemsReceived.Count();  i++)
             {
                 var item = Session.Items.AllItemsReceived[i];
 
@@ -215,6 +217,10 @@ namespace Archipelago.MonsterSanctuary.Client
         
         public static void ReceiveItem(ReceivedItemsHelper helper)
         {
+            // I guess we're supposed to ignore index 0, as that's special and means something else.
+            if (helper.Index == 0)
+                return;
+
             var item = helper.DequeueItem();
             var name = helper.GetItemName(item.Item);
             var action = Session.ConnectionInfo.Slot == item.Player

@@ -43,6 +43,7 @@ namespace Archipelago.MonsterSanctuary.Client
                     return;
                 }
 
+                Persistence.AddChampionDefeated(GameController.Instance.CurrentSceneName);
                 APState.CheckLocation(GameData.ChampionRankIds[locName]);
             }
         }
