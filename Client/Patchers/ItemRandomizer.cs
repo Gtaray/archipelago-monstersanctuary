@@ -27,7 +27,6 @@ namespace Archipelago.MonsterSanctuary.Client
         public string ItemName { get; set; }
         public string PlayerName { get; set; }
         public ItemTransferType Action { get; set; }
-        }
 
         public int? ItemIndex { get; set; }
         public long ItemID { get; set; }
@@ -39,7 +38,9 @@ namespace Archipelago.MonsterSanctuary.Client
 
     public partial class Patcher
     {
+
         private static ConcurrentDictionary<long, GrantItemsAction> _giftActions = new();
+        private static List<long> _monsterArmyRewards = new();
 
         #region Queue Functions
         // Because both items sent and received use the same pop up system to inform the player
@@ -67,12 +68,12 @@ namespace Archipelago.MonsterSanctuary.Client
             // This runs into the issue where resyncing will not give store items. 
             // We could avoid the need for this entirely if we make it so purchased items aren't given when bought
             // but instead use the normal randomized item rails. That might be better depending on how playtesting goes.
-            if (itemIndex != null && GameData.ShopChecks.ContainsValue(locationId) && _locations_checked.Contains(locationId))
+            if (itemIndex != null && GameData.ShopChecks.ContainsValue(locationId) && Persistence.Instance.LocationsChecked.Contains(locationId))
             {
                 // Have to do this check, becuase otherwise when resyncing this will reset the item received index back to
                 // an earlier value when a store item comes up in the list. This ensures that we only update the item cache
                 // for store items IF it was just purchased. Resyncing will skip these items entirely.
-                AddToItemCache(itemIndex.Value);
+                Persistence.AddToItemCache(itemIndex.Value);
                 return;
             }
 
@@ -337,7 +338,7 @@ namespace Archipelago.MonsterSanctuary.Client
                 ++ProgressManager.Instance.MonsterArmyRewardsClaimed;
                 AchievementsManager.Instance.OnMonsterArmyRewardClaimed();
 
-                var locIds = locNames.Select(l => GameData.ItemChecks[l]).Except(_locations_checked);
+                var locIds = locNames.Select(l => GameData.ItemChecks[l]).Except(Persistence.Instance.LocationsChecked);
 
                 // Queue up this location so that we know if we're handling monster army rewards
                 _monsterArmyRewards.AddRange(locIds);

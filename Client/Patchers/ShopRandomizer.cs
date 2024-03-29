@@ -153,7 +153,7 @@ namespace Archipelago.MonsterSanctuary.Client
                     var local = item.GetComponent<ForeignItem>() == null;
 
                     // Ignore foreign items that have already been checked
-                    if (!local && _locations_checked.Contains(rsi.LocationId))
+                    if (!local && Persistence.Instance.LocationsChecked.Contains(rsi.LocationId))
                     {
                         continue;
                     }
@@ -341,7 +341,7 @@ namespace Archipelago.MonsterSanctuary.Client
                     return;
 
                 // Don't do anything if we've already checked this location
-                if (_locations_checked.Contains(rsi.LocationId))
+                if (Persistence.Instance.LocationsChecked.Contains(rsi.LocationId))
                 {
                     return;
                 }
@@ -349,7 +349,7 @@ namespace Archipelago.MonsterSanctuary.Client
                 var foreignItem = item.GetComponent<ForeignItem>();
                 var isLocal = foreignItem == null;
 
-                Patcher.AddAndUpdateCheckedLocations(rsi.LocationId);
+                Persistence.AddAndUpdateCheckedLocations(rsi.LocationId);
                 Patcher.UI.AddItemToHistory(new ItemTransfer()
                 {
                     PlayerName = isLocal ? "" : foreignItem.Player, // Only need a name if we're sending an item

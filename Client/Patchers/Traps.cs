@@ -77,7 +77,7 @@ namespace Archipelago.MonsterSanctuary.Client
                         null);
 
                     // Save the trap to the cache so we don't get it again.
-                    AddToItemCache(_currentTrap.ItemIndex.Value);
+                    Persistence.AddToItemCache(_currentTrap.ItemIndex.Value);
                 }
 
                 _currentTrap = null;
