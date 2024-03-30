@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using Archipelago.MonsterSanctuary.Client.Behaviors;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -31,6 +32,7 @@ namespace Archipelago.MonsterSanctuary.Client
         public List<long> LocationsChecked = new List<long>();  // Includes champion rank up items
         public Dictionary<string, int> CheckCounter = new Dictionary<string, int>();  // does NOT include champion rank up items
         public List<string> ChampionsDefeated = new List<string>(); // Tracks which champions have been defeated
+        public List<string> ExploreItems = new List<string>();
 
         public static void PrintData()
         {
@@ -98,6 +100,34 @@ namespace Archipelago.MonsterSanctuary.Client
             SaveFile();
         }
 
+        public static void SnapshotExploreItems()
+        {
+            Instance.ExploreItems = PlayerController.Instance.Inventory.Uniques
+                .Where(i => i.Item is ExploreAbilityItem)
+                .Select(i => i.GetName())
+                .ToList();
+        }
+
+        public static void ReloadExploreItems()
+        {
+            foreach (var itemName in Instance.ExploreItems)
+            {
+                var item = GameData.GetItemByName<ExploreAbilityItem>(itemName);
+
+                if (item == null)
+                {
+                    Patcher.Logger.LogWarning("\tItem not found in World Data");
+                    continue;
+                }
+
+                // Don't add the same item twice
+                if (PlayerController.Instance.Inventory.Uniques.Any(i => i.GetName() == item.GetName()))
+                    continue;
+
+                PlayerController.Instance.Inventory.AddItem(item);
+            }
+        }
+
         public static void DeleteFile()
         {
             Patcher.Logger.LogInfo("DeleteFile");
@@ -107,12 +137,14 @@ namespace Archipelago.MonsterSanctuary.Client
             Instance = new Persistence();
         }
 
-        private static void SaveFile()
+        public static void SaveFile()
         {
             Patcher.Logger.LogInfo("SaveFile()");
             string rawPath = Environment.CurrentDirectory;
             if (rawPath != null)
             {
+                SnapshotExploreItems();
+
                 var json = JsonConvert.SerializeObject(Persistence.Instance);
                 Patcher.Logger.LogInfo(json);
                 File.WriteAllText(
@@ -128,6 +160,8 @@ namespace Archipelago.MonsterSanctuary.Client
             {
                 var json = File.ReadAllText(PERSISTENCE_FILENAME);
                 Instance = JsonConvert.DeserializeObject<Persistence>(json);
+
+                ReloadExploreItems();
             }
         }
     }

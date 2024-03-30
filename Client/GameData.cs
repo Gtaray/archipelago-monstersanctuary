@@ -66,6 +66,61 @@ namespace Archipelago.MonsterSanctuary.Client
         public BaseItem Item { get; set; }
     }
 
+    public class StoryFlagSkips
+    {
+        public List<string> Plotless = new();
+        public List<string> OpenShortcuts = new();
+        public List<string> OpenSunPalace = new();
+        public List<string> OpenHorizonBeach = new();
+        public List<string> OpenBlobBurg = new();
+        public List<string> OpenForgottenWorld = new();
+        public List<string> UnlockBlobBurg = new();
+
+        public List<string> AncientWoodsShortcuts = new();
+        public List<string> MysticalWorkshopShortcuts = new();
+
+        public bool ShouldSetFlag(string flag)
+        {
+            if (!APState.IsConnected)
+                return false;
+
+            if (Plotless.Contains(flag))
+                return SlotData.SkipPlot;
+
+            if (OpenShortcuts.Contains(flag))
+                return SlotData.OpenShortcuts;
+
+            if (OpenSunPalace.Contains(flag))
+                return SlotData.OpenSunPalace;
+
+            if (OpenHorizonBeach.Contains(flag))
+                return SlotData.OpenHorizonBeach;
+
+            if (OpenBlobBurg.Contains(flag))
+                return SlotData.OpenBlobBurg;
+
+            if (OpenForgottenWorld.Contains(flag))
+                return SlotData.OpenForgottenWorld;
+
+            if (UnlockBlobBurg.Contains(flag))
+                return SlotData.UnlockBlobBurg;
+
+            // These specific shortcuts we only want to remove if we're also removing locked doors.
+            if (AncientWoodsShortcuts.Contains(flag))
+                return SlotData.OpenShortcuts && SlotData.LockedDoors == LockedDoorsFlag.None;
+
+            if (MysticalWorkshopShortcuts.Contains(flag))
+                return SlotData.OpenShortcuts && SlotData.LockedDoors == LockedDoorsFlag.None;
+
+            return false;
+        }
+
+        public bool ShouldInteractableBeActivated(string interactable)
+        {
+            return ShouldSetFlag(interactable);
+        }
+    }
+
     public class GameData
     {
         #region Monster Location Data
@@ -236,14 +291,13 @@ namespace Archipelago.MonsterSanctuary.Client
         // Only needed for monsters whose names have spaces or special characters
         public static Dictionary<string, string> MonsterNames = new Dictionary<string, string>();
 
-        // Script Nodes that are skipped with plot less
-        public static List<string> Plotless = new();
-
         // Locked Doors
         public static List<string> LockedDoors = new();
 
         // Map Pin Locations
         public static Dictionary<string, List<long>> MapPins = new();
+
+        public static StoryFlagSkips StorySkips = new();
 
         public static void Load()
         {
@@ -272,11 +326,11 @@ namespace Archipelago.MonsterSanctuary.Client
 
             // Loads script nodes that are skipped with plotless
             using (Stream stream = assembly.GetManifestResourceStream(
-                "Archipelago.MonsterSanctuary.Client.data.plotless_flags.json"))
+                "Archipelago.MonsterSanctuary.Client.data.story_flag_skips.json"))
             using (StreamReader reader = new StreamReader(stream))
             {
                 string json = reader.ReadToEnd();
-                Plotless = JsonConvert.DeserializeObject<List<string>>(json);
+                StorySkips = JsonConvert.DeserializeObject<StoryFlagSkips>(json);
             }
 
             // Loads script nodes that are skipped with plotless

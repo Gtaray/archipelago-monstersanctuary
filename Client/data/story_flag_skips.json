@@ -1,0 +1,141 @@
+{
+  "Plotless": [
+    "enableMonsterJournal",
+    "KeeperStrongholdTalkEvent",
+    "TriggerOnce3200011", // Familiar talks when you enter the stronghold
+
+    "FirstWillEncounter",
+    "LeonardFightsBlob",
+    "FirstAlchemistEncounter",
+    "MinitaurChampion",
+    "TalkedToWillInLibrary",
+    "CongratulationsDuelTraining",
+    "EricToBlueCave",
+
+    "JuliaDungeonEncounter",
+    "JuliaWentToWoods",
+    "WillDungeonEvent",
+    "WillDungeonEncounter",
+    "WillDungeonEncounter2",
+    "WillDungeonEvent2",
+    "WillDungeonEncounter3",
+    "WillDungeonEvent3",
+    "WillDungeonEncounter4",
+    "WillResearch",
+    "DungeonRoomExplanationEvent",
+    "WillResearchInformation",
+    "JailAlchemistInformation",
+
+    "SnowyPeaksOldBuran",
+    "SnowyPeaksLakeWarning",
+
+    "CaretakerEvent1",
+    "CaretakerEvent2",
+    "CaretakerEventTrigger",
+    "CaretakerEventTriggerCompleted",
+    "CaretakerEvent4",
+
+    "OstanesJailed",
+
+    "GoblinKingDefeated",
+    "HorizonBeachLeonardEvent",
+    "HorizonBeachTreasureHunt",
+    "HorizonBeachLeonardPitEvent",
+    "HorizonBeachHelpLeonard",
+    "HorizonBeachLeonardSaved",
+    "HorizonBeachJuliaMaw",
+    "HorizonBeachMawEvent",
+    "HorizonBeachMawOpened",
+    "TreasureCaveEntranceActivated",
+    "TreasureCaveEntranceActivatedCompleted",
+
+    "MagmaRunestoneSeen",
+    "MagmaTalkedToWill",
+    "TriggerOnce28600039",
+    "MagmaWillLeft",
+
+    "UnderworldBeginsEvent",
+    "UnderworldJuliaEvent",
+    "UnderworldLeonardLostEvent",
+
+    "MysticalWorkshopAlchemistEvent1",
+    "MysticalWorkshopAlchemistEvent2"
+  ],
+  "OpenShortcuts": [
+    "MPC6SlidingGate",
+    "SDOrbGate2",
+    "BCEastShortcutGate",
+    "SDWestGate1",
+    "SDE1ShortcutSwitch",
+    "SDCentralGate1",
+    "SDCentralGate2",
+    "SDCentralGate5",
+    "SDCentralGate6",
+    "SPE4SlidingGate1",
+    "SPE3SlidingGate2",
+    "SPSPE1",
+    "SPEM3SlidingGate1b",
+    "AWS1RotatingGate1",
+    "AWS1RotatingGate2",
+    "HBC2RotatingGate",
+    "ForgottenWorld_Caves11_1",
+    "ForgottenWorld_Caves11_2",
+    "ATS8SlidingGate1",
+    "ATC10SlidingGate"
+  ],
+  "AncientWoodsShortcuts": [
+    "AncientWoods_South4_2",
+    "AncientWoods_SouthHidden4_4"
+  ],
+  "MysticalWorkshopShortcuts": [
+    "MWN4Gate1"
+  ],
+  "OpenSunPalace": [
+    "SunPalaceTowerSwitch1",
+    "SunPalaceTowerSwitch1Completed",
+    "SunPalaceTowerSwitch2",
+    "SunPalaceTowerSwitch2Completed",
+    "SunPalaceTowerSwitch3",
+    "SunPalaceTowerSwitch3Completed",
+    "SunPalaceWaterSwitch1",
+    "SunPalaceWaterSwitch1Completed",
+    "SunPalaceWaterSwitch2",
+    "SunPalaceWaterSwitch2Completed",
+    "SUPSlidingGate4",
+    "SPW2Gate1",
+    "SPS1SlidingGate"
+  ],
+  "OpenHorizonBeach": [
+    "AWE2EleGateWater",
+    "AWE2EleGateLightning",
+    "AWE2EleGateEarth",
+    "AWE2EleGateFire",
+    "MCE2RotatingGate"
+  ],
+  "UnlockBlobBurg": [
+    "BlobMonumentsAllActivated",
+    "BlobMonumentBlueActivated",
+    "BlobMonumentBlueCompleted",
+    "BlobMonumentGreenActivated",
+    "BlobMonumentGreenCompleted",
+    "BlobMonumentRedActivated",
+    "BlobMonumentRedCompleted"
+  ],
+  "OpenBlobBurg": [
+    "BlobBurgWall1",
+    "BlobBurgWall2",
+    "BlobBurgWall3",
+    "BlobBurgWall4",
+    "BlobBurgWall5",
+    "BlobBurgWall6",
+    "BlobBurgSidequestCompleted"
+  ],
+  "OpenForgottenWorld": [
+    "MCS9SlidingGate",
+    "MagmaChamber_South8_7", // Breakable wall
+    "MagmaChamber_South7_7", // Breakable wall
+    "HBFWE_GroundSwitch",
+    "TriggerOnce53500010",
+    "HBFWE_Wall"
+  ]
+}

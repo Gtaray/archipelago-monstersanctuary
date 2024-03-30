@@ -67,6 +67,12 @@ namespace Archipelago.MonsterSanctuary.Client
         public static int ExpMultiplier { get; set; } = 1;
         public static bool AlwaysGetEgg { get; set; } = false;
         public static bool SkipPlot { get; set; } = false;
+        public static bool UnlockBlobBurg { get; set; } = false;
+        public static bool OpenShortcuts { get; set; } = false;
+        public static bool OpenSunPalace { get; set; } = false;
+        public static bool OpenHorizonBeach { get; set; } = false;
+        public static bool OpenForgottenWorld { get; set; } = false;
+        public static bool OpenBlobBurg { get; set; } = false;
         public static ShiftFlag MonsterShiftRule { get; set; } = ShiftFlag.Normal;
         public static LockedDoorsFlag LockedDoors { get; set; } = 0;
         public static bool AddSmokeBombs { get; set; } = false;
@@ -88,6 +94,12 @@ namespace Archipelago.MonsterSanctuary.Client
             ExpMultiplier = GetIntData(options, "exp_multiplier", 1);
             AlwaysGetEgg = GetBoolData(options, "monsters_always_drop_egg", false);
             SkipPlot = GetBoolData(options, "skip_plot", false);
+            UnlockBlobBurg = GetBoolData(options, "unlock_blob_burg", false);
+            OpenShortcuts = GetBoolData(options, "open_shortcuts", false);
+            OpenSunPalace = GetBoolData(options, "open_sun_palace", false);
+            OpenHorizonBeach = GetBoolData(options, "open_horizon_beach", false);
+            OpenForgottenWorld = GetBoolData(options, "open_forgotten_world", false);
+            OpenBlobBurg = GetBoolData(options, "open_blob_burg", false);
             MonsterShiftRule = GetEnumData(options, "monster_shift_rule", ShiftFlag.Normal);
             LockedDoors = GetEnumData(options, "remove_locked_doors", LockedDoorsFlag.All);
             AddSmokeBombs = GetBoolData(options, "add_smoke_bombs", false);
@@ -150,6 +162,12 @@ namespace Archipelago.MonsterSanctuary.Client
             Patcher.Logger.LogInfo("Monster Shift Rule: " + Enum.GetName(typeof(ShiftFlag), MonsterShiftRule));
             Patcher.Logger.LogInfo("Locked Doors: " + Enum.GetName(typeof(LockedDoorsFlag), LockedDoors));
             Patcher.Logger.LogInfo("Skip Plot: " + SkipPlot);
+            Patcher.Logger.LogInfo("Open Shortcuts: " + OpenShortcuts);
+            Patcher.Logger.LogInfo("Open Sun Palace: " + OpenSunPalace);
+            Patcher.Logger.LogInfo("Open Horizon Beach: " + OpenHorizonBeach);
+            Patcher.Logger.LogInfo("Open Forgotten World: " + OpenForgottenWorld);
+            Patcher.Logger.LogInfo("Unlock Blob Burg: " + UnlockBlobBurg);
+            Patcher.Logger.LogInfo("Open Blob Burg: " + OpenBlobBurg);
             Patcher.Logger.LogInfo("Randomize Shop Prices: " + (GameData.ShopPrices.Count() > 0));
             Patcher.Logger.LogInfo("Shops Ignore Rank Requirement: " + ShopsIgnoreRank);
             Patcher.Logger.LogInfo("Monster Locations: " + GameData.MonstersCache.Count());

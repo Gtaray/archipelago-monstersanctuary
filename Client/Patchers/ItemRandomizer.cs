@@ -280,6 +280,20 @@ namespace Archipelago.MonsterSanctuary.Client
                     APState.CheckLocation(GameData.ItemChecks[locName]);
                 }
 
+                // if the gift comes from one of the blob burg chests that opens up walls
+                // then we want to skip the extra scripted components if OpenBlobBurg is set in the slot data
+                var isBlobBurgChest = (GameController.Instance.CurrentSceneName == "BlobBurg_Center2" ||
+                    GameController.Instance.CurrentSceneName == "BlobBurg_East5" ||
+                    GameController.Instance.CurrentSceneName == "BlobBurg_Center3" ||
+                    GameController.Instance.CurrentSceneName == "BlobBurg_South2" ||
+                    GameController.Instance.CurrentSceneName == "BlobBurg_West2" ||
+                    GameController.Instance.CurrentSceneName == "BlobBurg_Champion");
+                if (SlotData.OpenBlobBurg && isBlobBurgChest)
+                {
+                    Patcher.Logger.LogInfo("Yes, it's a blob burg chest");
+                    __instance.Connections.Clear();
+                }
+
                 return false;
             }
         }

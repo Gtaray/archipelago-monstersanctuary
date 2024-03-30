@@ -23,8 +23,8 @@
     <None Remove="data\monster_names.json" />
     <None Remove="data\npcs.json" />
     <None Remove="data\original_champions.json" />
-    <None Remove="data\plotless_flags.json" />
     <None Remove="data\script_nodes.json" />
+    <None Remove="data\story_flag_skips.json" />
   </ItemGroup>
 
   <ItemGroup>
@@ -40,7 +40,7 @@
   <ItemGroup>
     <EmbeddedResource Include="data\npcs.json" />
     <EmbeddedResource Include="data\original_champions.json" />
-    <EmbeddedResource Include="data\plotless_flags.json" />
+    <EmbeddedResource Include="data\story_flag_skips.json" />
   </ItemGroup>
 
   <ItemGroup>

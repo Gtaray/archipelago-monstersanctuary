@@ -15,62 +15,12 @@ namespace Archipelago.MonsterSanctuary.Client
     public partial class Patcher
     {
         #region Persistence
-        private const string EXPLORE_ITEMS_FILENAME = "archipelago_explore_items.json";
-
-        public static void DeleteExploreItemCache()
-        {
-            if (File.Exists(EXPLORE_ITEMS_FILENAME))
-                File.Delete(EXPLORE_ITEMS_FILENAME);
-        }
-
-        private static void SaveExploreItemsReceived()
-        {
-            string rawPath = Environment.CurrentDirectory;
-            if (rawPath != null)
-            {
-                var items = PlayerController.Instance.Inventory.Uniques
-                    .Where(i => i.Item is ExploreAbilityItem)
-                    .Select(i => i.GetName());
-
-                var bytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(items));
-                File.WriteAllBytes(Path.Combine(rawPath, EXPLORE_ITEMS_FILENAME), bytes);
-            }
-        }
-
-        private static void LoadExploreItemsReceived()
-        {
-            if (File.Exists(EXPLORE_ITEMS_FILENAME))
-            {
-                var reader = File.OpenText(EXPLORE_ITEMS_FILENAME);
-                var content = reader.ReadToEnd();
-                reader.Close();
-                List<string> items = JsonConvert.DeserializeObject<List<string>>(content);
-
-                foreach (var itemName in items)
-                {
-                    var item = GameData.GetItemByName<ExploreAbilityItem>(itemName);
-
-                    if (item == null)
-                    {
-                        Patcher.Logger.LogWarning("\tItem not found in World Data");
-                        continue;
-                    }
-
-                    // Don't add the same item twice
-                    if (PlayerController.Instance.Inventory.Uniques.Any(i => i.GetName() == item.GetName()))
-                        continue;
-
-                    PlayerController.Instance.Inventory.AddItem(item);
-                }
-            }
-        }
-
         [HarmonyPatch(typeof(InventoryManager), "SaveGame")]
         private static class InventoryManager_SaveGame
         {
             private static void Postfix(SaveGameData saveGameData)
             {
-                SaveExploreItemsReceived();
+                Persistence.SnapshotExploreItems();
 
                 // Go through the save game inventory and remove any new items.
                 // We'll add them back to the player when they connect and resync
@@ -83,7 +33,7 @@ namespace Archipelago.MonsterSanctuary.Client
         {
             private static void Postfix()
             {
-                LoadExploreItemsReceived();
+                Persistence.ReloadExploreItems();
             }
         }
         #endregion

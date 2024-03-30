@@ -217,8 +217,12 @@ namespace Archipelago.MonsterSanctuary.Client
 
                 if (name == "MozzieQuestStarted")
                 {
+                    // If we're in the mozzie room, we don't change the flag, just return it
+                    // This should allow mozzie to show up as normal
+                    if (GameController.Instance.CurrentSceneName == "MagmaChamber_PuppyRoom")
+                        return;
+
                     __result = PlayerController.Instance.Inventory.HasUniqueItem(EUniqueItemId.Mozzie);
-                    ProgressManager.Instance.SetBool(name, __result);
                     return;
                 }
 
@@ -229,11 +233,58 @@ namespace Archipelago.MonsterSanctuary.Client
                     return;
                 }
 
-                if (SlotData.SkipPlot && GameData.Plotless.Contains(name) && __result == false)
+                if (GameData.StorySkips.ShouldSetFlag(name) && __result == false)
                 {
                     ProgressManager.Instance.SetBool(name, true);
                     __result = true;
                     return;
+                }
+            }
+        }
+
+        [HarmonyPatch(typeof(ProgressManager), "GetInt")]
+        private class ProgressManager_GetInt
+        {
+            private static void Postfix(ref int __result, string name)
+            {
+                if (!APState.IsConnected)
+                    return;
+
+                if (GameData.StorySkips.ShouldSetFlag(name) && __result == 0)
+                {
+                    ProgressManager.Instance.SetInt(name, 1);
+                    __result = 1;
+                    return;
+                }
+            }
+        }
+
+        [HarmonyPatch(typeof(ProgressManager), "SetBool")]
+        private class ProgressManager_SetBool
+        {
+            private static void Postfix(bool value, string name)
+            {
+                Patcher.Logger.LogInfo($"SetBool: {name} ({value})");
+            }
+        }
+
+        [HarmonyPatch(typeof(MinimapEntry), "IsInteractableActivated")]
+        private class MinimapEntry_IsInteractableActivated
+        {
+            private static void Postfix(MinimapEntry __instance, ref bool __result, int ID)
+            {
+                if (!APState.IsConnected)
+                    return;
+
+                string id = $"{__instance.MapData.SceneName}_{ID}";
+
+                if (!GameData.StorySkips.ShouldInteractableBeActivated(id))
+                    return;
+
+                if (!__result)
+                {
+                    __instance.ActivateInteractable(ID);
+                    __result = true;
                 }
             }
         }
