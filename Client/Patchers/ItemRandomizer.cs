@@ -280,6 +280,10 @@ namespace Archipelago.MonsterSanctuary.Client
                     APState.CheckLocation(GameData.ItemChecks[locName]);
                 }
 
+                // Clear the dialog after opening the special chest that would contain the key of power
+                if (__instance.ID == 32100074)
+                    __instance.Connections.Clear();
+
                 // if the gift comes from one of the blob burg chests that opens up walls
                 // then we want to skip the extra scripted components if OpenBlobBurg is set in the slot data
                 var isBlobBurgChest = (GameController.Instance.CurrentSceneName == "BlobBurg_Center2" ||
@@ -288,9 +292,9 @@ namespace Archipelago.MonsterSanctuary.Client
                     GameController.Instance.CurrentSceneName == "BlobBurg_South2" ||
                     GameController.Instance.CurrentSceneName == "BlobBurg_West2" ||
                     GameController.Instance.CurrentSceneName == "BlobBurg_Champion");
-                if (SlotData.OpenBlobBurg && isBlobBurgChest)
+                var openBlobBurg = SlotData.OpenBlobBurg == OpenWorldSetting.Interior || SlotData.OpenBlobBurg == OpenWorldSetting.Full;
+                if (openBlobBurg && isBlobBurgChest)
                 {
-                    Patcher.Logger.LogInfo("Yes, it's a blob burg chest");
                     __instance.Connections.Clear();
                 }
 

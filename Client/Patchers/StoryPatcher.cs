@@ -210,7 +210,9 @@ namespace Archipelago.MonsterSanctuary.Client
 
                 if (name == "KeyOfPowerGained")
                 {
-                    __result = PlayerController.Instance.Inventory.Uniques.Any(i => i.GetName() == "Key of Power");
+                    __result = PlayerController.Instance.Inventory.Uniques.Any(i => i.GetName() == "Key of Power")
+                        || SlotData.OpenAbandonedTower == OpenWorldSetting.Entrances
+                        || SlotData.OpenAbandonedTower == OpenWorldSetting.Full;
                     ProgressManager.Instance.SetBool(name, __result);
                     return;
                 }
@@ -233,8 +235,10 @@ namespace Archipelago.MonsterSanctuary.Client
                     return;
                 }
 
-                if (GameData.StorySkips.ShouldSetFlag(name) && __result == false)
+                var shouldSetFlag = GameData.StorySkips.ShouldSetFlag(name);
+                if (shouldSetFlag && __result == false)
                 {
+                    Patcher.Logger.LogInfo("\tShould Set Flag? " + shouldSetFlag);
                     ProgressManager.Instance.SetBool(name, true);
                     __result = true;
                     return;
@@ -296,9 +300,12 @@ namespace Archipelago.MonsterSanctuary.Client
             {
                 // if checking how many sanctuary tokens we have, we modify the compare value to be 5
                 // This way the cut-scene will only trigger if all 5 sanctuary tokens are already gathered
+                // Unless the player has set underworld to start opened, in which case we basically ignore this condition entirely, treating it as true.
                 if (__instance.ID == 29300015)
                 {
-                    __instance.CompareValue = 5;
+                    __instance.CompareValue = SlotData.OpenUnderworld == OpenWorldSetting.Entrances || SlotData.OpenUnderworld == OpenWorldSetting.Full
+                        ? 0
+                        : 5;
                 }
             }
         }

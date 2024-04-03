@@ -66,18 +66,64 @@ namespace Archipelago.MonsterSanctuary.Client
         public BaseItem Item { get; set; }
     }
 
+    public class OpenWorldCollection
+    {
+        public List<string> Entrances = new();
+        public List<string> Interior = new();
+        public IEnumerable<string> Everything => Entrances.Union(Interior);
+
+        public IEnumerable<string> this[OpenWorldSetting setting]
+        {
+            get
+            {
+                return setting == OpenWorldSetting.Full
+                    ? Everything
+                    : setting == OpenWorldSetting.Entrances
+                        ? Entrances
+                        : Interior;
+            }
+        }
+
+        public bool Contains(OpenWorldSetting setting, string key)
+        {
+            if (setting == OpenWorldSetting.Closed)
+                return false;
+
+            return this[setting].Contains(key);
+        }
+
+        public bool Contains(string key)
+        {
+            return Everything.Contains(key);
+        }
+
+        public void Print()
+        {
+            Patcher.Logger.LogInfo("\tEntrances");
+            foreach (var item in Entrances)
+                Patcher.Logger.LogInfo("\t\t" + item);
+
+            Patcher.Logger.LogInfo("\tInterior");
+            foreach (var item in Interior)
+                Patcher.Logger.LogInfo("\t\t" + item);
+        }
+    }
+
     public class StoryFlagSkips
     {
         public List<string> Plotless = new();
-        public List<string> OpenShortcuts = new();
-        public List<string> OpenSunPalace = new();
-        public List<string> OpenHorizonBeach = new();
-        public List<string> OpenBlobBurg = new();
-        public List<string> OpenForgottenWorld = new();
-        public List<string> UnlockBlobBurg = new();
-
-        public List<string> AncientWoodsShortcuts = new();
-        public List<string> MysticalWorkshopShortcuts = new();
+        public OpenWorldCollection BlueCaves = new();
+        public OpenWorldCollection StrongholdDungeon = new();
+        public OpenWorldCollection SnowyPeaks = new();
+        public OpenWorldCollection AncientWoods = new();
+        public OpenWorldCollection SunPalace = new();
+        public OpenWorldCollection HorizonBeach = new();
+        public OpenWorldCollection MagmaChamber = new();
+        public OpenWorldCollection BlobBurg = new();
+        public OpenWorldCollection ForgottenWorld = new();
+        public OpenWorldCollection MysticalWorkshop = new();
+        public OpenWorldCollection Underworld = new();
+        public OpenWorldCollection AbandonedTower = new();
 
         public bool ShouldSetFlag(string flag)
         {
@@ -87,30 +133,41 @@ namespace Archipelago.MonsterSanctuary.Client
             if (Plotless.Contains(flag))
                 return SlotData.SkipPlot;
 
-            if (OpenShortcuts.Contains(flag))
-                return SlotData.OpenShortcuts;
+            if (BlueCaves.Contains(flag))
+                return SlotData.OpenBlueCaves;
 
-            if (OpenSunPalace.Contains(flag))
-                return SlotData.OpenSunPalace;
+            if (StrongholdDungeon.Contains(SlotData.OpenStrongholdDungeon, flag))
+                return true;
 
-            if (OpenHorizonBeach.Contains(flag))
-                return SlotData.OpenHorizonBeach;
+            if (SnowyPeaks.Contains(flag))
+                return SlotData.OpenSnowyPeaks;
 
-            if (OpenBlobBurg.Contains(flag))
-                return SlotData.OpenBlobBurg;
+            if (SunPalace.Contains(SlotData.OpenSunPalace, flag))
+                return true;
 
-            if (OpenForgottenWorld.Contains(flag))
-                return SlotData.OpenForgottenWorld;
+            if (AncientWoods.Contains(flag))
+                return SlotData.OpenAncientWoods;
 
-            if (UnlockBlobBurg.Contains(flag))
-                return SlotData.UnlockBlobBurg;
+            if (HorizonBeach.Contains(SlotData.OpenHorizonBeach, flag))
+                return true;
 
-            // These specific shortcuts we only want to remove if we're also removing locked doors.
-            if (AncientWoodsShortcuts.Contains(flag))
-                return SlotData.OpenShortcuts && SlotData.LockedDoors == LockedDoorsFlag.None;
+            if (MagmaChamber.Contains(SlotData.OpenMagmaChamber, flag))
+                return true;
 
-            if (MysticalWorkshopShortcuts.Contains(flag))
-                return SlotData.OpenShortcuts && SlotData.LockedDoors == LockedDoorsFlag.None;
+            if (BlobBurg.Contains(SlotData.OpenBlobBurg, flag))
+                return true;
+
+            if (ForgottenWorld.Contains(SlotData.OpenForgottenWorld, flag))
+                return true;
+
+            if (MysticalWorkshop.Contains(flag))
+                return SlotData.OpenMysticalWorkshop;
+
+            if (Underworld.Contains(SlotData.OpenUnderworld, flag))
+                return true;
+
+            if (AbandonedTower.Contains(SlotData.OpenAbandonedTower, flag))
+                return true;
 
             return false;
         }
@@ -118,6 +175,49 @@ namespace Archipelago.MonsterSanctuary.Client
         public bool ShouldInteractableBeActivated(string interactable)
         {
             return ShouldSetFlag(interactable);
+        }
+
+        public void PrintDebug()
+        {
+            Patcher.Logger.LogInfo("Story Skips");
+            foreach (var skip in Plotless)
+                Patcher.Logger.LogInfo("\t" + skip);
+
+            Patcher.Logger.LogInfo("Blue Caves");
+            BlueCaves.Print();
+
+            Patcher.Logger.LogInfo("Stronghold Dungeon");
+            StrongholdDungeon.Print();
+
+            Patcher.Logger.LogInfo("Snowy Peaks");
+            SnowyPeaks.Print();
+
+            Patcher.Logger.LogInfo("Ancient Woods");
+            AncientWoods.Print();
+
+            Patcher.Logger.LogInfo("Sun Palace");
+            SunPalace.Print();
+
+            Patcher.Logger.LogInfo("Horizon Beach");
+            HorizonBeach.Print();
+
+            Patcher.Logger.LogInfo("Magma Chamber");
+            MagmaChamber.Print();
+
+            Patcher.Logger.LogInfo("Blob Burg");
+            BlobBurg.Print();
+
+            Patcher.Logger.LogInfo("Forgotten World");
+            ForgottenWorld.Print();
+
+            Patcher.Logger.LogInfo("Underworld");
+            Underworld.Print();
+
+            Patcher.Logger.LogInfo("Mystical Workshop");
+            MysticalWorkshop.Print();
+
+            Patcher.Logger.LogInfo("Abandoned Tower");
+            AbandonedTower.Print();
         }
     }
 
@@ -331,6 +431,7 @@ namespace Archipelago.MonsterSanctuary.Client
             {
                 string json = reader.ReadToEnd();
                 StorySkips = JsonConvert.DeserializeObject<StoryFlagSkips>(json);
+                StorySkips.PrintDebug();
             }
 
             // Loads script nodes that are skipped with plotless

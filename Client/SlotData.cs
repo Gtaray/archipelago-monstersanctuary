@@ -42,6 +42,14 @@ namespace Archipelago.MonsterSanctuary.Client
         Species = 3
     }
 
+    public enum OpenWorldSetting
+    {
+        Closed = 0,
+        Entrances = 1,
+        Interior = 2,
+        Full = 3
+    }
+
     public class HintData
     {
         [JsonProperty("id")]
@@ -67,12 +75,18 @@ namespace Archipelago.MonsterSanctuary.Client
         public static int ExpMultiplier { get; set; } = 1;
         public static bool AlwaysGetEgg { get; set; } = false;
         public static bool SkipPlot { get; set; } = false;
-        public static bool UnlockBlobBurg { get; set; } = false;
-        public static bool OpenShortcuts { get; set; } = false;
-        public static bool OpenSunPalace { get; set; } = false;
-        public static bool OpenHorizonBeach { get; set; } = false;
-        public static bool OpenForgottenWorld { get; set; } = false;
-        public static bool OpenBlobBurg { get; set; } = false;
+        public static bool OpenBlueCaves { get; set; } = false;
+        public static OpenWorldSetting OpenStrongholdDungeon{ get; set; } = OpenWorldSetting.Closed;
+        public static bool OpenSnowyPeaks { get; set; } = false;
+        public static bool OpenAncientWoods { get; set; } = false;
+        public static OpenWorldSetting OpenSunPalace { get; set; } = OpenWorldSetting.Closed;
+        public static OpenWorldSetting OpenHorizonBeach { get; set; } = OpenWorldSetting.Closed;
+        public static OpenWorldSetting OpenMagmaChamber { get; set; } = OpenWorldSetting.Closed;
+        public static OpenWorldSetting OpenBlobBurg { get; set; } = OpenWorldSetting.Closed;
+        public static OpenWorldSetting OpenForgottenWorld { get; set; } = OpenWorldSetting.Closed;
+        public static bool OpenMysticalWorkshop { get; set; } = false;
+        public static OpenWorldSetting OpenUnderworld { get; set; } = OpenWorldSetting.Closed;
+        public static OpenWorldSetting OpenAbandonedTower { get; set; } = OpenWorldSetting.Closed;
         public static ShiftFlag MonsterShiftRule { get; set; } = ShiftFlag.Normal;
         public static LockedDoorsFlag LockedDoors { get; set; } = 0;
         public static bool AddSmokeBombs { get; set; } = false;
@@ -94,12 +108,18 @@ namespace Archipelago.MonsterSanctuary.Client
             ExpMultiplier = GetIntData(options, "exp_multiplier", 1);
             AlwaysGetEgg = GetBoolData(options, "monsters_always_drop_egg", false);
             SkipPlot = GetBoolData(options, "skip_plot", false);
-            UnlockBlobBurg = GetBoolData(options, "unlock_blob_burg", false);
-            OpenShortcuts = GetBoolData(options, "open_shortcuts", false);
-            OpenSunPalace = GetBoolData(options, "open_sun_palace", false);
-            OpenHorizonBeach = GetBoolData(options, "open_horizon_beach", false);
-            OpenForgottenWorld = GetBoolData(options, "open_forgotten_world", false);
-            OpenBlobBurg = GetBoolData(options, "open_blob_burg", false);
+            OpenBlueCaves = GetBoolData(options, "open_blue_caves", false);
+            OpenStrongholdDungeon = GetEnumData(options, "open_stronghold_dungeon", OpenWorldSetting.Closed);
+            OpenSnowyPeaks = GetBoolData(options, "open_snowy_peaks", false);
+            OpenAncientWoods = GetBoolData(options, "open_ancient_woods", false);
+            OpenSunPalace = GetEnumData(options, "open_sun_palace", OpenWorldSetting.Closed);
+            OpenHorizonBeach = GetEnumData(options, "open_horizon_beach", OpenWorldSetting.Closed);
+            OpenMagmaChamber = GetEnumData(options, "open_magma_chamber", OpenWorldSetting.Closed);
+            OpenBlobBurg = GetEnumData(options, "open_blob_burg", OpenWorldSetting.Closed);
+            OpenForgottenWorld = GetEnumData(options, "open_forgotten_world", OpenWorldSetting.Closed);
+            OpenMysticalWorkshop = GetBoolData(options, "open_mystical_workshop", false);
+            OpenUnderworld = GetEnumData(options, "open_underworld", OpenWorldSetting.Closed);
+            OpenAbandonedTower = GetEnumData(options, "open_abandoned_tower", OpenWorldSetting.Closed);
             MonsterShiftRule = GetEnumData(options, "monster_shift_rule", ShiftFlag.Normal);
             LockedDoors = GetEnumData(options, "remove_locked_doors", LockedDoorsFlag.All);
             AddSmokeBombs = GetBoolData(options, "add_smoke_bombs", false);
@@ -162,12 +182,18 @@ namespace Archipelago.MonsterSanctuary.Client
             Patcher.Logger.LogInfo("Monster Shift Rule: " + Enum.GetName(typeof(ShiftFlag), MonsterShiftRule));
             Patcher.Logger.LogInfo("Locked Doors: " + Enum.GetName(typeof(LockedDoorsFlag), LockedDoors));
             Patcher.Logger.LogInfo("Skip Plot: " + SkipPlot);
-            Patcher.Logger.LogInfo("Open Shortcuts: " + OpenShortcuts);
-            Patcher.Logger.LogInfo("Open Sun Palace: " + OpenSunPalace);
-            Patcher.Logger.LogInfo("Open Horizon Beach: " + OpenHorizonBeach);
-            Patcher.Logger.LogInfo("Open Forgotten World: " + OpenForgottenWorld);
-            Patcher.Logger.LogInfo("Unlock Blob Burg: " + UnlockBlobBurg);
-            Patcher.Logger.LogInfo("Open Blob Burg: " + OpenBlobBurg);
+            Patcher.Logger.LogInfo("Open Blue Caves: " + OpenBlueCaves);
+            Patcher.Logger.LogInfo("Open Stronghold Dungeon: " + Enum.GetName(typeof(OpenWorldSetting), OpenStrongholdDungeon));
+            Patcher.Logger.LogInfo("Open Snowy Peaks: " + OpenSnowyPeaks);
+            Patcher.Logger.LogInfo("Open Ancient Woods: " + OpenAncientWoods);
+            Patcher.Logger.LogInfo("Open Sun Palace: " + Enum.GetName(typeof(OpenWorldSetting), OpenSunPalace));
+            Patcher.Logger.LogInfo("Open Horizon Beach: " + Enum.GetName(typeof(OpenWorldSetting), OpenHorizonBeach));
+            Patcher.Logger.LogInfo("Open Magma Chamber: " + Enum.GetName(typeof(OpenWorldSetting), OpenMagmaChamber));
+            Patcher.Logger.LogInfo("Open Open Blurg: " + Enum.GetName(typeof(OpenWorldSetting), OpenBlobBurg));
+            Patcher.Logger.LogInfo("Open Forgotten World: " + Enum.GetName(typeof(OpenWorldSetting), OpenForgottenWorld));
+            Patcher.Logger.LogInfo("Open Underworld: " + Enum.GetName(typeof(OpenWorldSetting), OpenUnderworld));
+            Patcher.Logger.LogInfo("Open Mystical Workshop: " + Enum.GetName(typeof(OpenWorldSetting), OpenMysticalWorkshop));
+            Patcher.Logger.LogInfo("Open Abandoned Tower: " + Enum.GetName(typeof(OpenWorldSetting), OpenAbandonedTower));
             Patcher.Logger.LogInfo("Randomize Shop Prices: " + (GameData.ShopPrices.Count() > 0));
             Patcher.Logger.LogInfo("Shops Ignore Rank Requirement: " + ShopsIgnoreRank);
             Patcher.Logger.LogInfo("Monster Locations: " + GameData.MonstersCache.Count());

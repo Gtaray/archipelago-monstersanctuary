@@ -61,81 +61,167 @@
     "MysticalWorkshopAlchemistEvent1",
     "MysticalWorkshopAlchemistEvent2"
   ],
-  "OpenShortcuts": [
-    "MPC6SlidingGate",
-    "SDOrbGate2",
-    "BCEastShortcutGate",
-    "SDWestGate1",
-    "SDE1ShortcutSwitch",
-    "SDCentralGate1",
-    "SDCentralGate2",
-    "SDCentralGate5",
-    "SDCentralGate6",
-    "SPE4SlidingGate1",
-    "SPE3SlidingGate2",
-    "SPSPE1",
-    "SPEM3SlidingGate1b",
-    "AWS1RotatingGate1",
-    "AWS1RotatingGate2",
-    "HBC2RotatingGate",
-    "ForgottenWorld_Caves11_1",
-    "ForgottenWorld_Caves11_2",
-    "ATS8SlidingGate1",
-    "ATC10SlidingGate"
-  ],
-  "AncientWoodsShortcuts": [
-    "AncientWoods_South4_2",
-    "AncientWoods_SouthHidden4_4"
-  ],
-  "MysticalWorkshopShortcuts": [
-    "MWN4Gate1"
-  ],
-  "OpenSunPalace": [
-    "SunPalaceTowerSwitch1",
-    "SunPalaceTowerSwitch1Completed",
-    "SunPalaceTowerSwitch2",
-    "SunPalaceTowerSwitch2Completed",
-    "SunPalaceTowerSwitch3",
-    "SunPalaceTowerSwitch3Completed",
-    "SunPalaceWaterSwitch1",
-    "SunPalaceWaterSwitch1Completed",
-    "SunPalaceWaterSwitch2",
-    "SunPalaceWaterSwitch2Completed",
-    "SUPSlidingGate4",
-    "SPW2Gate1",
-    "SPS1SlidingGate"
-  ],
-  "OpenHorizonBeach": [
-    "AWE2EleGateWater",
-    "AWE2EleGateLightning",
-    "AWE2EleGateEarth",
-    "AWE2EleGateFire",
-    "MCE2RotatingGate"
-  ],
-  "UnlockBlobBurg": [
-    "BlobMonumentsAllActivated",
-    "BlobMonumentBlueActivated",
-    "BlobMonumentBlueCompleted",
-    "BlobMonumentGreenActivated",
-    "BlobMonumentGreenCompleted",
-    "BlobMonumentRedActivated",
-    "BlobMonumentRedCompleted"
-  ],
-  "OpenBlobBurg": [
-    "BlobBurgWall1",
-    "BlobBurgWall2",
-    "BlobBurgWall3",
-    "BlobBurgWall4",
-    "BlobBurgWall5",
-    "BlobBurgWall6",
-    "BlobBurgSidequestCompleted"
-  ],
-  "OpenForgottenWorld": [
-    "MCS9SlidingGate",
-    "MagmaChamber_South8_7", // Breakable wall
-    "MagmaChamber_South7_7", // Breakable wall
-    "HBFWE_GroundSwitch",
-    "TriggerOnce53500010",
-    "HBFWE_Wall"
-  ]
+  "BlueCaves": {
+    "Entrances": [],
+    "Interior": [
+      "MPC6SlidingGate"
+    ]
+  },
+  "StrongholdDungeon": {
+    "Entrances": [
+      "SDOrbGate2",
+      "BCEastShortcutGate"
+    ],
+    "Interior": [
+      "SDWestGate1",
+      "SDE1ShortcutSwitch",
+      "SDCentralGate1",
+      "SDCentralGate2",
+      "SDCentralGate5",
+      "SDCentralGate6"
+    ]
+  },
+  "SnowyPeaks": {
+    "Entrances": [],
+    "Interior": [
+      "SPE4SlidingGate1",
+      "SPE3SlidingGate2",
+      "SPEM3SlidingGate1b"
+    ]
+  },
+  "AncientWoods": {
+    "Entrances": [
+    ],
+    "Interior": [
+      "AncientWoods_South4_2",
+      "AncientWoods_SouthHidden4_4",
+      "AWE1RotatingGate"
+    ]
+  },
+  "SunPalace": {
+    "Entrances": [
+      "SPSPE1"
+    ],
+    "Interior": [
+      "SunPalaceTowerSwitch1",
+      "SunPalaceTowerSwitch1Completed",
+      "SunPalaceTowerSwitch2",
+      "SunPalaceTowerSwitch2Completed",
+      "SunPalaceTowerSwitch3",
+      "SunPalaceTowerSwitch3Completed",
+      "SunPalaceWaterSwitch1",
+      "SunPalaceWaterSwitch1Completed",
+      "SunPalaceWaterSwitch2",
+      "SunPalaceWaterSwitch2Completed",
+      "SUPSlidingGate4",
+      "SPW2Gate1",
+      "SPS1SlidingGate"
+    ]
+  },
+  "HorizonBeach": {
+    "Entrances": [
+      "AWE2EleGateWater",
+      "AWE2EleGateLightning",
+      "AWE2EleGateEarth",
+      "AWE2EleGateFire",
+      "MCE2RotatingGate"
+    ],
+    "Interior": [
+      "HBC2RotatingGate"
+    ]
+  },
+  "MagmaChamber": {
+    "Entrances": [
+      "AWS1RotatingGate1",
+      "AWS1RotatingGate2",
+      "MagmaChamber_South8_7", // Breakable wall
+      "MagmaChamber_South7_7" // Breakable wall
+    ],
+    "Interior": [
+      "RunestoneEventCompleted",
+      "MagmaRunestoneComplete", // After lowering the lava
+      "MagmaLavaSpell", // After lowering the lava
+      "MagmaLavaSpellCompleted",
+      "TriggerOnce26500065", // Cut-scene when lowering lava
+      "MCN8RotatingGate",
+      "MCC4RotatingGate",
+      "MCE1RotatingGate",
+      "MCS3RotatingGate"
+    ]
+  },
+  "BlobBurg": {
+    "Entrances": [
+      "BlobQuestBegins",
+      "BlobMonumentsAllActivated",
+      "BlobMonumentBlueActivated",
+      "BlobMonumentBlueCompleted",
+      "BlobMonumentGreenActivated",
+      "BlobMonumentGreenCompleted",
+      "BlobMonumentRedActivated",
+      "BlobMonumentRedCompleted"
+    ],
+    "Interior": [
+      "BlobBurgWall1",
+      "BlobBurgWall2",
+      "BlobBurgWall3",
+      "BlobBurgWall4",
+      "BlobBurgWall5",
+      "BlobBurgWall6",
+      "BlobBurgSidequestCompleted"
+    ]
+  },
+  "ForgottenWorld": {
+    "Entrances": [
+      "MCS9SlidingGate",
+      "HBFWE_GroundSwitch",
+      "TriggerOnce53500010",
+      "HBFWE_Wall"
+    ],
+    "Interior": [
+      "ForgottenWorld_Caves11_1",
+      "ForgottenWorld_Caves11_2"
+    ]
+  },
+  "MysticalWorkshop": {
+    "Entrances": [],
+    "Interior": [
+      "MWN4Gate1"
+    ]
+  },
+  "Underworld": {
+    "Entrances": [
+      "UnderworldDoorIsOpen",
+      "WestCatacombWall8" // Shortcut to sun palace
+    ],
+    "Interior": [
+      "TriggerOnce30500001", // East Catacomb 6 shortcut
+      "EastCatacombWall2", // East Catacomb 6 shortcut
+      "TriggerOnce30300001", // East catacomb center access
+      "EastCatacombWall1", // East catacomb center access
+      "TriggerOnce30700001", // East Catacomb 8 shortcut
+      "UnderworldShortcut1", // East Catacomb 8 shortcut
+      "UWWC4SlidingGate", // West catacomb 4 shortcut
+      "TriggerOnce32100011", // Roof access via west
+      "UWWC9GrapplingAnchor2", // Roof access via west
+      "TriggerOnce32100008", // Roof access via east
+      "UWWC9GrapplingAnchor1", // Roof access via east
+      "UWWC7SlidingGate", // West catacomb 7 shortcut
+      "UWWC1SlidingGate", // West Catacomb 1 trio of sliding gates
+    ]
+  },
+  "AbandonedTower": {
+    "Entrances": [
+      "MysticalWorkshopWall",
+      "AbandonedTowerGreeting",
+      "AbandonedTowerDoorOpened",
+      "AbandonedTowerRefreshEvent",
+      "AbandonedTowerEntrance1",
+      "AbandonedTowerEntrance2",
+      "AbandonedTowerEntrance3"
+    ],
+    "Interior": [
+      "ATS8SlidingGate1",
+      "ATC10SlidingGate"
+    ]
+  }
 }
