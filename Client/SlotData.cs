@@ -70,8 +70,9 @@ namespace Archipelago.MonsterSanctuary.Client
 
         public static int StartingFamiliar { get; set; } = -1;
         public static CompletionEvent Goal { get; set; } = CompletionEvent.MadLord;
-        public static int MozzieSoulPieces { get; set; } = 7;
+        public static int MozziePieces { get; set; } = 7;
         public static bool IncludeChaosRelics { get; set; } = false;
+        public static bool ChestMatchesContext { get; set; } = true;
         public static int ExpMultiplier { get; set; } = 1;
         public static bool AlwaysGetEgg { get; set; } = false;
         public static bool SkipPlot { get; set; } = false;
@@ -103,8 +104,9 @@ namespace Archipelago.MonsterSanctuary.Client
         {
             var options = GetDictionaryData<object>(slotData, "options");
             Goal = GetEnumData(options, "goal", CompletionEvent.MadLord);
-            MozzieSoulPieces = GetIntData(options, "mozzie_pieces", 7);
+            MozziePieces = GetIntData(options, "mozzie_pieces", 7);
             IncludeChaosRelics = GetBoolData(options, "include_chaos_relics", false);
+            ChestMatchesContext = GetBoolData(options, "chest_matches_content", true);
             ExpMultiplier = GetIntData(options, "exp_multiplier", 1);
             AlwaysGetEgg = GetBoolData(options, "monsters_always_drop_egg", false);
             SkipPlot = GetBoolData(options, "skip_plot", false);
@@ -145,6 +147,7 @@ namespace Archipelago.MonsterSanctuary.Client
             var itemLocations = GetDictionaryData<Dictionary<string, long>>(slotData, "locations");
 
             GameData.ShopChecks = itemLocations["shops"];
+            GameData.ShopChecksReversed = GameData.ShopChecks.ToDictionary(kvp => kvp.Value, kvp => kvp.Key);
             GameData.ShopPrices = GetDictionaryData<int>(slotData, "prices");
             GameData.ChampionRankIds = itemLocations["ranks"];
 
@@ -171,6 +174,9 @@ namespace Archipelago.MonsterSanctuary.Client
             foreach (var hint in hints)
                 GameData.AddHint(hint.ID, hint.Text, hint.IgnoreRemainingText);
 
+            Patcher.Logger.LogInfo("Goal: " + Enum.GetName(typeof(CompletionEvent), Goal));
+            if (Goal == CompletionEvent.Mozzie)
+                Patcher.Logger.LogInfo("Mozzie Count: " + MozziePieces);
             Patcher.Logger.LogInfo("Death Link: " + DeathLink);
             Patcher.Logger.LogInfo("Locked Explore Abilities: " + Enum.GetName(typeof(ExploreAbilityLockType), ExploreAbilityLock));
             Patcher.Logger.LogInfo("Eggsanity: " + Eggsanity);

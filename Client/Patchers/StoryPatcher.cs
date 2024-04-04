@@ -224,8 +224,31 @@ namespace Archipelago.MonsterSanctuary.Client
                     if (GameController.Instance.CurrentSceneName == "MagmaChamber_PuppyRoom")
                         return;
 
-                    __result = PlayerController.Instance.Inventory.HasUniqueItem(EUniqueItemId.Mozzie);
-                    return;
+                    // if the goal isn't to reunite mozzie, then we ignore this flag
+                    if (SlotData.Goal != CompletionEvent.Mozzie)
+                    {
+                        __result = PlayerController.Instance.Inventory.HasUniqueItem(EUniqueItemId.Mozzie);
+                    }
+                    else
+                    {
+                        Patcher.Logger.LogInfo("Checking MozzieQuestStarted");
+                        bool result = false;
+                        // if the player doesn't have a single mozzie, then return false
+                        if (PlayerController.Instance.Inventory.HasUniqueItem(EUniqueItemId.Mozzie))
+                        {
+                            // There should only be a single instance of unique Mozzie item
+                            // and we want its count
+                            int _mozzieCount = PlayerController.Instance.Inventory.Uniques
+                                    .Where(i => i.Item is UniqueItem && i.Unique.ItemID == EUniqueItemId.Mozzie)
+                                    .Select(i => i.Quantity)
+                                    .Single();
+                            Patcher.Logger.LogInfo("Mozzie count: " + _mozzieCount);
+                            result = _mozzieCount >= SlotData.MozziePieces;
+                        }
+                        
+                        __result = result;
+                        ProgressManager.Instance.SetBool(name, __result);
+                    }
                 }
 
                 if (name == "TrevisanQuestAazerach")
@@ -238,7 +261,6 @@ namespace Archipelago.MonsterSanctuary.Client
                 var shouldSetFlag = GameData.StorySkips.ShouldSetFlag(name);
                 if (shouldSetFlag && __result == false)
                 {
-                    Patcher.Logger.LogInfo("\tShould Set Flag? " + shouldSetFlag);
                     ProgressManager.Instance.SetBool(name, true);
                     __result = true;
                     return;
@@ -263,14 +285,14 @@ namespace Archipelago.MonsterSanctuary.Client
             }
         }
 
-        [HarmonyPatch(typeof(ProgressManager), "SetBool")]
-        private class ProgressManager_SetBool
-        {
-            private static void Postfix(bool value, string name)
-            {
-                Patcher.Logger.LogInfo($"SetBool: {name} ({value})");
-            }
-        }
+        //[HarmonyPatch(typeof(ProgressManager), "SetBool")]
+        //private class ProgressManager_SetBool
+        //{
+        //    private static void Postfix(bool value, string name)
+        //    {
+        //        Patcher.Logger.LogInfo($"SetBool: {name} ({value})");
+        //    }
+        //}
 
         [HarmonyPatch(typeof(MinimapEntry), "IsInteractableActivated")]
         private class MinimapEntry_IsInteractableActivated

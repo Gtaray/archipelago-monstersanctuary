@@ -28,7 +28,7 @@ namespace Archipelago.MonsterSanctuary.Client
 
         public const string PERSISTENCE_FILENAME = "archipelago_save_data.json";
 
-        public List<int> ItemsReceived = new List<int>(); 
+        public int ItemIndex { get; set; } = 0;
         public List<long> LocationsChecked = new List<long>();  // Includes champion rank up items
         public Dictionary<string, int> CheckCounter = new Dictionary<string, int>();  // does NOT include champion rank up items
         public List<string> ChampionsDefeated = new List<string>(); // Tracks which champions have been defeated
@@ -37,18 +37,25 @@ namespace Archipelago.MonsterSanctuary.Client
         public static void PrintData()
         {
             Patcher.Logger.LogInfo("Persistence:");
-            Patcher.Logger.LogInfo("\tItems Received: " + Instance.ItemsReceived.Count());
+            Patcher.Logger.LogInfo("\tItems Received: " + Instance.ItemIndex);
             Patcher.Logger.LogInfo("\tILocations Checked: " + Instance.LocationsChecked.Count());
             Patcher.Logger.LogInfo("\tChampions Defeated: " + Instance.ChampionsDefeated.Count());
         }
 
         public static void AddToItemCache(int id)
         {
-            if (Instance.ItemsReceived.Contains(id)) 
+            if (Instance.ItemIndex >= id) 
                 return;
 
-            Instance.ItemsReceived.Add(id);
+
+            Instance.ItemIndex = id;
             SaveFile();
+        }
+
+        public static void AddAndUpdateCheckedLocations(IEnumerable<long> locationIds)
+        {
+            foreach (long id in locationIds)
+                AddAndUpdateCheckedLocations(id);
         }
 
         public static void AddAndUpdateCheckedLocations(long locationId)
@@ -130,7 +137,6 @@ namespace Archipelago.MonsterSanctuary.Client
 
         public static void DeleteFile()
         {
-            Patcher.Logger.LogInfo("DeleteFile");
             if (File.Exists(PERSISTENCE_FILENAME))
                 File.Delete(PERSISTENCE_FILENAME);
 
@@ -146,7 +152,6 @@ namespace Archipelago.MonsterSanctuary.Client
                 SnapshotExploreItems();
 
                 var json = JsonConvert.SerializeObject(Persistence.Instance);
-                Patcher.Logger.LogInfo(json);
                 File.WriteAllText(
                     Path.Combine(rawPath, PERSISTENCE_FILENAME), 
                     json);

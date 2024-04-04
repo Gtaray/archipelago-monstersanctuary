@@ -22,6 +22,7 @@ using System.Data.SqlTypes;
 using System.Net.Sockets;
 using System.Collections.Concurrent;
 using Team17.Online;
+using UnityEngine.Networking.Match;
 
 namespace Archipelago.MonsterSanctuary.Client
 {
@@ -121,8 +122,9 @@ namespace Archipelago.MonsterSanctuary.Client
             Persistence.RebuildCheckCounter();
             Patcher.ClearModifiedShopItems();
 
-            // Scout shops
-            APState.ScoutLocations(GameData.ShopChecks.Values.ToArray(), false, Patcher.AddShopItem);
+            // Scout shops and progression item checks
+            var allScouts = GameData.ShopChecks.Values.Union(GameData.ItemChecks.Values).ToArray();
+            ScoutLocations(allScouts, false, HandleGlobalScoutCallback);
 
             // If the player opened chests while not connected, this get those items upon connection
             if (OfflineChecks.Count() > 0)
@@ -133,6 +135,21 @@ namespace Archipelago.MonsterSanctuary.Client
             }
 
             Resync();
+        }
+
+        static void HandleGlobalScoutCallback(NetworkItem packet)
+        {
+            if (GameData.ShopChecksReversed.ContainsKey(packet.Location))
+            {
+                Patcher.AddShopItem(packet);
+                return;
+            }
+            if (GameData.ItemChecksReversed.ContainsKey(packet.Location))
+            {
+                Patcher.AddProgressionItemChest(packet);
+                return;
+            }
+
         }
 
         static void Session_PacketReceived(ArchipelagoPacketBase packet)
@@ -203,32 +220,57 @@ namespace Archipelago.MonsterSanctuary.Client
             if (!APState.IsConnected)
                 return;
 
-            for (int i = 1; i < Session.Items.AllItemsReceived.Count();  i++)
+            Patcher.Logger.LogInfo("Resync()");
+            for (int i = 0; i < Session.Items.AllItemsReceived.Count();  i++)
             {
                 var item = Session.Items.AllItemsReceived[i];
+                
+                if (Persistence.Instance.ItemIndex >= i)
+                    continue;
 
-                var action = Session.ConnectionInfo.Slot == item.Player
-                    ? ItemTransferType.Aquired // We found our own item
-                    : ItemTransferType.Received; // Someone else found our item
-                var classification = (ItemClassification)((int)item.Flags);
-                Patcher.QueueItemTransfer(i, item.Item, item.Player, item.Location, classification, action);
+                Patcher.Logger.LogInfo("\t" + Session.Items.GetItemName(item.Item) + " - " + i);
+                QueueItemTransfer(i, item);
             }
         }
         
         public static void ReceiveItem(ReceivedItemsHelper helper)
         {
-            // I guess we're supposed to ignore index 0, as that's special and means something else.
-            if (helper.Index == 0)
-                return;
-
             var item = helper.DequeueItem();
-            var name = helper.GetItemName(item.Item);
-            var action = Session.ConnectionInfo.Slot == item.Player
-                ? ItemTransferType.Aquired // We found our own item
-                : ItemTransferType.Received; // Someone else found our item
-            var classification = (ItemClassification)((int)item.Flags);
+            string itemName = Session.Items.GetItemName(item.Item);
+            // -1 here as helper.Index tracks the NEXT hypothetical index you'd receive
+            // Or otherwise is considered the length of the array of items received
+            // This is directly from Not Phar on the AP discord
+            int index = helper.Index - 1; 
 
-            Patcher.QueueItemTransfer(helper.Index, item.Item, item.Player, item.Location, classification, action);
+            Patcher.Logger.LogInfo("RecieveItem(): " + itemName + "(" + index + ")");
+
+            // If the item index is less than our saved index, we simply ignore it.
+            // We've already received this item
+            if (index <= Persistence.Instance.ItemIndex)
+            {
+                Patcher.Logger.LogInfo("\tAlready handled. Ignore");
+                return;
+            }
+
+            // If the next item index is more than 1 above what we expect, resync
+            int delta = index - Persistence.Instance.ItemIndex;
+            if (delta > 1)
+            {
+                Patcher.Logger.LogInfo("Mismatched item index. Resyncing");
+                Resync();
+                return;
+            }
+
+            QueueItemTransfer(index, item);
+        }
+
+        private static void QueueItemTransfer(int index, NetworkItem item)
+        {
+            var action = Session.ConnectionInfo.Slot == item.Player
+                    ? ItemTransferType.Aquired // We found our own item
+                    : ItemTransferType.Received; // Someone else found our item
+            var classification = (ItemClassification)((int)item.Flags);
+            Patcher.QueueItemTransfer(index, item.Item, item.Player, item.Location, classification, action);
         }
 
         public static void CheckLocations(params long[] locationIds)
@@ -242,6 +284,12 @@ namespace Archipelago.MonsterSanctuary.Client
                 return;
 
             var locationsToCheck = CheckedLocations.Except(Session.Locations.AllLocationsChecked);
+
+            // Update the map and check counter that we've checked one or more locations
+            // We do this on the front end of the request so that even if we've already received this item
+            // we can still mark the location as checked
+            Persistence.AddAndUpdateCheckedLocations(locationsToCheck);
+
             Task.Run(() =>
             {
                 Session.Locations.CompleteLocationChecksAsync(
@@ -258,7 +306,7 @@ namespace Archipelago.MonsterSanctuary.Client
 
         private static async Task ShowMessageForSentItem(long[] locationsToCheck)
         {
-            // First we go through and 
+            // Scout the location in case its another players' check
             var packet = await Session.Locations.ScoutLocationsAsync(false, locationsToCheck);
             foreach (var scout in packet.Locations)
             {
@@ -279,6 +327,7 @@ namespace Archipelago.MonsterSanctuary.Client
             if (!APState.IsConnected)
                 return;
 
+            Patcher.Logger.LogInfo("Complete()");
             var statusUpdatePacket = new StatusUpdatePacket();
             statusUpdatePacket.Status = ArchipelagoClientState.ClientGoal;
             Session.Socket.SendPacket(statusUpdatePacket);
@@ -308,57 +357,29 @@ namespace Archipelago.MonsterSanctuary.Client
         #endregion
 
         #region Scouting
-        private static ConcurrentQueue<ScoutRequest> _scoutQueue = new ConcurrentQueue<ScoutRequest>();
-
         public static void ScoutLocations(string[] locationNames, bool scoutAsHint = false, System.Action<NetworkItem> action = null)
         {
             var locations = locationNames.Select(l => Session.Locations.GetLocationIdFromName("Monster Sanctuary", l));
             ScoutLocations(locations.ToArray(), scoutAsHint, action);
         }
 
+        public static void ScoutLocations(long location, bool scoutAsHint = false, System.Action<NetworkItem> action = null)
+        {
+            ScoutLocations(new long[] { location }, scoutAsHint, action);
+        }
+
         public static void ScoutLocations(long[] locations, bool scoutAsHint = false, System.Action<NetworkItem> action = null)
         {
-            QueueScoutRequest(locations, scoutAsHint, action);
+            var task = Task.Run(() => ProcessScoutRequest(locations, scoutAsHint, action));
         }
 
-        private static void QueueScoutRequest(long[] locations, bool scoutAsHint = false, System.Action<NetworkItem> action = null)
+        private static async Task ProcessScoutRequest(long[] locations, bool asHint, System.Action<NetworkItem> callback)
         {
-            var request = new ScoutRequest()
+            var packet = await Session.Locations.ScoutLocationsAsync(asHint, locations);
+            foreach (var location in packet.Locations)
             {
-                Locations = locations,
-                CallbackAction = action,
-                ScoutAsHint = scoutAsHint
-            };
-
-            _scoutQueue.Enqueue(request);
-
-            // If the queue contains exactly 1 request (the one we just put in there), spin up the background task to handle it.
-            if (_scoutQueue.Count == 1)
-            {
-                Task.Run(ProcessNextScoutRequest);
-            }
-        }
-
-        private static async Task ProcessNextScoutRequest()
-        {
-            // Peek because we don't want to dequeue until we're actually done with the request
-            if (_scoutQueue.TryPeek(out ScoutRequest request))
-            {
-                var packet = await Session.Locations.ScoutLocationsAsync(request.ScoutAsHint, request.Locations);
-                foreach (var location in packet.Locations)
-                {
-                    if (request.CallbackAction != null)
-                        request.CallbackAction(location);
-                }
-
-                // Once we're done with the request, do the dequeue
-                _scoutQueue.TryDequeue(out _);
-            }
-
-            // After dequeing, we check if there are more scouts to process. If there are, call this method again.
-            if (_scoutQueue.Count() > 0)
-            {
-                await ProcessNextScoutRequest();
+                if (callback!= null)
+                    callback(location);
             }
         }
         #endregion

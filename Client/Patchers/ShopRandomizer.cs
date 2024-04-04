@@ -247,6 +247,31 @@ namespace Archipelago.MonsterSanctuary.Client
             }
         }
 
+        [HarmonyPatch(typeof(MenuList), "AddDisplayable")]
+        public class MenuList_AddDisplayable
+        {
+            private static void Postfix(MenuList __instance, ref MenuListItem __result, ref IMenuListDisplayable displayable)
+            {
+                // If we can't do this cast, then return
+                if (displayable is not BaseItem)
+                    return;
+
+                BaseItem item = (BaseItem)displayable;
+                if (item == null)
+                    return;
+
+                var rsi = item.GetComponent<RandomizedShopItem>();
+                if (rsi == null)
+                    return;
+
+                // Don't color filler items
+                if (rsi.Classification == ItemClassification.Filler)
+                    return;
+
+                __result.Text.text = FormatItem(__result.Text.text, rsi.Classification);
+            }
+        }
+
         [HarmonyPatch(typeof(TradePopup), "Open")]
         public class TradePopup_Open 
         { 
@@ -349,7 +374,6 @@ namespace Archipelago.MonsterSanctuary.Client
                 var foreignItem = item.GetComponent<ForeignItem>();
                 var isLocal = foreignItem == null;
 
-                Persistence.AddAndUpdateCheckedLocations(rsi.LocationId);
                 Patcher.UI.AddItemToHistory(new ItemTransfer()
                 {
                     PlayerName = isLocal ? "" : foreignItem.Player, // Only need a name if we're sending an item

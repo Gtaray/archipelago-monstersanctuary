@@ -299,6 +299,7 @@ namespace Archipelago.MonsterSanctuary.Client
         #region Item Location Data
         // Maps the logical <scene>_<object_id> format that the client generates to the location ids that AP cares about
         public static Dictionary<string, long> ItemChecks = new();
+        public static Dictionary<long, string> ItemChecksReversed = new();
 
         // The number of item checks in each area
         public static Dictionary<string, int> NumberOfChecks = new();
@@ -306,6 +307,8 @@ namespace Archipelago.MonsterSanctuary.Client
         public static void AddItemCheck(string logicalName, long locationId, string area)
         {
             ItemChecks[logicalName] = locationId;
+            ItemChecksReversed[locationId] = logicalName;
+
             if (!NumberOfChecks.ContainsKey(area))
                 NumberOfChecks[area] = 0;
             NumberOfChecks[area] += 1;
@@ -315,6 +318,7 @@ namespace Archipelago.MonsterSanctuary.Client
         #region Shop Location Data
         public static bool Shopsanity => ShopChecks.Count > 0;
         public static Dictionary<string, long> ShopChecks = new();
+        public static Dictionary<long, string> ShopChecksReversed = new();
         public static Dictionary<string, int> ShopPrices = new();
 
         // Shopsanity entries
@@ -431,7 +435,7 @@ namespace Archipelago.MonsterSanctuary.Client
             {
                 string json = reader.ReadToEnd();
                 StorySkips = JsonConvert.DeserializeObject<StoryFlagSkips>(json);
-                StorySkips.PrintDebug();
+                //StorySkips.PrintDebug();
             }
 
             // Loads script nodes that are skipped with plotless

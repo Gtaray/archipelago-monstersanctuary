@@ -102,7 +102,6 @@ namespace Archipelago.MonsterSanctuary.Client
 
                     if (egg != null)
                     {
-                        Patcher.Logger.LogInfo($"Adding Egg: {egg.Name} ({(int)enemy.Shift})");
                         __instance.AddRewardItem(items, egg, 1, (int)enemy.Shift);
                     }
                 }

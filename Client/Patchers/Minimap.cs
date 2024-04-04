@@ -182,52 +182,5 @@ namespace Archipelago.MonsterSanctuary.Client
                 }
             }
         }
-
-        [HarmonyPatch(typeof(MapMenu), "CheckAllAreas")]
-        private class MapMenu_CheckAllAreas
-        {
-            private static void Postfix(MapMenu __instance)
-            {
-                if (!APState.IsConnected)
-                    return;
-
-                __instance.AreaPercentText.maxChars = 150;
-                ShowGoalProgress(__instance);
-            }
-        }
-
-        [HarmonyPatch(typeof(MapMenu), "CheckCurrentArea")]
-        private class MapMenu_CheckCurrentArea
-        {
-            private static void Postfix(MapMenu __instance)
-            {
-                if (!APState.IsConnected)
-                    return;
-
-                __instance.AreaPercentText.maxChars = 150;
-                ShowGoalProgress(__instance);
-            }
-        }
-
-        private static void ShowGoalProgress(MapMenu __instance)
-        {
-            string goalText = "";
-            if (SlotData.Goal == CompletionEvent.MadLord)
-                goalText = "Defeat the Mad Lord";
-            else if (SlotData.Goal == CompletionEvent.Champions)
-                goalText = $"Defeat All Champions - {Persistence.Instance.ChampionsDefeated.Count()} / 27";
-
-            if (APState.Completed)
-            {
-                // Formats the text to be green
-                goalText = FormatItem(goalText, ItemClassification.Useful);
-            }
-
-            __instance.AreaPercentText.text = string.Format(
-                "{0}\nGoal: {1}",
-                __instance.AreaPercentText.text,
-                goalText
-                );
-        }
     }
 }

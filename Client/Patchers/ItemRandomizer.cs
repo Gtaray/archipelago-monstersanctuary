@@ -7,10 +7,13 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net.Sockets;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Xml;
+using System.Xml.Linq;
 using UnityEngine;
+using UnityEngine.SocialPlatforms;
 using static PopupController;
 using static System.Net.Mime.MediaTypeNames;
 
@@ -53,17 +56,16 @@ namespace Archipelago.MonsterSanctuary.Client
         // until the player is able to move again, then check all of them at once.
         private static List<long> _giftQueue = new();
 
+        public static bool ItemQueueHasIndex(int itemIndex)
+        {
+            return _itemQueue.Any(i => i.ItemIndex == itemIndex);
+        }
+
         public static void QueueItemTransfer(int? itemIndex, long itemId, int playerId, long locationId, ItemClassification classification, ItemTransferType action)
         {
             var itemName = APState.Session.Items.GetItemName(itemId);
 
-            // If item index is null (meaning this is someone else's item), we can only rely on whether the location ID is checked.
-            if (itemIndex == null && Persistence.Instance.LocationsChecked.Contains(locationId))
-            {
-                return;
-            }
-
-            // If this is a shop location and we've already checked it, we updatea the index and move on
+            // If this is a shop location and we've already checked it, we update the index and move on
             // This is so we receive items we've bought.
             // This runs into the issue where resyncing will not give store items. 
             // We could avoid the need for this entirely if we make it so purchased items aren't given when bought
@@ -77,16 +79,9 @@ namespace Archipelago.MonsterSanctuary.Client
                 return;
             }
 
-            // We need to do this here so that we know for sure when a check is done the map is updated
-            // If the item action is either sent or acquired, we want to update the minimap. If we received the item then its not from us at all.
-            if (action != ItemTransferType.Received)
-            {
-                Persistence.AddAndUpdateCheckedLocations(locationId);
-            }   
-
             // Do not queue a new item if we've already received that item.
             // Do not queue an item if the queue already contains that index.
-            if (itemIndex != null && (Persistence.Instance.ItemsReceived.Contains(itemIndex.Value) || _itemQueue.Any(i => i.ItemIndex == itemIndex)))
+            if (itemIndex != null && _itemQueue.Any(i => i.ItemIndex == itemIndex))
             {
                 return;
             }
@@ -111,6 +106,13 @@ namespace Archipelago.MonsterSanctuary.Client
             else
             {
                 _itemQueue.Enqueue(transfer);
+            }
+
+            // Save the item as received as soon as it's queued up, not when its processed
+            // This will avoid cascading resyncs when multiple items are received simultaneously.
+            if (itemIndex != null)
+            {
+                Persistence.AddToItemCache(itemIndex.Value);
             }
         }
         #endregion
@@ -137,6 +139,7 @@ namespace Archipelago.MonsterSanctuary.Client
 
                 if (_itemQueue.TryDequeue(out ItemTransfer nextItem))
                 {
+                    Patcher.Logger.LogInfo("Dequeueing " + nextItem.ItemName);
                     // For these, we just want to increment the counter and move on. Nothing else.
                     if (nextItem.ItemName == "Champion Defeated")
                     {
@@ -194,10 +197,6 @@ namespace Archipelago.MonsterSanctuary.Client
                             nextItem.Action == ItemTransferType.Aquired,
                             eggShift,
                             callback);
-
-                        // We only want to save items to the item cache if we're receiving the item. 
-                        // Do not cache items we send to other people
-                        Persistence.AddToItemCache(nextItem.ItemIndex.Value);
                     }
                 }
             }
@@ -375,6 +374,85 @@ namespace Archipelago.MonsterSanctuary.Client
         }
         #endregion
 
+        #region Chest Matches Content
+        private static ConcurrentBag<long> _progressionItemChests = new();
+
+        public static void AddProgressionItemChest(NetworkItem packet) 
+        {
+            var classification = (ItemClassification)(int)packet.Flags;
+            if (classification == ItemClassification.Progression)
+            {
+                _progressionItemChests.Add(packet.Location);
+            }
+        }
+
+        [HarmonyPatch(typeof(Chest), "Start")]
+        private class Chest_Start
+        {
+            private static void Postfix(Chest __instance)
+            {
+                if (!APState.IsConnected)
+                    return;
+
+                string locName = $"{GameController.Instance.CurrentSceneName}_{__instance.ID}";
+                if (!GameData.ItemChecks.ContainsKey(locName))
+                    return;
+
+                var locId = GameData.ItemChecks[locName];
+                var progression = _progressionItemChests.Contains(locId);
+
+                int baseSprite = 0;
+                if (progression)
+                {
+                    baseSprite = 33;
+                }
+
+                Patcher.Logger.LogInfo("Chest Sprite ID: " + baseSprite);
+                __instance.GetComponent<tk2dSprite>().SetSprite(baseSprite);
+            }
+        }
+
+        [HarmonyPatch(typeof(Chest), "Interact")]
+        private class Chest_Interact
+        {
+            private static void Prefix(Chest __instance)
+            {
+                if (!APState.IsConnected)
+                    return;
+
+                string locName = $"{GameController.Instance.CurrentSceneName}_{__instance.ID}";
+                if (!GameData.ItemChecks.ContainsKey(locName))
+                    return;
+
+                var locId = GameData.ItemChecks[locName];
+                var progression = _progressionItemChests.Contains(locId);
+
+                int baseSprite = 0;
+                if (progression)
+                {
+                    baseSprite = 33;
+                }
+
+                var animator = __instance.GetComponent<tk2dSpriteAnimator>();
+                var closed = animator.GetClipByName("closed");
+                var opening = animator.GetClipByName("opening");
+                var open = animator.GetClipByName("open");
+
+                // Closed
+                Patcher.Logger.LogInfo("closed sprite set to " + baseSprite);
+                closed.frames[0].spriteId = baseSprite;
+                // Opening
+                Patcher.Logger.LogInfo("opening sprites set to: " + baseSprite + ", " + (baseSprite + 1) + ", and " + (baseSprite + 2));
+                opening.frames[0].spriteId = baseSprite;
+                opening.frames[1].spriteId = baseSprite + 1;
+                opening.frames[2].spriteId = baseSprite + 2;
+                // Open
+                Patcher.Logger.LogInfo("Open sprite set to " + (baseSprite + 2));
+                open.frames[0].spriteId = baseSprite + 2;
+            }
+        }
+        #endregion
+
         public static void CheckArmyRewards()
         {
             Traverse.Create(UIController.Instance.MonsterArmy)
@@ -424,7 +502,7 @@ namespace Archipelago.MonsterSanctuary.Client
             }
 
             GiveItem(newItem, player, classification, self, quantity, confirmCallback, eggShift);
-        }        
+        }
 
         #region Give Items
         static void GiveItem(BaseItem item, string player, ItemClassification classification, bool self, int quantity = 1, PopupDelegate callback = null, EShift eggShift = EShift.Normal)
@@ -548,6 +626,24 @@ namespace Archipelago.MonsterSanctuary.Client
             }
 
             return Colors.FillerItem;
+        }
+
+        public static UnityEngine.Color GetItemColorCode(ItemClassification classification)
+        {
+            if (classification == ItemClassification.Progression)
+            {
+                return Colors.ProgressionItemColor;
+            }
+            else if (classification == ItemClassification.Useful)
+            {
+                return Colors.UsefulItemColor;
+            }
+            else if (classification == ItemClassification.Trap)
+            {
+                return Colors.TrapItemColor;
+            }
+
+            return Colors.FillerItemColor;
         }
 
         public static string FormatItem(string text, ItemClassification classification)
