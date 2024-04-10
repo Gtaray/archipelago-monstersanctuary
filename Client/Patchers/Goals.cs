@@ -45,7 +45,7 @@ namespace Archipelago.MonsterSanctuary.Client
             else if (SlotData.Goal == CompletionEvent.Champions)
                 goalText = $"Defeat All Champions - {Persistence.Instance.ChampionsDefeated.Count()} / 27";
             else if (SlotData.Goal == CompletionEvent.Monsterpedia)
-                goalText = $"Complete Monster Journal - {PlayerController.Instance.Monsters.AllMonster.Select(m => m.ID).Distinct().Count()} / 111";
+                goalText = $"Complete Monster Journal - {PlayerController.Instance.Monsters.CountHatchedMonsterTypes()} / 111";
             else if (SlotData.Goal == CompletionEvent.Mozzie)
                 goalText = $"Reunite Mozzie and Velvet Melody - {PlayerController.Instance.Inventory.Uniques.Count(i => i.Unique.ItemID == EUniqueItemId.Mozzie)} / {SlotData.MozziePieces}";
 
@@ -102,7 +102,7 @@ namespace Archipelago.MonsterSanctuary.Client
                 // If the goal is to complete the monster journal, and we've got 111 monsters, complete the game.
                 if (SlotData.Goal == CompletionEvent.Monsterpedia)
                 {
-                    if (PlayerController.Instance.Monsters.AllMonster.Select(m => m.ID).Distinct().Count() == 111)
+                    if (PlayerController.Instance.Monsters.HasHatchedAllMonsters())
                         APState.CompleteGame();
                 }
             }

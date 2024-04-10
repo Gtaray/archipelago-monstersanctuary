@@ -407,7 +407,6 @@ namespace Archipelago.MonsterSanctuary.Client
                     baseSprite = 33;
                 }
 
-                Patcher.Logger.LogInfo("Chest Sprite ID: " + baseSprite);
                 __instance.GetComponent<tk2dSprite>().SetSprite(baseSprite);
             }
         }
@@ -439,15 +438,12 @@ namespace Archipelago.MonsterSanctuary.Client
                 var open = animator.GetClipByName("open");
 
                 // Closed
-                Patcher.Logger.LogInfo("closed sprite set to " + baseSprite);
                 closed.frames[0].spriteId = baseSprite;
                 // Opening
-                Patcher.Logger.LogInfo("opening sprites set to: " + baseSprite + ", " + (baseSprite + 1) + ", and " + (baseSprite + 2));
                 opening.frames[0].spriteId = baseSprite;
                 opening.frames[1].spriteId = baseSprite + 1;
                 opening.frames[2].spriteId = baseSprite + 2;
                 // Open
-                Patcher.Logger.LogInfo("Open sprite set to " + (baseSprite + 2));
                 open.frames[0].spriteId = baseSprite + 2;
             }
         }

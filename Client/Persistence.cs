@@ -109,6 +109,7 @@ namespace Archipelago.MonsterSanctuary.Client
 
         public static void SnapshotExploreItems()
         {
+            Patcher.Logger.LogInfo("SnapshotExploreItems()");
             Instance.ExploreItems = PlayerController.Instance.Inventory.Uniques
                 .Where(i => i.Item is ExploreAbilityItem)
                 .Select(i => i.GetName())
@@ -117,6 +118,7 @@ namespace Archipelago.MonsterSanctuary.Client
 
         public static void ReloadExploreItems()
         {
+            Patcher.Logger.LogInfo("ReloadExploreItems()");
             foreach (var itemName in Instance.ExploreItems)
             {
                 var item = GameData.GetItemByName<ExploreAbilityItem>(itemName);
@@ -137,6 +139,7 @@ namespace Archipelago.MonsterSanctuary.Client
 
         public static void DeleteFile()
         {
+            Patcher.Logger.LogInfo("DeleteFile()");
             if (File.Exists(PERSISTENCE_FILENAME))
                 File.Delete(PERSISTENCE_FILENAME);
 
@@ -146,6 +149,8 @@ namespace Archipelago.MonsterSanctuary.Client
         public static void SaveFile()
         {
             Patcher.Logger.LogInfo("SaveFile()");
+            Persistence.SnapshotExploreItems();
+
             string rawPath = Environment.CurrentDirectory;
             if (rawPath != null)
             {

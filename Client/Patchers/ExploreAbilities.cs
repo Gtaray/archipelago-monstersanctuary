@@ -18,10 +18,13 @@ namespace Archipelago.MonsterSanctuary.Client
         [HarmonyPatch(typeof(InventoryManager), "SaveGame")]
         private static class InventoryManager_SaveGame
         {
+            private static void Prefix()
+            {
+                Persistence.SaveFile();
+            }
+
             private static void Postfix(SaveGameData saveGameData)
             {
-                Persistence.SnapshotExploreItems();
-
                 // Go through the save game inventory and remove any new items.
                 // We'll add them back to the player when they connect and resync
                 saveGameData.Inventory.RemoveAll(i => i.Item is ExploreAbilityItem);
@@ -256,6 +259,12 @@ namespace Archipelago.MonsterSanctuary.Client
                     return;
 
                 var itemName = GameData.GetItemRequiredForMonsterExploreAbility(monster.GetName());
+                if (string.IsNullOrEmpty(itemName))
+                {
+                    Patcher.Logger.LogError($"could not find the item that unlocks {monster.GetName()}'s explore ability");
+                    return;
+                }
+
                 __instance.AbilityName.text += "\n" + FormatItem(itemName, ItemClassification.Progression);
             }
         }

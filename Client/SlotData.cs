@@ -68,6 +68,7 @@ namespace Archipelago.MonsterSanctuary.Client
         public static bool SkipKeeperBattles { get; set; } = false;
         // END UNUSED
 
+        public static string Version { get; set; }
         public static int StartingFamiliar { get; set; } = -1;
         public static CompletionEvent Goal { get; set; } = CompletionEvent.MadLord;
         public static int MozziePieces { get; set; } = 7;
@@ -102,6 +103,8 @@ namespace Archipelago.MonsterSanctuary.Client
 
         public static void LoadSlotData(Dictionary<string, object> slotData)
         {
+            Version = GetStringData(slotData, "version");
+
             var options = GetDictionaryData<object>(slotData, "options");
             Goal = GetEnumData(options, "goal", CompletionEvent.MadLord);
             MozziePieces = GetIntData(options, "mozzie_pieces", 7);

@@ -36,6 +36,7 @@ namespace Archipelago.MonsterSanctuary.Client
         }
 
         public static int[] AP_VERSION = new int[] { 0, 4, 4 };
+        public static string ModVersion = "1.1.0";
         public static ConnectionState State = ConnectionState.Disconnected;
         public static bool IsConnected => State == ConnectionState.Connected;
 
@@ -180,8 +181,11 @@ namespace Archipelago.MonsterSanctuary.Client
 
             if (Session != null && Session.Socket != null && Session.Socket.Connected)
             {
+                State = ConnectionState.Disconnected;
+                Authenticated = false;
                 _deathLink.DisableDeathLink();
                 Session.Socket.DisconnectAsync();
+                Session = null;
             }
         }
         public static void Disconnect()

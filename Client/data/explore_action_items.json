@@ -215,7 +215,7 @@
     {
       "name": "Slime Snack",
       "tooltip": "Allows you to use the explore ability for: Blob, Ice Blob, Lava Blob, Rainbow Blob, King Blob, Tar Blob",
-      "monsters": [ "Blob", "Ice Blob", "Lava Blob", "King Blob", "Tar Blob" ]
+      "monsters": [ "Blob", "Ice Blob", "Lava Blob", "Rainbow Blob", "King Blob", "Tar Blob" ]
     },
     {
       "name": "Insect Pheromones",

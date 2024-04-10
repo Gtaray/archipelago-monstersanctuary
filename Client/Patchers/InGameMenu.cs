@@ -240,10 +240,10 @@ namespace Archipelago.MonsterSanctuary.Client
                         __instance.MenuList,
                         () => LoadGame(__instance),
                         () => ConfirmWithoutArchipelago(
-                            __instance.gameObject,
-                            __instance.MenuList,
-                            "Load this save file while not connected to Archipelago?",
-                            () => LoadGame(__instance)));
+                                __instance.gameObject,
+                                __instance.MenuList,
+                                "Load this save file while not connected to Archipelago?",
+                                () => LoadGame(__instance)));
                     __instance.MenuList.SetLocked(locked: true);
                 }
 
@@ -253,22 +253,11 @@ namespace Archipelago.MonsterSanctuary.Client
 
         private static void PromptConnectToArchipelago(GameObject __instance, MenuList menuList, PopupController.PopupDelegate postConnectionAction, PopupController.PopupDelegate disconnectedAction, bool withTimer = false)
         {
-            if (withTimer)
-            {
-                Timer.StartTimer(__instance, 0.25f, () => PopupController.Instance.ShowRequest(
-                    "Connect to Archipleago",
-                    "You are not connected to archipelago. Would you like to connect with your current info?",
-                    () => ConnectToArchipelago(__instance, menuList, postConnectionAction),
-                    () => disconnectedAction.Invoke()));
-                return;
-            }
-
             Timer.StartTimer(__instance, 0.25f, () => PopupController.Instance.ShowRequest(
                 "Connect to Archipleago",
                 "You are not connected to archipelago. Would you like to connect with your current info?",
                 () => ConnectToArchipelago(__instance, menuList, postConnectionAction),
                 () => disconnectedAction.Invoke()));
-
         }
 
         private static void ConfirmWithoutArchipelago(GameObject __instance, MenuList menuList, string message, PopupController.PopupDelegate confirm)

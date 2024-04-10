@@ -117,6 +117,7 @@ namespace Archipelago.MonsterSanctuary.Client
 
         private static int DisplayConnectionInfo()
         {
+            int y = 40;
             string ap_ver = "Archipelago v" + APState.AP_VERSION[0] + "." + APState.AP_VERSION[1] + "." + APState.AP_VERSION[2];
 
             if (APState.Session != null)
@@ -124,6 +125,14 @@ namespace Archipelago.MonsterSanctuary.Client
                 if (APState.Authenticated)
                 {
                     GUI.Label(new Rect(16, 16, 300, 20), ap_ver + " Status: Connected");
+
+                    if (APState.ModVersion != SlotData.Version)
+                    {
+                        GUI.Label(new Rect(16, 36, 300, 20), "WARNING: MISMATCHED MOD VERSION");
+                        GUI.Label(new Rect(16, 56, 300, 20), $"\tMod Version:\t\t{APState.ModVersion}");
+                        GUI.Label(new Rect(16, 76, 300, 20), $"\tAP World Version:\t{(String.IsNullOrEmpty(SlotData.Version) ? "Unknown" : SlotData.Version)}");
+                        y = 96;
+                    }
                 }
                 else
                 {
@@ -162,10 +171,10 @@ namespace Archipelago.MonsterSanctuary.Client
                     APState.Connect();
                 }
 
-                return 120;
+                y = 120;
             }
 
-            return 40;
+            return y;
         }
 
         private void DisplayItemHistory(int y)

@@ -28,7 +28,7 @@ namespace Archipelago.MonsterSanctuary.Client
                     // but the other option is to delete even when not connected, and that will break
                     // if someone wants to do a normal run while also doing a rando.
                     Logger.LogWarning("New Save. Deleting item cache and checked locations");
-                Persistence.DeleteFile();
+                    Persistence.DeleteFile();
                     APState.Resync();
 
                     startingScene = "MountainPath_North1";
@@ -219,10 +219,18 @@ namespace Archipelago.MonsterSanctuary.Client
 
                 if (name == "MozzieQuestStarted")
                 {
-                    // If we're in the mozzie room, we don't change the flag, just return it
-                    // This should allow mozzie to show up as normal
+                    // If we're in the mozzie room, we need to treat this differently
                     if (GameController.Instance.CurrentSceneName == "MagmaChamber_PuppyRoom")
-                        return;
+                    {
+                        // If the goal isn't the mozzie goal, then we return the normal event flag
+                        // This allows the cutscene to show up as normal even when you own the Mozzie item
+                        if (SlotData.Goal != CompletionEvent.Mozzie)
+                            return;
+
+                        // The current goal is to reunite mozzie, we always need to return false so that we can
+                        // watch this cutscene again
+                        __result = false;
+                    }
 
                     // if the goal isn't to reunite mozzie, then we ignore this flag
                     if (SlotData.Goal != CompletionEvent.Mozzie)
@@ -231,7 +239,6 @@ namespace Archipelago.MonsterSanctuary.Client
                     }
                     else
                     {
-                        Patcher.Logger.LogInfo("Checking MozzieQuestStarted");
                         bool result = false;
                         // if the player doesn't have a single mozzie, then return false
                         if (PlayerController.Instance.Inventory.HasUniqueItem(EUniqueItemId.Mozzie))
@@ -242,7 +249,6 @@ namespace Archipelago.MonsterSanctuary.Client
                                     .Where(i => i.Item is UniqueItem && i.Unique.ItemID == EUniqueItemId.Mozzie)
                                     .Select(i => i.Quantity)
                                     .Single();
-                            Patcher.Logger.LogInfo("Mozzie count: " + _mozzieCount);
                             result = _mozzieCount >= SlotData.MozziePieces;
                         }
                         
