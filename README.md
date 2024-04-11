@@ -39,7 +39,7 @@ This connection info is saved and will re-populate when you run the game in the 
 	- 1: Spectral Eagle
 	- 2: Spectral Toad
 	- 3: Spectral Lion
-- `randomize_monsters`: 
+- `randomize_monsters`:
 	- Randomization rules for monsters
 	- 0: Monsters are not randomized
 	- 1: Monsters are entirely randomized, with every monster replaced with any other monster
@@ -50,52 +50,52 @@ This connection info is saved and will re-populate when you run the game in the 
 	- 0: Never
 	- 1: After Sun Palace
 	- 2: At any time
-- `improved_mobility_limit`
+- `improved_mobility_limit`:
 	- Restrict placement of monsters with improved mobility abilities (improved flying, improved swimming, dual mobility, and lofty mount)
  	- 0: Do not restrict placement of these monsters
   	- 1: Monsters with these abilities will not show up in the Mountain Path, Blue Caves, Stronghold Dungeon, Snowy Peaks, Sun Palace, or Ancient Woods.
-- `lock_explore_abilities`
+- `lock_explore_abilities`:
 	- If enabled, explore abilities cannot be used until a corresponding item has been collected. The items required to use explore abilities depend on the selected option. Default is Off
 	- 0: Off
 	- 1: Type. Monsters are grouped into 16 difference categories based on monster type, and there are 16 unique items that unlock abilities for all monsters of that particular type.
 	- 2: Ability. Each explore ability must be unlocked separately with its own item.
 	- 3: Species: Each monster species will require a unique item to unlock its explore ability, with the exception of evolutions whose ability is the same as its base form.
 
-- `eggsanity`
+- `eggsanity`:
 	- Add locations for all 111 monsters that are checked when you hatch or evolve that monster.
 	- 0: Off
 	- 1: On
-- `shopsanity`
+- `shopsanity`:
 	- If enabled, all shop inventories are randomized
 	- 0: Off
 	- 1: On
-- `shopsanity_prices`
+- `shopsanity_prices`:
 	- Only applies if Shopsanity is enabled. Randomizes the prices of shop items
 	- 0: Normal. Shop prices remain unchanged
 	- 1: Weighted. Prices are randomized, with the cost of progression items weighted towards the upper end of the range
 	- 2: Any. Shop prices are entirely randomized
-- `shops_ignore_rank`
+- `shops_ignore_rank`:
 	- If enabled, all shops will offer their full inventory regardless of player rank
 	- 0: Off
 	- 1: On
+- `monster_army`:
+	- If enabled, then all monster army rewards are added to the location pool and the rewards are randomized. Since these checks are technically in sphere 0 (and would require a massive grind), the logic adds progressively higher keeper ranks as an artificial gate for item placement in these locations.
+	- 0: Disabled
+	- 1: Enabled
 
-- `local_area_keys`
+- `local_area_keys`:
 	- Controls where area keys can be placed
  	- 0: Area keys can show up anywhere in any world (following normal logic rules)
   	- 1: Area keys will only show up in the Monster Sanctuary player's world, and they will only appear in their own area
-- `remove_locked_doors`
+- `remove_locked_doors`:
 	- Removes locked doors
  	- 0: Do not remove any locked doors
   	- 1: Remove extraneous locked doors such that each area only has one place where keys are used
   	- 2: Remove all locked doors
-- `add_gift_eggs_to_pool`
+- `add_gift_eggs_to_pool`:
 	- Adds eggs you would normally receive from NPCs to the item pool so their location is randomized. Gift monsters are: Koi, Skorch, Shockhopper, and Bard
  	- 0: Gift monsters are received in their normal location (though the monster you receive may be different depending on monster randomization rules)
   	- 1: Gift monster eggs are added to the item pool and can appear anywhere (following normal logic rules)
-- `monster_army`
-	- If enabled, then all monster army rewards are added to the location pool and the rewards are randomized. Since these checks are technically in sphere 0 (and would require a massive grind), the logic adds progressively higher keeper ranks as an artificial gate for item placement in these locations.
-	- 0: Disabled
-	- 1: Enabled
 
 - `starting_gold`:
 	- Override the player's starting gold. The amount is counted in increments of 100. Default is 100g
@@ -129,10 +129,10 @@ This connection info is saved and will re-populate when you run the game in the 
 - `drop_chance_currency`:
 	- Controls the relative frequency that a random non-progression item is gold
 	- Range from 0 to 100
-- `drop_chance_currency`:
+- `drop_chance_trap`:
 	- Controls the relative frequency that a random non-progression item is a trap
 	- Range from 0 to 100
-- `replace_filler_with_level_badges`
+- `replace_filler_with_level_badges`:
 	- If enabled, replaces a percentage value of filler items with Level 42 Badges, meant to reduce the grind required to complete a game. The value is a percentage range from 0 (no filler items are replaced with badges) to 100 (all filler items are replaced with badges)
 	- Range from 0 to 100
 - `include_chaos_relics`:
@@ -140,7 +140,7 @@ This connection info is saved and will re-populate when you run the game in the 
 	- 0: No
 	- 1: Yes
 
-- `skip_plot`
+- `skip_plot`:
 	- Disable all flags and checks that require progressing the game's story. This allows entering areas before you would normally be able to
  	- 0: No
   	- 1: Yes
@@ -154,12 +154,12 @@ This connection info is saved and will re-populate when you run the game in the 
 	- 1: Entrances. Opens up entrances to the Dungeon from the Blue Caves and Ancient Woods
 	- 2: Shortcuts. Opens up interior gates and shortcuts within the Dungeon
 	- 3: Fully open. Opens both Entrances and Shortcuts
-- `open_ancient_woods`
+- `open_ancient_woods`:
 	- If enabled, opens up alternate routes to access the Brutus and Goblin King fights. 
 	- NOTE: These shortcuts allow you to bypass the need for Ancient Woods Keys. It is recommended to only use this setting if locked doors are turned off.
 	- 0: Disabled
 	- 1: Enabled
-- `open_snowy_peaks`
+- `open_snowy_peaks`:
 	- If enabled, opens up shortcuts within Snowy Peaks 
 	- 0: Disabled
 	- 1: Enabled
@@ -193,7 +193,7 @@ This connection info is saved and will re-populate when you run the game in the 
 	- 1: Entrances. Opens alternative entrances to Forgotten World from Horizon Beach and Magma Chamber
 	- 2: Shortcuts. Opens one-way shortcuts in the Forgotten World
 	- 3: Fully open. Opens both Entrances and Shortcuts
-- `open_mystical_workshop`
+- `open_mystical_workshop`:
 	- If enabled, opens up the northern shortcut within Mystical Workshop
 	- NOTE: This shortcut allows you to bypass the need for Mystical Workshop Keys. It is recommended to only use this setting if locked doors are turned off
 	- 0: Disabled
