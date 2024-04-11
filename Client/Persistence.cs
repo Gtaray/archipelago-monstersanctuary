@@ -28,7 +28,7 @@ namespace Archipelago.MonsterSanctuary.Client
 
         public const string PERSISTENCE_FILENAME = "archipelago_save_data.json";
 
-        public int ItemIndex { get; set; } = 0;
+        public int ItemIndex { get; set; } = -1;
         public List<long> LocationsChecked = new List<long>();  // Includes champion rank up items
         public Dictionary<string, int> CheckCounter = new Dictionary<string, int>();  // does NOT include champion rank up items
         public List<string> ChampionsDefeated = new List<string>(); // Tracks which champions have been defeated

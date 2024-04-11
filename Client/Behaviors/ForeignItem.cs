@@ -1,4 +1,5 @@
-﻿using System;
+﻿using FuzzySharp;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,21 +12,36 @@ namespace Archipelago.MonsterSanctuary.Client.Behaviors
         public string Player { get; set; }
         public ItemClassification Classification => GetComponent<RandomizedShopItem>().Classification;
 
+        private string _icon;
         public override string GetIcon()
         {
-            switch (Classification)
+            if (_icon == null)
             {
-                case ItemClassification.Progression:
-                    return "icon_key";
-                case ItemClassification.Useful:
-                    return "icon_lootbox";
-                case ItemClassification.Filler:
-                    return "icon_potion";
-                case ItemClassification.Trap:
-                    return "icon_shuriken";
-                default:
-                    return "icon_potion";
+                var match = Process.ExtractOne(Name, GameData.ItemIcons);
+                if (match.Score > 65)
+                    _icon = match.Value;
+                else
+                {
+                    switch (Classification)
+                    {
+                        case ItemClassification.Progression:
+                            _icon = "icon_key";
+                            break;
+                        case ItemClassification.Useful:
+                            _icon = "icon_lootbox";
+                            break;
+                        case ItemClassification.Trap:
+                            _icon = "icon_shuriken";
+                            break;
+                        case ItemClassification.Filler:
+                        default:
+                            _icon = "icon_potion";
+                            break;
+                    }
+                }
             }
+
+            return _icon;
         }
 
         public override string GetName()

@@ -348,6 +348,7 @@ namespace Archipelago.MonsterSanctuary.Client
         #endregion
 
         #region New Items
+        public static List<string> ItemIcons = new();
         public static Dictionary<ExploreAbilityLockType, List<ExploreActionUnlockItem>> ExploreActionUnlockItems = new();
 
         public static ExploreActionUnlockItem GetExploreItem(string itemName)
@@ -456,7 +457,14 @@ namespace Archipelago.MonsterSanctuary.Client
                 OriginalChampions = JsonConvert.DeserializeObject<Dictionary<string, string>>(json);
             }
 
-           
+            // Load item icons
+            using (Stream stream = assembly.GetManifestResourceStream(
+                "Archipelago.MonsterSanctuary.Client.data.item_icons.json"))
+            using (StreamReader reader = new StreamReader(stream))
+            {
+                string json = reader.ReadToEnd();
+                ItemIcons = JsonConvert.DeserializeObject<List<string>>(json);
+            }
         }
         #endregion
 

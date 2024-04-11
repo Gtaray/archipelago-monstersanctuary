@@ -47,7 +47,12 @@ namespace Archipelago.MonsterSanctuary.Client
             else if (SlotData.Goal == CompletionEvent.Monsterpedia)
                 goalText = $"Complete Monster Journal - {PlayerController.Instance.Monsters.CountHatchedMonsterTypes()} / 111";
             else if (SlotData.Goal == CompletionEvent.Mozzie)
-                goalText = $"Reunite Mozzie and Velvet Melody - {PlayerController.Instance.Inventory.Uniques.Count(i => i.Unique.ItemID == EUniqueItemId.Mozzie)} / {SlotData.MozziePieces}";
+            {
+                var mozzie = PlayerController.Instance.Inventory.Uniques
+                    .FirstOrDefault(i => i.Unique != null && i.Unique.ItemID == EUniqueItemId.Mozzie);
+                var count = mozzie != null ? mozzie.Quantity : 0;
+                goalText = $"Reunite Mozzie and Velvet Melody - {count} / {SlotData.MozziePieces}";
+            }
 
 
             if (APState.Completed)

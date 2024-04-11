@@ -18,6 +18,7 @@
 
   <ItemGroup>
     <None Remove="data\explore_action_items.json" />
+    <None Remove="data\item_icons.json" />
     <None Remove="data\map_pins.json" />
     <None Remove="data\minimal_locked_doors.json" />
     <None Remove="data\monster_names.json" />
@@ -29,6 +30,7 @@
 
   <ItemGroup>
     <EmbeddedResource Include="data\explore_action_items.json" />
+    <EmbeddedResource Include="data\item_icons.json" />
   </ItemGroup>
 
   <ItemGroup>
@@ -48,12 +50,13 @@
     <PackageReference Include="BepInEx.Analyzers" Version="1.*" PrivateAssets="all" />
     <PackageReference Include="BepInEx.Core" Version="5.4.19" />
     <PackageReference Include="BepInEx.PluginInfoProps" Version="2.*" />
+    <PackageReference Include="FuzzySharp" Version="2.0.2" />
     <PackageReference Include="Json.Net.Unity3D" Version="9.0.1" />
     <PackageReference Include="UnityEngine.Modules" Version="2018.4.30" IncludeAssets="compile" />
   </ItemGroup>
   
   <ItemGroup Condition="'$(TargetFramework.TrimEnd(`0123456789`))' == 'net'">
-    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.2" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3" PrivateAssets="all" />
   </ItemGroup>
   
   <ItemGroup>

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using FuzzySharp;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -28,6 +29,19 @@ namespace Archipelago.MonsterSanctuary.Client.Behaviors
 
         public override string GetTooltip(int variation) => Tooltip;
 
-        public override string GetIcon() => "icon_potion";
+        private string _icon;
+        public override string GetIcon()
+        {
+            if (_icon == null)
+            {
+                var match = Process.ExtractOne(Name, GameData.ItemIcons);
+                if (match.Score > 50)
+                    _icon = match.Value;
+                else
+                    _icon = "icon_potion";
+            }
+
+            return _icon;
+        }
     }
 }
