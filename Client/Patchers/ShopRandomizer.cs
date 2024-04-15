@@ -163,14 +163,14 @@ namespace Archipelago.MonsterSanctuary.Client
                     __instance.PagedMenuList.AddDisplayable(item.GetComponent<BaseItem>());
                 }
 
-                var progressionLocations = shopInventory
-                    .Select(i => i.GetComponent<RandomizedShopItem>())
-                    .Where(i => i.Classification == ItemClassification.Progression)
-                    .Select(i => i.LocationId)
-                    .ToArray();
+                //var progressionLocations = shopInventory
+                //    .Select(i => i.GetComponent<RandomizedShopItem>())
+                //    .Where(i => i.Classification == ItemClassification.Progression)
+                //    .Select(i => i.LocationId)
+                //    .ToArray();
 
                 // Scout any items in this shop that are progression
-                APState.ScoutLocations(progressionLocations, true);
+                //APState.ScoutLocations(progressionLocations, true);
 
                 return false;
             }

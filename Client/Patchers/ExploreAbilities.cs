@@ -128,8 +128,9 @@ namespace Archipelago.MonsterSanctuary.Client
 
             if (PlayerController.Instance.Inventory.HasUniqueItem(EUniqueItemId.Ahrimaaya))
             {
-                var ahrimaaya = GameData.ExploreActionUnlockItems[SlotData.ExploreAbilityLock].First(i => i.Name == "Ahrimaaya");
-                monsters.AddRange(ahrimaaya.Monsters);
+                var ahrimaaya = GameData.ExploreActionUnlockItems[SlotData.ExploreAbilityLock].FirstOrDefault(i => i.Name == "Ahrimaaya");
+                if (ahrimaaya != null && ahrimaaya.Monsters.Count() > 0)
+                    monsters.AddRange(ahrimaaya.Monsters);
             }
 
             return monsters;

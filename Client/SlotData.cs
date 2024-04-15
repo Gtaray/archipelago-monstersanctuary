@@ -73,7 +73,6 @@ namespace Archipelago.MonsterSanctuary.Client
         public static CompletionEvent Goal { get; set; } = CompletionEvent.MadLord;
         public static int MozziePieces { get; set; } = 7;
         public static bool IncludeChaosRelics { get; set; } = false;
-        public static bool ChestMatchesContext { get; set; } = true;
         public static int ExpMultiplier { get; set; } = 1;
         public static bool AlwaysGetEgg { get; set; } = false;
         public static bool SkipPlot { get; set; } = false;
@@ -104,36 +103,88 @@ namespace Archipelago.MonsterSanctuary.Client
         public static void LoadSlotData(Dictionary<string, object> slotData)
         {
             Version = GetStringData(slotData, "version");
+            Patcher.Logger.LogInfo(Version);
 
             var options = GetDictionaryData<object>(slotData, "options");
             Goal = GetEnumData(options, "goal", CompletionEvent.MadLord);
+            Patcher.Logger.LogInfo("Goal: " + Enum.GetName(typeof(CompletionEvent), Goal));
+
             MozziePieces = GetIntData(options, "mozzie_pieces", 7);
+            if (Goal == CompletionEvent.Mozzie)
+                Patcher.Logger.LogInfo("Mozzie Count: " + MozziePieces);
+
             IncludeChaosRelics = GetBoolData(options, "include_chaos_relics", false);
-            ChestMatchesContext = GetBoolData(options, "chest_matches_content", true);
+            Patcher.Logger.LogInfo("Include Chaos Relics: " + IncludeChaosRelics);
+
             ExpMultiplier = GetIntData(options, "exp_multiplier", 1);
+            Patcher.Logger.LogInfo("Exp Multiplier: " + ExpMultiplier);
+
             AlwaysGetEgg = GetBoolData(options, "monsters_always_drop_egg", false);
+
             SkipPlot = GetBoolData(options, "skip_plot", false);
+            Patcher.Logger.LogInfo("Skip Plot: " + SkipPlot);
+
             OpenBlueCaves = GetBoolData(options, "open_blue_caves", false);
+            Patcher.Logger.LogInfo("Open Blue Caves: " + OpenBlueCaves);
+
             OpenStrongholdDungeon = GetEnumData(options, "open_stronghold_dungeon", OpenWorldSetting.Closed);
+            Patcher.Logger.LogInfo("Open Stronghold Dungeon: " + Enum.GetName(typeof(OpenWorldSetting), OpenStrongholdDungeon));
+
             OpenSnowyPeaks = GetBoolData(options, "open_snowy_peaks", false);
+            Patcher.Logger.LogInfo("Open Snowy Peaks: " + OpenSnowyPeaks);
+
             OpenAncientWoods = GetBoolData(options, "open_ancient_woods", false);
+            Patcher.Logger.LogInfo("Open Ancient Woods: " + OpenAncientWoods);
+
             OpenSunPalace = GetEnumData(options, "open_sun_palace", OpenWorldSetting.Closed);
+            Patcher.Logger.LogInfo("Open Sun Palace: " + Enum.GetName(typeof(OpenWorldSetting), OpenSunPalace));
+
             OpenHorizonBeach = GetEnumData(options, "open_horizon_beach", OpenWorldSetting.Closed);
+            Patcher.Logger.LogInfo("Open Horizon Beach: " + Enum.GetName(typeof(OpenWorldSetting), OpenHorizonBeach));
+
             OpenMagmaChamber = GetEnumData(options, "open_magma_chamber", OpenWorldSetting.Closed);
+            Patcher.Logger.LogInfo("Open Magma Chamber: " + Enum.GetName(typeof(OpenWorldSetting), OpenMagmaChamber));
+
             OpenBlobBurg = GetEnumData(options, "open_blob_burg", OpenWorldSetting.Closed);
+            Patcher.Logger.LogInfo("Open Open Blurg: " + Enum.GetName(typeof(OpenWorldSetting), OpenBlobBurg));
+
             OpenForgottenWorld = GetEnumData(options, "open_forgotten_world", OpenWorldSetting.Closed);
+            Patcher.Logger.LogInfo("Open Forgotten World: " + Enum.GetName(typeof(OpenWorldSetting), OpenForgottenWorld));
+
             OpenMysticalWorkshop = GetBoolData(options, "open_mystical_workshop", false);
+            Patcher.Logger.LogInfo("Open Mystical Workshop: " + Enum.GetName(typeof(OpenWorldSetting), OpenMysticalWorkshop));
+
             OpenUnderworld = GetEnumData(options, "open_underworld", OpenWorldSetting.Closed);
+            Patcher.Logger.LogInfo("Open Underworld: " + Enum.GetName(typeof(OpenWorldSetting), OpenUnderworld));
+
             OpenAbandonedTower = GetEnumData(options, "open_abandoned_tower", OpenWorldSetting.Closed);
+            Patcher.Logger.LogInfo("Open Abandoned Tower: " + Enum.GetName(typeof(OpenWorldSetting), OpenAbandonedTower));
+
             MonsterShiftRule = GetEnumData(options, "monster_shift_rule", ShiftFlag.Normal);
+            Patcher.Logger.LogInfo("Monster Shift Rule: " + Enum.GetName(typeof(ShiftFlag), MonsterShiftRule));
+
             LockedDoors = GetEnumData(options, "remove_locked_doors", LockedDoorsFlag.All);
+            Patcher.Logger.LogInfo("Locked Doors: " + Enum.GetName(typeof(LockedDoorsFlag), LockedDoors));
+
             AddSmokeBombs = GetBoolData(options, "add_smoke_bombs", false);
+            Patcher.Logger.LogInfo("Add Smoke Bombs: " + AddSmokeBombs);
+
             StartingGold = GetIntData(options, "starting_gold", 1);
+            Patcher.Logger.LogInfo("Starting Gold: " + StartingGold * 100);
+
             ShopsIgnoreRank = GetBoolData(options, "shops_ignore_rank", false);
+            Patcher.Logger.LogInfo("Shops Ignore Rank Requirement: " + ShopsIgnoreRank);
+
             Eggsanity = GetBoolData(options, "eggsanity", false);
+            Patcher.Logger.LogInfo("Eggsanity: " + Eggsanity);
+
             MonsterArmy = GetBoolData(options, "monster_army", false);
+
             ExploreAbilityLock = GetEnumData(options, "lock_explore_abilities", ExploreAbilityLockType.Off);
+            Patcher.Logger.LogInfo("Locked Explore Abilities: " + Enum.GetName(typeof(ExploreAbilityLockType), ExploreAbilityLock));
+
             DeathLink = GetBoolData(options, "death_link", false);
+            Patcher.Logger.LogInfo("Death Link: " + DeathLink);
 
             var monsterData = GetDictionaryData<object>(slotData, "monsters");
             BexMonster = GetStringData(monsterData, "bex_monster");
@@ -143,15 +194,20 @@ namespace Archipelago.MonsterSanctuary.Client
             var monsterLocations = GetDictionaryData<string>(monsterData, "monster_locations");
             foreach (var location in monsterLocations)
                 GameData.AddMonster(location.Key, location.Value);
+            Patcher.Logger.LogInfo("Monster Locations: " + GameData.MonstersCache.Count());
 
             GameData.ChampionScenes = new();
             GameData.ChampionScenes = GetDictionaryData<string>(monsterData, "champions");
+            Patcher.Logger.LogInfo("Champions: " + GameData.ChampionScenes.Count());
 
             var itemLocations = GetDictionaryData<Dictionary<string, long>>(slotData, "locations");
 
             GameData.ShopChecks = itemLocations["shops"];
+            Patcher.Logger.LogInfo("Shop Locations: " + GameData.ShopChecks.Count());
             GameData.ShopChecksReversed = GameData.ShopChecks.ToDictionary(kvp => kvp.Value, kvp => kvp.Key);
             GameData.ShopPrices = GetDictionaryData<int>(slotData, "prices");
+            Patcher.Logger.LogInfo("Randomize Shop Prices: " + (GameData.ShopPrices.Count() > 0));
+
             GameData.ChampionRankIds = itemLocations["ranks"];
 
             GameData.ItemChecks = new();
@@ -171,44 +227,12 @@ namespace Archipelago.MonsterSanctuary.Client
                     GameData.AddItemCheck(check.Key, check.Value, locationGroup.Key);
                 }
             }
+            Patcher.Logger.LogInfo("Item Locations: " + GameData.ItemChecks.Count());
 
             var hints = GetListData<HintData>(slotData, "hints");
             GameData.Hints = new();
             foreach (var hint in hints)
                 GameData.AddHint(hint.ID, hint.Text, hint.IgnoreRemainingText);
-
-            Patcher.Logger.LogInfo("Goal: " + Enum.GetName(typeof(CompletionEvent), Goal));
-            if (Goal == CompletionEvent.Mozzie)
-                Patcher.Logger.LogInfo("Mozzie Count: " + MozziePieces);
-            Patcher.Logger.LogInfo("Death Link: " + DeathLink);
-            Patcher.Logger.LogInfo("Locked Explore Abilities: " + Enum.GetName(typeof(ExploreAbilityLockType), ExploreAbilityLock));
-            Patcher.Logger.LogInfo("Eggsanity: " + Eggsanity);
-            Patcher.Logger.LogInfo("Exp Multiplier: " + ExpMultiplier);
-            Patcher.Logger.LogInfo("Include Chaos Relics: " + IncludeChaosRelics);
-            Patcher.Logger.LogInfo("Force Egg Drop: " + AlwaysGetEgg);
-            Patcher.Logger.LogInfo("Add Smoke Bombs: " + AddSmokeBombs);
-            Patcher.Logger.LogInfo("Starting Gold: " + StartingGold * 100);
-            Patcher.Logger.LogInfo("Monster Shift Rule: " + Enum.GetName(typeof(ShiftFlag), MonsterShiftRule));
-            Patcher.Logger.LogInfo("Locked Doors: " + Enum.GetName(typeof(LockedDoorsFlag), LockedDoors));
-            Patcher.Logger.LogInfo("Skip Plot: " + SkipPlot);
-            Patcher.Logger.LogInfo("Open Blue Caves: " + OpenBlueCaves);
-            Patcher.Logger.LogInfo("Open Stronghold Dungeon: " + Enum.GetName(typeof(OpenWorldSetting), OpenStrongholdDungeon));
-            Patcher.Logger.LogInfo("Open Snowy Peaks: " + OpenSnowyPeaks);
-            Patcher.Logger.LogInfo("Open Ancient Woods: " + OpenAncientWoods);
-            Patcher.Logger.LogInfo("Open Sun Palace: " + Enum.GetName(typeof(OpenWorldSetting), OpenSunPalace));
-            Patcher.Logger.LogInfo("Open Horizon Beach: " + Enum.GetName(typeof(OpenWorldSetting), OpenHorizonBeach));
-            Patcher.Logger.LogInfo("Open Magma Chamber: " + Enum.GetName(typeof(OpenWorldSetting), OpenMagmaChamber));
-            Patcher.Logger.LogInfo("Open Open Blurg: " + Enum.GetName(typeof(OpenWorldSetting), OpenBlobBurg));
-            Patcher.Logger.LogInfo("Open Forgotten World: " + Enum.GetName(typeof(OpenWorldSetting), OpenForgottenWorld));
-            Patcher.Logger.LogInfo("Open Underworld: " + Enum.GetName(typeof(OpenWorldSetting), OpenUnderworld));
-            Patcher.Logger.LogInfo("Open Mystical Workshop: " + Enum.GetName(typeof(OpenWorldSetting), OpenMysticalWorkshop));
-            Patcher.Logger.LogInfo("Open Abandoned Tower: " + Enum.GetName(typeof(OpenWorldSetting), OpenAbandonedTower));
-            Patcher.Logger.LogInfo("Randomize Shop Prices: " + (GameData.ShopPrices.Count() > 0));
-            Patcher.Logger.LogInfo("Shops Ignore Rank Requirement: " + ShopsIgnoreRank);
-            Patcher.Logger.LogInfo("Monster Locations: " + GameData.MonstersCache.Count());
-            Patcher.Logger.LogInfo("Champions: " + GameData.ChampionScenes.Count());
-            Patcher.Logger.LogInfo("Item Locations: " + GameData.ItemChecks.Count());
-            Patcher.Logger.LogInfo("Shop Locations: " + GameData.ShopChecks.Count());
             Patcher.Logger.LogInfo("Hints: " + hints.Count());
 
             // Lastly, we update tooltips for explore items that are not new items
@@ -250,7 +274,7 @@ namespace Archipelago.MonsterSanctuary.Client
 
         private static Dictionary<string, T> GetDictionaryData<T>(Dictionary<string, object> data, string key)
         {
-            if (data[key].ToString() != null)
+            if (data.ContainsKey(key) && data[key].ToString() != null)
                 return JsonConvert.DeserializeObject<Dictionary<string, T>>(data[key].ToString());
 
             return new Dictionary<string, T>();
