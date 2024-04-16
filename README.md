@@ -32,6 +32,9 @@ Once you start the game with the client mod, you'll see connection info in the t
 
 This connection info is saved and will re-populate when you run the game in the future.
 
+## PopTracker
+Many thanks for Cybe3R for getting us set up with a [PopTracker pack](https://github.com/Cyb3RGER/monster_sanctuary_ap_pack). Follow the instructions on that page to set up PopTracker.
+
 ## Randomizer Options
 - `starting_familiar`:
 	- Select your starting familiar. If not set, your starting familiar will be randomly selected from the four spectral familiars

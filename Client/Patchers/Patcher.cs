@@ -16,6 +16,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using Team17.Online;
 using UnityEngine;
+using UnityEngine.Events;
+using UnityEngine.SceneManagement;
 
 namespace Archipelago.MonsterSanctuary.Client
 {
@@ -33,8 +35,31 @@ namespace Archipelago.MonsterSanctuary.Client
 
             // Plugin startup logic
             new Harmony(MyPluginInfo.PLUGIN_GUID).PatchAll(Assembly.GetExecutingAssembly());
+            SceneManager.sceneLoaded += new UnityAction<Scene, LoadSceneMode>(this.OnSceneLoaded);
 
             Persistence.LoadFile();
+        }
+
+        private void OnDestroy()
+        {
+            SceneManager.sceneLoaded -= new UnityAction<Scene, LoadSceneMode>(this.OnSceneLoaded);
+        }
+
+        private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+        {
+            var parts = scene.name.Split('_');
+
+            // Unless the parts are exactly as expected, don't do anything
+            if (parts.Length != 2)
+                return;
+
+            if (!APState.IsConnected)
+                return;
+
+            Task.Run(() =>
+            {
+                APState.SetToDataStorage("CurrentArea", parts[0]);
+            });
         }
 
         [HarmonyPatch(typeof(MainMenu))]
