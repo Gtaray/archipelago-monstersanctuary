@@ -34,6 +34,8 @@ namespace Archipelago.MonsterSanctuary.Client
         public List<string> ChampionsDefeated = new List<string>(); // Tracks which champions have been defeated
         public List<string> ExploreItems = new List<string>();
 
+        private static bool _loaded = false;
+
         public static void PrintData()
         {
             Patcher.Logger.LogInfo("Persistence:");
@@ -148,6 +150,18 @@ namespace Archipelago.MonsterSanctuary.Client
 
         public static void SaveFile()
         {
+            // Never save the file before its loaded to avoid overwriting it
+            if (!_loaded)
+            {
+                // If it's not loaded, we check to see if the player has collected anything
+                // If they have, we treat the file has having been loaded.
+                _loaded = Instance.ItemIndex > 0 
+                    || Instance.LocationsChecked.Count() > 0
+                    || Instance.ChampionsDefeated.Count() > 0
+                    || Instance.ExploreItems.Count() > 0;
+
+            }
+
             Patcher.Logger.LogInfo("SaveFile()");
             Persistence.SnapshotExploreItems();
 
@@ -165,6 +179,8 @@ namespace Archipelago.MonsterSanctuary.Client
 
         public static void LoadFile()
         {
+            _loaded = true;
+
             Patcher.Logger.LogInfo("LoadFile()");
             if (File.Exists(PERSISTENCE_FILENAME))
             {

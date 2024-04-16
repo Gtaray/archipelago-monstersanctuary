@@ -174,7 +174,7 @@ namespace Archipelago.MonsterSanctuary.Client
                 // Rather than trying to control the state of the invisible platform, we're simply going to suppress
                 // the platforms updates. This effectively means it'll never turn on, and avoids having to make a reflection
                 // call in an update loop
-                return IsMonsterAbilityAvailable(PlayerController.Instance.Follower.Monster.GetName());
+                return IsMonsterAbilityAvailable(PlayerController.Instance.Follower.Monster.OriginalMonsterName);
             }
         }
 
@@ -193,7 +193,7 @@ namespace Archipelago.MonsterSanctuary.Client
                 if (position != PlayerController.Instance.Follower.transform.position)
                     return true;
 
-                return IsMonsterAbilityAvailable(PlayerController.Instance.Follower.Monster.GetName());
+                return IsMonsterAbilityAvailable(PlayerController.Instance.Follower.Monster.OriginalMonsterName);
             }
         }
         #endregion
@@ -213,7 +213,7 @@ namespace Archipelago.MonsterSanctuary.Client
                 if (__instance.CurrentSelectType != MonsterSelector.MonsterSelectType.SelectFollower)
                     return;
 
-                bool avail = IsMonsterAbilityAvailable(monsterView.Monster.GetName());
+                bool avail = IsMonsterAbilityAvailable(monsterView.Monster.OriginalMonsterName);
                 monsterView.SetDisabled(!avail);
             }
         }
@@ -236,7 +236,7 @@ namespace Archipelago.MonsterSanctuary.Client
                 if (!msv.IsDisabled)
                     return true;
 
-                var itemName = GameData.GetItemRequiredForMonsterExploreAbility(msv.Monster.GetName());
+                var itemName = GameData.GetItemRequiredForMonsterExploreAbility(msv.Monster.OriginalMonsterName);
 
                 SFXController.Instance.PlaySFX(SFXController.Instance.SFXMenuCancel);
                 __instance.MenuList.SetLocked(true);
@@ -259,10 +259,10 @@ namespace Archipelago.MonsterSanctuary.Client
                 if (SlotData.ExploreAbilityLock == ExploreAbilityLockType.Off)
                     return;
 
-                var itemName = GameData.GetItemRequiredForMonsterExploreAbility(monster.GetName());
+                var itemName = GameData.GetItemRequiredForMonsterExploreAbility(monster.OriginalMonsterName);
                 if (string.IsNullOrEmpty(itemName))
                 {
-                    Patcher.Logger.LogError($"could not find the item that unlocks {monster.GetName()}'s explore ability");
+                    Patcher.Logger.LogError($"could not find the item that unlocks {monster.OriginalMonsterName}'s explore ability");
                     return;
                 }
 

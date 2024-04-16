@@ -202,7 +202,7 @@ namespace Archipelago.MonsterSanctuary.Client
 
             var itemLocations = GetDictionaryData<Dictionary<string, long>>(slotData, "locations");
 
-            GameData.ShopChecks = itemLocations["shops"];
+            GameData.ShopChecks = GetDictionaryData<long>(slotData, "shops");
             Patcher.Logger.LogInfo("Shop Locations: " + GameData.ShopChecks.Count());
             GameData.ShopChecksReversed = GameData.ShopChecks.ToDictionary(kvp => kvp.Value, kvp => kvp.Key);
             GameData.ShopPrices = GetDictionaryData<int>(slotData, "prices");
