@@ -36,7 +36,7 @@ namespace Archipelago.MonsterSanctuary.Client
         }
 
         public static int[] AP_VERSION = new int[] { 0, 4, 5 };
-        public static string ModVersion = "1.1.2";
+        public static string ModVersion = "1.1.3";
         public static ConnectionState State = ConnectionState.Disconnected;
         public static bool IsConnected => State == ConnectionState.Connected;
 
@@ -229,7 +229,7 @@ namespace Archipelago.MonsterSanctuary.Client
             {
                 var item = Session.Items.AllItemsReceived[i];
                 
-                if (Persistence.Instance.ItemIndex >= i)
+                if (Persistence.HasReceivedItem(i))
                     continue;
 
                 Patcher.Logger.LogInfo("\t" + Session.Items.GetItemName(item.Item) + " - " + i);
@@ -246,24 +246,25 @@ namespace Archipelago.MonsterSanctuary.Client
             // This is directly from Not Phar on the AP discord
             int index = helper.Index - 1; 
 
-            Patcher.Logger.LogInfo("RecieveItem(): " + itemName + "(" + index + ")");
+            //Patcher.Logger.LogInfo("RecieveItem(): " + itemName + "(" + index + ")");
 
             // If the item index is less than our saved index, we simply ignore it.
             // We've already received this item
-            if (index <= Persistence.Instance.ItemIndex)
+            if (Persistence.HasReceivedItem(index))
             {
-                Patcher.Logger.LogInfo("\tAlready handled. Ignore");
+                //Patcher.Logger.LogInfo("\tAlready handled. Ignore");
                 return;
             }
 
+            // Removing this, as we're now tracking the index of all items received
             // If the next item index is more than 1 above what we expect, resync
-            int delta = index - Persistence.Instance.ItemIndex;
-            if (delta > 1)
-            {
-                Patcher.Logger.LogInfo("Mismatched item index. Resyncing");
-                Resync();
-                return;
-            }
+            //int delta = index - Persistence.Instance.ItemsRecieved;
+            //if (delta > 1)
+            //{
+            //    Patcher.Logger.LogInfo("Mismatched item index. Resyncing");
+            //    Resync();
+            //    return;
+            //}
 
             QueueItemTransfer(index, item);
         }
@@ -331,7 +332,7 @@ namespace Archipelago.MonsterSanctuary.Client
             if (!APState.IsConnected)
                 return;
 
-            Patcher.Logger.LogInfo("Complete()");
+            //Patcher.Logger.LogInfo("Complete()");
             var statusUpdatePacket = new StatusUpdatePacket();
             statusUpdatePacket.Status = ArchipelagoClientState.ClientGoal;
             Session.Socket.SendPacket(statusUpdatePacket);

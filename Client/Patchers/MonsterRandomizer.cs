@@ -118,8 +118,10 @@ namespace Archipelago.MonsterSanctuary.Client
                 if (!APState.IsConnected)
                     return true;
 
-                // TODO: This doesn't seem to be changing the level of super champions
-                // Need to double check this.
+                // Eternity's End spectral familiar champions are exempt from randomization. For now
+                if (GameController.Instance.CurrentSceneName == "KeeperStronghold_EndOfTime")
+                    return true;
+
                 if (isChampion)
                 {
                     encounter.PredefinedMonsters.level = ((PlayerController.Instance.Minimap.CurrentEntry.EncounterLevel != 0)

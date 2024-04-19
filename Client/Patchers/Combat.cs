@@ -35,6 +35,11 @@ namespace Archipelago.MonsterSanctuary.Client
                 if (!__instance.CurrentEncounter.IsChampion)
                     return;
 
+                // Right now, the champions in End of Time don't do anything
+                // Also this prevents them from progressing the All Champions goal
+                if (GameController.Instance.CurrentSceneName == "KeeperStronghold_EndOfTime")
+                    return;
+
                 // We only want to operate on champion encounters
                 string locName = $"{GameController.Instance.CurrentSceneName}_Champion";
                 if (!GameData.ChampionRankIds.ContainsKey(locName))

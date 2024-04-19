@@ -28,7 +28,7 @@ namespace Archipelago.MonsterSanctuary.Client
 
         public const string PERSISTENCE_FILENAME = "archipelago_save_data.json";
 
-        public int ItemIndex { get; set; } = -1;
+        public List<int> ItemsRecieved = new(); // Stores the list of item indexes received from the server
         public List<long> LocationsChecked = new List<long>();  // Includes champion rank up items
         public Dictionary<string, int> CheckCounter = new Dictionary<string, int>();  // does NOT include champion rank up items
         public List<string> ChampionsDefeated = new List<string>(); // Tracks which champions have been defeated
@@ -39,18 +39,22 @@ namespace Archipelago.MonsterSanctuary.Client
         public static void PrintData()
         {
             Patcher.Logger.LogInfo("Persistence:");
-            Patcher.Logger.LogInfo("\tItems Received: " + Instance.ItemIndex);
+            Patcher.Logger.LogInfo("\tItems Received: " + Instance.ItemsRecieved);
             Patcher.Logger.LogInfo("\tILocations Checked: " + Instance.LocationsChecked.Count());
             Patcher.Logger.LogInfo("\tChampions Defeated: " + Instance.ChampionsDefeated.Count());
         }
 
+        public static bool HasReceivedItem(int index)
+        {
+            return Instance.ItemsRecieved.Contains(index);
+        }
+
         public static void AddToItemCache(int id)
         {
-            if (Instance.ItemIndex >= id) 
+            if (HasReceivedItem(id)) 
                 return;
 
-
-            Instance.ItemIndex = id;
+            Instance.ItemsRecieved.Add(id);
             SaveFile();
         }
 
@@ -109,36 +113,6 @@ namespace Archipelago.MonsterSanctuary.Client
             SaveFile();
         }
 
-        public static void SnapshotExploreItems()
-        {
-            Patcher.Logger.LogInfo("SnapshotExploreItems()");
-            Instance.ExploreItems = PlayerController.Instance.Inventory.Uniques
-                .Where(i => i.Item is ExploreAbilityItem)
-                .Select(i => i.GetName())
-                .ToList();
-        }
-
-        public static void ReloadExploreItems()
-        {
-            Patcher.Logger.LogInfo("ReloadExploreItems()");
-            foreach (var itemName in Instance.ExploreItems)
-            {
-                var item = GameData.GetItemByName<ExploreAbilityItem>(itemName);
-
-                if (item == null)
-                {
-                    Patcher.Logger.LogWarning("\tItem not found in World Data");
-                    continue;
-                }
-
-                // Don't add the same item twice
-                if (PlayerController.Instance.Inventory.Uniques.Any(i => i.GetName() == item.GetName()))
-                    continue;
-
-                PlayerController.Instance.Inventory.AddItem(item);
-            }
-        }
-
         public static void DeleteFile()
         {
             Patcher.Logger.LogInfo("DeleteFile()");
@@ -155,7 +129,7 @@ namespace Archipelago.MonsterSanctuary.Client
             {
                 // If it's not loaded, we check to see if the player has collected anything
                 // If they have, we treat the file has having been loaded.
-                _loaded = Instance.ItemIndex > 0 
+                _loaded = Instance.ItemsRecieved.Any()
                     || Instance.LocationsChecked.Count() > 0
                     || Instance.ChampionsDefeated.Count() > 0
                     || Instance.ExploreItems.Count() > 0;
@@ -163,12 +137,14 @@ namespace Archipelago.MonsterSanctuary.Client
             }
 
             Patcher.Logger.LogInfo("SaveFile()");
-            Persistence.SnapshotExploreItems();
-
             string rawPath = Environment.CurrentDirectory;
             if (rawPath != null)
             {
-                SnapshotExploreItems();
+                //Persistence.SnapshotExploreItems();
+                foreach (var item in Instance.ExploreItems)
+                {
+                    Patcher.Logger.LogInfo("\t" + item);
+                }
 
                 var json = JsonConvert.SerializeObject(Persistence.Instance);
                 File.WriteAllText(
@@ -187,7 +163,13 @@ namespace Archipelago.MonsterSanctuary.Client
                 var json = File.ReadAllText(PERSISTENCE_FILENAME);
                 Instance = JsonConvert.DeserializeObject<Persistence>(json);
 
-                ReloadExploreItems();
+                // No reason to do this here, as GameController doesn't exist
+                // when this file is initially loaded.
+                //ReloadExploreItems();
+                foreach (var item in Instance.ExploreItems)
+                {
+                    Patcher.Logger.LogInfo("\t" + item);
+                }
             }
         }
     }

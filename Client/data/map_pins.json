@@ -99,6 +99,18 @@
     "KeeperStronghold_MonsterArmy_32_1",
     "KeeperStronghold_MonsterArmy_32_2"
   ],
+  "KeeperStronghold_KeepersTower_0_3": [
+    "KeeperStronghold_EndOfTime_20",
+    "KeeperStronghold_EndOfTime_21",
+    "KeeperStronghold_EndOfTime_42700002",
+    "KeeperStronghold_EndOfTime_42700036",
+    "KeeperStronghold_EndOfTime_42700027",
+    "KeeperStronghold_EndOfTime_42700032",
+    "KeeperStronghold_EndOfTime_42700013",
+    "KeeperStronghold_EndOfTime_42700030",
+    "KeeperStronghold_EndOfTime_42700020",
+    "KeeperStronghold_EndOfTime_42700034"
+  ],
 
   "BlueCave_Platforms_0_0": [ "BlueCave_Platforms_0", "BlueCave_Platforms_1" ],
   "BlueCave_Platforms_1_0": [ "BlueCave_Platforms_3" ],
@@ -257,7 +269,7 @@
   "AncientWoods_Center1_1_0": [ "AncientWoods_Center1_0" ],
   "AncientWoods_Center1_2_1": [ "AncientWoods_Center1_1" ],
   "AncientWoods_Center5_1_0": [ "AncientWoods_Center5_4" ],
-  "AncientWoods_Center6_0_0": [ "AncientWoods_Center6_3", "AncientWoods_Center6_8500062" ],
+  "AncientWoods_Center6_1_0": [ "AncientWoods_Center6_3", "AncientWoods_Center6_8500062" ],
   "AncientWoods_Center7_1_0": [ "AncientWoods_Center7_6" ],
   "AncientWoods_North3_1_0": [ "AncientWoods_North3_10", "AncientWoods_North3_11" ],
   "AncientWoods_North5_0_0": [ "AncientWoods_North5_0" ],

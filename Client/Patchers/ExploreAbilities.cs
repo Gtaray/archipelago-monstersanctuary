@@ -14,17 +14,19 @@ namespace Archipelago.MonsterSanctuary.Client
 {
     public partial class Patcher
     {
+        private static List<ExploreAbilityItem> _cachedExploreItems = new();
+
         #region Persistence
         [HarmonyPatch(typeof(InventoryManager), "SaveGame")]
         private static class InventoryManager_SaveGame
         {
-            private static void Prefix()
-            {
-                Persistence.SaveFile();
-            }
-
             private static void Postfix(SaveGameData saveGameData)
             {
+                _cachedExploreItems = saveGameData.Inventory
+                    .Where(i => i.Item is ExploreAbilityItem)
+                    .Select(i => i.Item as ExploreAbilityItem)
+                    .ToList();
+
                 // Go through the save game inventory and remove any new items.
                 // We'll add them back to the player when they connect and resync
                 saveGameData.Inventory.RemoveAll(i => i.Item is ExploreAbilityItem);
@@ -36,8 +38,45 @@ namespace Archipelago.MonsterSanctuary.Client
         {
             private static void Postfix()
             {
-                Persistence.ReloadExploreItems();
+                if (_cachedExploreItems.Any() && PlayerController.Instance != null)
+                {
+                    foreach (var item in _cachedExploreItems)
+                    {
+                        AddExploreItem(item);
+                    }    
+                }
+                else
+                {
+                    ReloadExploreItems();
+                }
             }
+        }
+
+        private static void ReloadExploreItems()
+        {
+            Patcher.Logger.LogInfo("ReloadExploreItems()");
+            foreach (var itemName in Persistence.Instance.ExploreItems)
+            {
+                Patcher.Logger.LogInfo("\t" + itemName);
+                var item = GameData.GetItemByName<ExploreAbilityItem>(itemName);
+
+                if (item == null)
+                {
+                    Patcher.Logger.LogWarning("\tItem not found in World Data");
+                    continue;
+                }
+
+                AddExploreItem(item);
+            }
+        }
+
+        private static void AddExploreItem(ExploreAbilityItem item)
+        {
+            // Don't add the same item twice
+            if (PlayerController.Instance.Inventory.Uniques.Any(i => i.GetName() == item.GetName()))
+                return;
+
+            PlayerController.Instance.Inventory.AddItem(item);
         }
         #endregion
 

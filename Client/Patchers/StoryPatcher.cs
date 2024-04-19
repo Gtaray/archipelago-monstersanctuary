@@ -79,8 +79,6 @@ namespace Archipelago.MonsterSanctuary.Client
                 ProgressManager.Instance.SetBool("TriggerOnce42700080", true, true); // Vertraag talking in Eternity's End
                 ProgressManager.Instance.SetBool("EndOfTimeDoorActivated", true, true); // open the door to eternity's end
 
-                SlotData.StartingFamiliar = 1; // Debugging
-
                 if (SlotData.StartingFamiliar < 0)
                     return true;
 

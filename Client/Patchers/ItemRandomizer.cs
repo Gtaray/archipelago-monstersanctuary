@@ -1,4 +1,5 @@
-﻿using Archipelago.MultiClient.Net.Models;
+﻿using Archipelago.MonsterSanctuary.Client.Behaviors;
+using Archipelago.MultiClient.Net.Models;
 using HarmonyLib;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
@@ -107,13 +108,6 @@ namespace Archipelago.MonsterSanctuary.Client
             {
                 _itemQueue.Enqueue(transfer);
             }
-
-            // Save the item as received as soon as it's queued up, not when its processed
-            // This will avoid cascading resyncs when multiple items are received simultaneously.
-            if (itemIndex != null)
-            {
-                Persistence.AddToItemCache(itemIndex.Value);
-            }
         }
         #endregion
 
@@ -140,7 +134,8 @@ namespace Archipelago.MonsterSanctuary.Client
                 if (_itemQueue.TryDequeue(out ItemTransfer nextItem))
                 {
                     Patcher.Logger.LogInfo("Dequeueing " + nextItem.ItemName);
-                    // For these, we just want to increment the counter and move on. Nothing else.
+                    // For these, we simply need to check if our total is 27. We track this when the champion is defeated
+                    // before the check is sent to AP.
                     if (nextItem.ItemName == "Champion Defeated")
                     {
                         if (Persistence.Instance.ChampionsDefeated.Count() >= 27 && SlotData.Goal == CompletionEvent.Champions)
@@ -149,8 +144,6 @@ namespace Archipelago.MonsterSanctuary.Client
                         }
                         return;
                     }
-
-                    Patcher.UI.AddItemToHistory(nextItem);
 
                     PopupController.PopupDelegate callback = null;
                     EShift eggShift = EShift.Normal;
@@ -197,6 +190,15 @@ namespace Archipelago.MonsterSanctuary.Client
                             nextItem.Action == ItemTransferType.Aquired,
                             eggShift,
                             callback);
+                    }
+
+                    // Show the item in the tracker, and add it to the persistence file
+                    // We do this at the end to make sure the player has actually received the item before 
+                    // saving it to the file.
+                    Patcher.UI.AddItemToHistory(nextItem);
+                    if (nextItem.ItemIndex.HasValue)
+                    {
+                        Persistence.AddToItemCache(nextItem.ItemIndex.Value);
                     }
                 }
             }
@@ -513,6 +515,13 @@ namespace Archipelago.MonsterSanctuary.Client
                     callback);
 
                 PlayerController.Instance.Inventory.AddItem(item, quantity, (int) eggShift);
+
+                // Whenever we receive an explore item we have to save it
+                if (item is ExploreAbilityItem)
+                {
+                    Patcher.Logger.LogInfo(item.Name + " is explore ability item");
+                    Persistence.Instance.ExploreItems.Add(item.GetName());
+                }
             }
         }
 

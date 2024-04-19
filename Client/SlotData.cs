@@ -113,6 +113,9 @@ namespace Archipelago.MonsterSanctuary.Client
             if (Goal == CompletionEvent.Mozzie)
                 Patcher.Logger.LogInfo("Mozzie Count: " + MozziePieces);
 
+            StartingFamiliar = GetIntData(options, "starting_familiar", -1);
+            Patcher.Logger.LogInfo("Starting Familiar: " + StartingFamiliar);
+
             IncludeChaosRelics = GetBoolData(options, "include_chaos_relics", false);
             Patcher.Logger.LogInfo("Include Chaos Relics: " + IncludeChaosRelics);
 
@@ -202,7 +205,8 @@ namespace Archipelago.MonsterSanctuary.Client
 
             var itemLocations = GetDictionaryData<Dictionary<string, long>>(slotData, "locations");
 
-            GameData.ShopChecks = GetDictionaryData<long>(slotData, "shops");
+            if (itemLocations.ContainsKey("shops"))
+                GameData.ShopChecks = itemLocations["shops"];
             Patcher.Logger.LogInfo("Shop Locations: " + GameData.ShopChecks.Count());
             GameData.ShopChecksReversed = GameData.ShopChecks.ToDictionary(kvp => kvp.Value, kvp => kvp.Key);
             GameData.ShopPrices = GetDictionaryData<int>(slotData, "prices");
