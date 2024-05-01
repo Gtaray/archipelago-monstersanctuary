@@ -25,7 +25,7 @@ NOTE: This mod is currently in its alpha stage. Features are likely to be broken
 - [Download the latest version of the .apworld file from this link.](https://github.com/Gtaray/archipelago-monstersanctuary/releases/latest/download/monster_sanctuary.apworld)
 - Place the `monster_sanctuary.apworld` file inside of `lib/worlds`. 
 - Once all of the .yaml files have been configured and placed into Players, click `Generate` in the Archipelago Launcher.
-- A .zip file will be created in the `output` folder containing information for your multiworld. In order to hose your game, go to [https://archipelago.gg/uploads](https://archipelago.gg/uploads) and upload the .zip file, then click `Create New Room`.
+- A .zip file will be created in the `output` folder containing information for your multiworld. In order to host your game, go to [https://archipelago.gg/uploads](https://archipelago.gg/uploads) and upload the .zip file, then click `Create New Room`.
 
 ## Connecting to a Room
 Once you start the game with the client mod, you'll see connection info in the top right. Enter the link to your room, the room's password, and your player name. Then click Connect.
