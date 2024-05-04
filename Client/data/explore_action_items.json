@@ -721,8 +721,8 @@
     },
     {
       "name": "Rainbow Slime Snack",
-      "tooltip": "Allows you to use {Rainbow Slime's} explore ability",
-      "monsters": ["Rainbow Slime"]
+      "tooltip": "Allows you to use {Rainbow Blob's} explore ability",
+      "monsters": ["Rainbow Blob"]
     },
     {
       "name": "Power Suit",
@@ -732,7 +732,7 @@
     {
       "name": "Blob Crown",
       "tooltip": "Allows you to use {King Blob's} explore ability",
-      "monsters": ["Kinb Blob"]
+      "monsters": ["King Blob"]
     },
     {
       "name": "Grapnel Launcher",

@@ -71,7 +71,7 @@ namespace Archipelago.MonsterSanctuary.Client
             // This runs into the issue where resyncing will not give store items. 
             // We could avoid the need for this entirely if we make it so purchased items aren't given when bought
             // but instead use the normal randomized item rails. That might be better depending on how playtesting goes.
-            if (itemIndex != null && GameData.ShopChecks.ContainsValue(locationId) && Persistence.Instance.LocationsChecked.Contains(locationId))
+            if (action == ItemTransferType.Aquired && itemIndex != null && GameData.ShopChecks.ContainsValue(locationId) && Persistence.Instance.LocationsChecked.Contains(locationId))
             {
                 // Have to do this check, becuase otherwise when resyncing this will reset the item received index back to
                 // an earlier value when a store item comes up in the list. This ensures that we only update the item cache

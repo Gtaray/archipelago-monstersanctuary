@@ -36,7 +36,7 @@ namespace Archipelago.MonsterSanctuary.Client
         }
 
         public static int[] AP_VERSION = new int[] { 0, 4, 5 };
-        public static string ModVersion = "1.1.3";
+        public static string ModVersion = "1.1.4";
         public static ConnectionState State = ConnectionState.Disconnected;
         public static bool IsConnected => State == ConnectionState.Connected;
 

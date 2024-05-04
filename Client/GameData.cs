@@ -34,17 +34,17 @@ namespace Archipelago.MonsterSanctuary.Client
 
         public void AddItem(string key, ShopInventoryItem item)
         {
-            Inventory[key] = item;
+            Inventory[key.ToLower()] = item;
         }
 
         public bool HasItem(string key)
         {
-            return Inventory.ContainsKey(key);
+            return Inventory.ContainsKey(key.ToLower());
         }
 
         public ShopInventoryItem GetItem(string key)
         {
-            return Inventory[key];
+            return Inventory[key.ToLower()];
         }
     }
 

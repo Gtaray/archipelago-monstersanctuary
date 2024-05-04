@@ -99,8 +99,6 @@ namespace Archipelago.MonsterSanctuary.Client
             }
         }
 
-        // This probably won't work, because we can't return a game object for 
-        // items from other games.
         [HarmonyPatch(typeof(TradeMenu), "UpdateMenuList")]
         private class TradeMenu_UpdateMenuList
         {
@@ -152,8 +150,8 @@ namespace Archipelago.MonsterSanctuary.Client
                     var rsi = item.GetComponent<RandomizedShopItem>();
                     var local = item.GetComponent<ForeignItem>() == null;
 
-                    // Ignore foreign items that have already been checked
-                    if (!local && Persistence.Instance.LocationsChecked.Contains(rsi.LocationId))
+                    // Ignore foreign and progression items that have already been checked
+                    if (Persistence.Instance.LocationsChecked.Contains(rsi.LocationId) || rsi.Classification == ItemClassification.Progression)
                     {
                         continue;
                     }
