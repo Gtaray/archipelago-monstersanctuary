@@ -191,7 +191,6 @@ namespace Archipelago.MonsterSanctuary.Client
                 if (SlotData.ExploreAbilityLock == ExploreAbilityLockType.Off)
                     return;
 
-                Patcher.Logger.LogInfo("monster name: " + __instance.Monster.OriginalMonsterName);
                 __result = IsMonsterAbilityAvailable(__instance.Monster.OriginalMonsterName);
             }
         }
