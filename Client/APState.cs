@@ -224,7 +224,6 @@ namespace Archipelago.MonsterSanctuary.Client
             if (!APState.IsConnected)
                 return;
 
-            Patcher.Logger.LogInfo("Resync()");
             for (int i = 0; i < Session.Items.AllItemsReceived.Count();  i++)
             {
                 var item = Session.Items.AllItemsReceived[i];
@@ -232,7 +231,6 @@ namespace Archipelago.MonsterSanctuary.Client
                 if (Persistence.HasReceivedItem(i))
                     continue;
 
-                Patcher.Logger.LogInfo("\t" + Session.Items.GetItemName(item.Item) + " - " + i);
                 QueueItemTransfer(i, item);
             }
         }

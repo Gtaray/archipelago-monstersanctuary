@@ -133,7 +133,7 @@ namespace Archipelago.MonsterSanctuary.Client
 
                 if (_itemQueue.TryDequeue(out ItemTransfer nextItem))
                 {
-                    Patcher.Logger.LogInfo("Dequeueing " + nextItem.ItemName);
+                    //Patcher.Logger.LogInfo("Dequeueing " + nextItem.ItemName);
                     // For these, we simply need to check if our total is 27. We track this when the champion is defeated
                     // before the check is sent to AP.
                     if (nextItem.ItemName == "Champion Defeated")
@@ -519,7 +519,7 @@ namespace Archipelago.MonsterSanctuary.Client
                 // Whenever we receive an explore item we have to save it
                 if (item is ExploreAbilityItem)
                 {
-                    Patcher.Logger.LogInfo(item.Name + " is explore ability item");
+                    //Patcher.Logger.LogInfo(item.Name + " is explore ability item");
                     Persistence.Instance.ExploreItems.Add(item.GetName());
                 }
             }

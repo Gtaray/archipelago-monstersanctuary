@@ -87,7 +87,7 @@ namespace Archipelago.MonsterSanctuary.Client
 
 
                 GameObject familiarPrefab = __instance.FamiliarButtons[SlotData.StartingFamiliar].FamiliarPrefab;
-                Patcher.Logger.LogInfo("Starter: " + familiarPrefab.name);
+                //Patcher.Logger.LogInfo("Starter: " + familiarPrefab.name);
 
                 PlayerController.Instance.Monsters.Familiar = PlayerController.Instance.Monsters.AddMonsterByPrefab(familiarPrefab, EShift.Normal);
                 PlayerController.Instance.Follower.Monster = PlayerController.Instance.Monsters.Familiar;

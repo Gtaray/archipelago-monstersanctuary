@@ -321,6 +321,11 @@ namespace Archipelago.MonsterSanctuary.Client
                 if (baseItem == null)
                     return true;
 
+                if (baseItem is ExploreAbilityItem)
+                {
+                    Persistence.Instance.ExploreItems.Add(baseItem.GetName());
+                }
+
                 // If the player buys an egg, mark off that it's been encountered
                 if (baseItem is Egg)
                 {

@@ -130,14 +130,14 @@ namespace Archipelago.MonsterSanctuary.Client
                     return;
                 }
 
-                Patcher.Logger.LogInfo("Setting connections");
+                //Patcher.Logger.LogInfo("Setting connections");
                 // Save the connections for later use
                 _connections = __instance.Connections;
 
                 // If we've finished the mozzie quest, then we can move on.
                 if (ProgressManager.Instance.GetBool("MozzieQuestDone"))
                 {
-                    Patcher.Logger.LogInfo("Reinstalling connections");
+                    //Patcher.Logger.LogInfo("Reinstalling connections");
                     // Re-install the connections so we can move on
                     __instance.Connections = _connections;
                     return;
@@ -146,7 +146,7 @@ namespace Archipelago.MonsterSanctuary.Client
                 __instance.Text = "You must reunite Mozzie's soul before you can awaken and battle Velvet Melody";
 
                 // End the dialog early
-                Patcher.Logger.LogInfo("Clearing connections");
+                //Patcher.Logger.LogInfo("Clearing connections");
                 __instance.Connections.Clear();
             }
         }
@@ -163,11 +163,11 @@ namespace Archipelago.MonsterSanctuary.Client
                 if (SlotData.Goal != CompletionEvent.Mozzie)
                     return;
 
-                Patcher.Logger.LogInfo("IsKeeperBattle: " + __instance.CurrentEncounter.IsKeeperBattle);
+                //Patcher.Logger.LogInfo("IsKeeperBattle: " + __instance.CurrentEncounter.IsKeeperBattle);
                 if (!__instance.CurrentEncounter.IsKeeperBattle)
                     return;
 
-                Patcher.Logger.LogInfo("GameObject name: " + __instance.CurrentEncounter.gameObject.name);
+                //Patcher.Logger.LogInfo("GameObject name: " + __instance.CurrentEncounter.gameObject.name);
                 if (__instance.CurrentEncounter.gameObject.name != "LegendaryEncounterVelvetMelody (1)")
                     return;
 

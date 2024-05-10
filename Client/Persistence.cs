@@ -115,7 +115,7 @@ namespace Archipelago.MonsterSanctuary.Client
 
         public static void DeleteFile()
         {
-            Patcher.Logger.LogInfo("DeleteFile()");
+            //Patcher.Logger.LogInfo("DeleteFile()");
             if (File.Exists(PERSISTENCE_FILENAME))
                 File.Delete(PERSISTENCE_FILENAME);
 
@@ -136,14 +136,14 @@ namespace Archipelago.MonsterSanctuary.Client
 
             }
 
-            Patcher.Logger.LogInfo("SaveFile()");
+            //Patcher.Logger.LogInfo("SaveFile()");
             string rawPath = Environment.CurrentDirectory;
             if (rawPath != null)
             {
                 //Persistence.SnapshotExploreItems();
                 foreach (var item in Instance.ExploreItems)
                 {
-                    Patcher.Logger.LogInfo("\t" + item);
+                    //Patcher.Logger.LogInfo("\t" + item);
                 }
 
                 var json = JsonConvert.SerializeObject(Persistence.Instance);
@@ -157,7 +157,7 @@ namespace Archipelago.MonsterSanctuary.Client
         {
             _loaded = true;
 
-            Patcher.Logger.LogInfo("LoadFile()");
+            //Patcher.Logger.LogInfo("LoadFile()");
             if (File.Exists(PERSISTENCE_FILENAME))
             {
                 var json = File.ReadAllText(PERSISTENCE_FILENAME);
@@ -168,7 +168,7 @@ namespace Archipelago.MonsterSanctuary.Client
                 //ReloadExploreItems();
                 foreach (var item in Instance.ExploreItems)
                 {
-                    Patcher.Logger.LogInfo("\t" + item);
+                    //Patcher.Logger.LogInfo("\t" + item);
                 }
             }
         }
