@@ -148,10 +148,10 @@ namespace Archipelago.MonsterSanctuary.Client
                 foreach (var item in shopInventory)
                 {
                     var rsi = item.GetComponent<RandomizedShopItem>();
-                    var local = item.GetComponent<ForeignItem>() == null;
+                    var isForeign = item.GetComponent<ForeignItem>() != null;
 
                     // Ignore foreign and progression items that have already been checked
-                    if (Persistence.Instance.LocationsChecked.Contains(rsi.LocationId) || rsi.Classification == ItemClassification.Progression)
+                    if (Persistence.Instance.LocationsChecked.Contains(rsi.LocationId) && (isForeign || rsi.Classification == ItemClassification.Progression))
                     {
                         continue;
                     }
@@ -280,8 +280,16 @@ namespace Archipelago.MonsterSanctuary.Client
                     return;
                 }
 
+                var rsi = item.GetComponent<RandomizedShopItem>();
+                var isForeign = item.GetComponent<ForeignItem>() != null;
+
+                if (rsi == null)
+                {
+                    return;
+                }
+
                 // Can only ever buy a single foreign item
-                if (item is ForeignItem)
+                if (rsi.Classification == ItemClassification.Progression || isForeign)
                 {
                     maxQuantity = 1;
                 }

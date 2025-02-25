@@ -138,7 +138,7 @@
     {
       "name": "Ability - Slash",
       "tooltip": "Allows you to use the {Slash} ability",
-      "monsters": [ "Catzerker", "Blade Widow", "Ucan" ]
+      "monsters": [ "Catzerker", "Minitaur", "Blade Widow", "Ucan" ]
     },
     {
       "name": "Ability - Slime Shot",

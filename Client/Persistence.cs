@@ -93,11 +93,16 @@ namespace Archipelago.MonsterSanctuary.Client
 
         public static void IncrementCheckCounter(long locationId)
         {
+            Patcher.Logger.LogInfo("Connected? " + APState.IsConnected);
             if (!APState.IsConnected)
                 return;
 
             // Add a check to our check counter base don the area
+            Patcher.Logger.LogInfo("Location ID: " + locationId);
             var locationName = APState.Session.Locations.GetLocationNameFromId(locationId);
+            if (locationName == null)
+                Patcher.Logger.LogInfo("Location name is null!");
+            Patcher.Logger.LogInfo("Location Name: " + locationName);
             var regionName = locationName.Replace(" ", "").Split('-').First();
             if (!Instance.CheckCounter.ContainsKey(regionName))
                 Instance.CheckCounter[regionName] = 0;

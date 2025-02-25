@@ -142,14 +142,15 @@ namespace Archipelago.MonsterSanctuary.Client
             else
             {
                 GUI.Label(new Rect(16, 16, 300, 20), ap_ver + " Status: Not Connected");
+                GUI.Label(new Rect(16, 36, 300, 20), "Client v" + APState.ModVersion);
             }
 
             // Login details
             if ((APState.Session == null || !APState.Authenticated) && APState.State != APState.ConnectionState.Connected)
             {
-                GUI.Label(new Rect(16, 36, 150, 20), "Host: ");
-                GUI.Label(new Rect(16, 56, 150, 20), "PlayerName: ");
-                GUI.Label(new Rect(16, 76, 150, 20), "Password: ");
+                GUI.Label(new Rect(16, 56, 150, 20), "Host: ");
+                GUI.Label(new Rect(16, 76, 150, 20), "PlayerName: ");
+                GUI.Label(new Rect(16, 96, 150, 20), "Password: ");
 
                 bool submit = Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.Return;
 
@@ -166,12 +167,12 @@ namespace Archipelago.MonsterSanctuary.Client
                     submit = false;
                 }
 
-                if ((GUI.Button(new Rect(16, 96, 100, 20), "Connect") || submit) && APState.ConnectionInfo.Valid)
+                if ((GUI.Button(new Rect(16, 116, 100, 20), "Connect") || submit) && APState.ConnectionInfo.Valid)
                 {
                     APState.Connect();
                 }
 
-                y = 120;
+                y = 140;
             }
 
             return y;
