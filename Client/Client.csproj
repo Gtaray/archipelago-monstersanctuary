@@ -39,11 +39,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Archipelago.MultiClient.Net" Version="5.0.6" />
+    <PackageReference Include="Archipelago.MultiClient.Net" Version="6.3.1" />
     <PackageReference Include="BepInEx.Analyzers" Version="1.*" PrivateAssets="all" />
     <PackageReference Include="BepInEx.Core" Version="5.4.19" />
     <PackageReference Include="BepInEx.PluginInfoProps" Version="2.*" />
-    <PackageReference Include="Json.Net.Unity3D" Version="9.0.1" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="UnityEngine.Modules" Version="2018.4.30" IncludeAssets="compile" />
   </ItemGroup>
   
@@ -53,14 +53,7 @@
   
   <ItemGroup>
     <Reference Include="Assembly-CSharp">
-      <HintPath>..\Libraries\Assembly-CSharp.dll</HintPath>
-    </Reference>
-    <Reference Include="MonSancAPI">
-      <HintPath>..\Libraries\MonSancAPI.dll</HintPath>
+      <HintPath>/mnt/GameCollectionDos/SteamLibrary/steamapps/common/Monster Sanctuary/Monster Sanctuary_Data/Managed/Assembly-CSharp.dll</HintPath>
     </Reference>
   </ItemGroup>
-  
-  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="copy /Y &quot;$(TargetDir)$(SolutionName).$(ProjectName).dll&quot; &quot;C:\Program Files (x86)\Steam\steamapps\common\Monster Sanctuary\BepInEx\plugins\Archipelago.MonsterSanctuary\$(SolutionName).$(ProjectName).dll&quot;" />
-  </Target>
 </Project>

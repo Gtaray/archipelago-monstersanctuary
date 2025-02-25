@@ -1,13 +1,10 @@
-﻿using Archipelago.MultiClient.Net.Enums;
-using Archipelago.MultiClient.Net.Packets;
+﻿using BepInEx;
 using HarmonyLib;
 using JetBrains.Annotations;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
-using System.Threading;
 using UnityEngine;
 
 namespace Archipelago.MonsterSanctuary.Client
@@ -142,7 +139,7 @@ namespace Archipelago.MonsterSanctuary.Client
                 }
                 if (replacementMonsters.Count() == 0)
                 {
-                    Logger.LogError($"Failed to build encounter; no data was found for '{GameController.Instance.CurrentSceneName}_{encounter.ID}'");
+                    Patcher.Logger.LogError($"Failed to build encounter; no data was found for '{GameController.Instance.CurrentSceneName}_{encounter.ID}'");
                     return true; // Let the original encounter spawn
                 }
                 encounterConfig.Monster = replacementMonsters.ToArray();
@@ -269,7 +266,7 @@ namespace Archipelago.MonsterSanctuary.Client
 
                 if (GameController.Instance == null)
                 {
-                    Logger.LogWarning("GameController.Instance was null");
+                    Patcher.Logger.LogWarning("GameController.Instance was null");
                     return true;
                 }
 
@@ -288,7 +285,7 @@ namespace Archipelago.MonsterSanctuary.Client
                 }
                 else
                 {
-                    Logger.LogWarning("Didn't find champion data for " + __instance.name);
+                    Patcher.Logger.LogWarning("Didn't find champion data for " + __instance.name);
                 }
 
                 if (monster == null)

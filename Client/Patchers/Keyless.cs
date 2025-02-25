@@ -1,10 +1,7 @@
 ﻿using HarmonyLib;
 using JetBrains.Annotations;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using UnityEngine;
 
 namespace Archipelago.MonsterSanctuary.Client
 {
@@ -27,7 +24,7 @@ namespace Archipelago.MonsterSanctuary.Client
                 if (SlotData.LockedDoors == LockedDoorsFlag.None 
                     || (SlotData.LockedDoors == LockedDoorsFlag.Minimal && !GameData.LockedDoors.Contains(id)))
                 {
-                    Destroy(__instance.gameObject);
+                    GameObject.Destroy(__instance.gameObject);
                     return false;
                 }
 

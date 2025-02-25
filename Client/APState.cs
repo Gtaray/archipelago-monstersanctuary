@@ -1,25 +1,14 @@
 ﻿using Archipelago.MultiClient.Net;
 using Archipelago.MultiClient.Net.Enums;
-using Newtonsoft.Json.Linq;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
-using System.Text;
 using System.Threading.Tasks;
-using UnityEngine;
 using Archipelago.MultiClient.Net.MessageLog.Messages;
 using Archipelago.MultiClient.Net.Helpers;
-using System.Xml.Linq;
 using Archipelago.MultiClient.Net.Packets;
 using Archipelago.MultiClient.Net.Models;
-using static System.Collections.Specialized.BitVector32;
-using static MonoMod.Cil.RuntimeILReferenceBag.FastDelegateInvokers;
 using Archipelago.MultiClient.Net.BounceFeatures.DeathLink;
-using System.Net;
-using System.Data.SqlTypes;
-using System.Net.Sockets;
 
 namespace Archipelago.MonsterSanctuary.Client
 {
@@ -197,7 +186,7 @@ namespace Archipelago.MonsterSanctuary.Client
                     ? ItemTransferType.Aquired // We found our own item
                     : ItemTransferType.Received; // Someone else found our item
                 var classification = (ItemClassification)((int)item.Flags);
-                Patcher.QueueItemTransfer(i, item.Item, item.Player, item.Location, classification, action);
+                Patcher.QueueItemTransfer(i, item.ItemGame, item.ItemId, item.Player, item.LocationId, classification, action);
             }
         }
         
@@ -208,13 +197,13 @@ namespace Archipelago.MonsterSanctuary.Client
                 return;
 
             var item = helper.DequeueItem();
-            var name = helper.GetItemName(item.Item);
+            var name = helper.GetItemName(item.ItemId);
             var action = Session.ConnectionInfo.Slot == item.Player
                 ? ItemTransferType.Aquired // We found our own item
                 : ItemTransferType.Received; // Someone else found our item
             var classification = (ItemClassification)((int)item.Flags);
 
-            Patcher.QueueItemTransfer(helper.Index, item.Item, item.Player, item.Location, classification, action);
+            Patcher.QueueItemTransfer(helper.Index, item.ItemGame, item.ItemId, item.Player, item.LocationId, classification, action);
         }
 
         public static void CheckLocations(params long[] locationIds)
@@ -246,7 +235,7 @@ namespace Archipelago.MonsterSanctuary.Client
         {
             // First we go through and 
             var packet = await Session.Locations.ScoutLocationsAsync(false, locationsToCheck);
-            foreach (var scout in packet.Locations)
+            foreach (var scout in packet.Values)
             {
                 if (Session.ConnectionInfo.Slot == scout.Player)
                 {
@@ -254,7 +243,7 @@ namespace Archipelago.MonsterSanctuary.Client
                 }
                 var classification = (ItemClassification)((int)scout.Flags);
                 // This needs to work without an index (because sent items never have an index.
-                Patcher.QueueItemTransfer(null, scout.Item, scout.Player, scout.Location, classification, ItemTransferType.Sent);
+                Patcher.QueueItemTransfer(null, scout.ItemGame, scout.ItemId, scout.Player, scout.LocationId, classification, ItemTransferType.Sent);
             }
         }
 

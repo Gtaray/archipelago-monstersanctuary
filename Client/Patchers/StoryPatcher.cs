@@ -1,12 +1,7 @@
 ﻿using HarmonyLib;
 using JetBrains.Annotations;
-using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
-using UnityEngine;
 using UnityEngine.SceneManagement;
 
 namespace Archipelago.MonsterSanctuary.Client
@@ -20,7 +15,7 @@ namespace Archipelago.MonsterSanctuary.Client
             private static bool Prefix(GameController __instance, bool isNewGamePlus)
             {
                 // new game file started, delete old files so we start fresh.
-                Logger.LogWarning("New Save. Deleting item cache and checked locations");
+                Patcher.Logger.LogWarning("New Save. Deleting item cache and checked locations");
                 Persistence.DeleteFile();
                 APState.Resync();
 

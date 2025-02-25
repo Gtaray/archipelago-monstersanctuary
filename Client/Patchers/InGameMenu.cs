@@ -1,15 +1,8 @@
 ﻿using HarmonyLib;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Runtime.Remoting.Messaging;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
-using UnityEngine.Experimental.UIElements.StyleEnums;
 using UnityEngine.SceneManagement;
-using static PopupController;
 using static SaveGameMenu;
 
 namespace Archipelago.MonsterSanctuary.Client
@@ -68,7 +61,7 @@ namespace Archipelago.MonsterSanctuary.Client
             {
                 if (__instance.ChangeType == GameController.SceneChangeType.Teleport && scene.name == "MountainPath_North1")
                 {
-                    Logger.LogDebug("Teleporting to Beginning of Game");
+                    Patcher.Logger.LogDebug("Teleporting to Beginning of Game");
                     GameObject.FindWithTag("MapSettings").GetComponent<MapSettings>().UpdateMinimap();
 
                     PlayerController.Instance.gameObject.SetActive(true);

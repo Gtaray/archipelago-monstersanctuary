@@ -1,16 +1,11 @@
 ﻿using HarmonyLib;
 using JetBrains.Annotations;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using UnityEngine;
 using static PopupController;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace Archipelago.MonsterSanctuary.Client
 {
@@ -49,9 +44,9 @@ namespace Archipelago.MonsterSanctuary.Client
         // until the player is able to move again, then check all of them at once.
         private static List<long> _giftQueue = new();
 
-        public static void QueueItemTransfer(int? itemIndex, long itemId, int playerId, long locationId, ItemClassification classification, ItemTransferType action)
+        public static void QueueItemTransfer(int? itemIndex, string itemGame, long itemId, int playerId, long locationId, ItemClassification classification, ItemTransferType action)
         {
-            var itemName = APState.Session.Items.GetItemName(itemId);
+            var itemName = APState.Session.Items.GetItemName(itemId, itemGame);
 
             // If item index is null (meaning this is someone else's item), we can only rely on whether the location ID is checked.
             if (itemIndex == null && Persistence.Instance.LocationsChecked.Contains(locationId))
@@ -436,6 +431,9 @@ namespace Archipelago.MonsterSanctuary.Client
 
         public static string RemoveProblematicCharacters(string text)
         {
+            Logger.LogInfo("Haiii!");
+            if (text is null)
+            Logger.LogInfo($"Replacing {text}");
             return text.Replace("<3", "heart")
                 .Replace("<", "")
                 .Replace(">", "");

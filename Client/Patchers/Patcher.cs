@@ -1,20 +1,13 @@
-﻿using Archipelago.MultiClient.Net.Helpers;
-using Archipelago.MultiClient.Net.Models;
+﻿using Archipelago.MultiClient.Net.Models;
 using BepInEx;
 using BepInEx.Logging;
 using HarmonyLib;
 using JetBrains.Annotations;
-using Newtonsoft.Json;
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Text.RegularExpressions;
-using System.Threading;
 using System.Threading.Tasks;
-using Team17.Online;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.SceneManagement;
@@ -24,15 +17,13 @@ namespace Archipelago.MonsterSanctuary.Client
     [BepInPlugin(MyPluginInfo.PLUGIN_GUID, MyPluginInfo.PLUGIN_NAME, MyPluginInfo.PLUGIN_VERSION)]
     public partial class Patcher : BaseUnityPlugin
     {
-        public static ManualLogSource Logger;
+        public static new ManualLogSource Logger;
         public static ArchipelagoUI UI;
 
         private void Awake()
         {
             Logger = base.Logger;
-
             GameData.Load();
-
             // Plugin startup logic
             new Harmony(MyPluginInfo.PLUGIN_GUID).PatchAll(Assembly.GetExecutingAssembly());
             SceneManager.sceneLoaded += new UnityAction<Scene, LoadSceneMode>(this.OnSceneLoaded);
