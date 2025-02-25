@@ -161,7 +161,7 @@ namespace Archipelago.MonsterSanctuary.Client
 
         private static Dictionary<string, T> GetDictionaryData<T>(Dictionary<string, object> data, string key)
         {
-            if (data[key].ToString() != null)
+            if (data.ContainsKey(key) && data[key].ToString() != null)
                 return JsonConvert.DeserializeObject<Dictionary<string, T>>(data[key].ToString());
 
             return new Dictionary<string, T>();
@@ -169,7 +169,7 @@ namespace Archipelago.MonsterSanctuary.Client
 
         private static IList<T> GetListData<T>(Dictionary<string, object> data, string key) where T : class
         {
-            if (data[key].ToString() != null)
+            if (data.ContainsKey(key) && data[key].ToString() != null)
             {
                 return JsonConvert.DeserializeObject<List<T>>(data[key].ToString());
             }
