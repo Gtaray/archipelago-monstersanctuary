@@ -18,6 +18,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="tools\**" />
+    <EmbeddedResource Remove="tools\**" />
+    <None Remove="tools\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Remove="data\map_pins.json" />
     <None Remove="data\minimal_locked_doors.json" />
     <None Remove="data\monster_names.json" />
@@ -59,7 +65,7 @@
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="&quot;$(ProjectDir)pdb2mdb.exe&quot; &quot;$(TargetDir)$(SolutionName).$(ProjectName).dll&quot;" />
+    <Exec Command="&quot;$(ProjectDir)tools\pdb2mdb.exe&quot; &quot;$(TargetDir)$(SolutionName).$(ProjectName).dll&quot;" />
     <Exec Command="copy /Y &quot;$(TargetDir)$(SolutionName).$(ProjectName).dll.mdb&quot; &quot;C:\Program Files (x86)\Steam\steamapps\common\Monster Sanctuary\BepInEx\plugins\Archipelago.MonsterSanctuary\$(SolutionName).$(ProjectName).dll.mdb&quot;" />
     <Exec Command="copy /Y &quot;$(TargetDir)$(SolutionName).$(ProjectName).dll&quot; &quot;C:\Program Files (x86)\Steam\steamapps\common\Monster Sanctuary\BepInEx\plugins\Archipelago.MonsterSanctuary\$(SolutionName).$(ProjectName).dll&quot;" />
   </Target>

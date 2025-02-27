@@ -88,22 +88,19 @@ namespace Archipelago.MonsterSanctuary.Client
         [HarmonyPatch(typeof(NewGameMenu), "UpdateButtonText")]
         public static class NewGameMenu_UpdateButtonText
         {
-            private static void Prefix(NewGameMenu __instance)
+            private static void Prefix(NewGameMenu __instance, ref bool ___relicMode)
             {
                 if (!APState.IsConnected)
                     return;
 
-                //var traverse = Traverse.Create(__instance);
-                //Patcher.Logger.LogInfo("UpdateButtonText");
-                //traverse.Field("relicMode").SetValue(SlotData.IncludeChaosRelics);
-                //Patcher.Logger.LogInfo("Relic Mode: " + traverse.Field("relicMode").GetValue<bool>());
+                //___relicMode = SlotData.IncludeChaosRelics;
             }
         }
 
         [HarmonyPatch(typeof(NewGameMenu), "Open")]
         public static class NewGameMenu_Open
         {
-            private static void Postfix(NewGameMenu __instance)
+            private static void Postfix(NewGameMenu __instance, ref bool ___timer)
             {
                 if (!APState.IsConnected)
                     return;
@@ -114,7 +111,7 @@ namespace Archipelago.MonsterSanctuary.Client
                 __instance.NewGamePlusItem.SetDisabled(true);
 
                 // Force timer to be on by default, but don't disable it.
-                Traverse.Create(__instance).Field("timer").SetValue(true);
+                ___timer = true;
                 __instance.TimerItem.Text.text = GetOnOffText(true);
             }
 
@@ -343,7 +340,6 @@ namespace Archipelago.MonsterSanctuary.Client
                     return;
                 }
 
-                // var saveSlot = Traverse.Create(__instance).Field("slotToBeLoaded").GetValue<int>();
                 ApData.CreateFileForSaveSlot(___slotToBeLoaded);
                 ApData.LoadFileForSaveSlot(___slotToBeLoaded);
                 ApData.SetConnectionDataCurrentFile(host_name, slot_name, password);

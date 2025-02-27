@@ -92,7 +92,7 @@ namespace Archipelago.MonsterSanctuary.Client
         private class CombatController_GrantRewards
         {
             [UsedImplicitly]
-            private static void Prefix(CombatController __instance)
+            private static void Prefix(CombatController __instance, List<InventoryItem> ___rareRewards)
             {
                 if(__instance.CurrentEncounter.EncounterType == EEncounterType.InfinityArena 
                     || GameModeManager.Instance.BraveryMode
@@ -117,10 +117,7 @@ namespace Archipelago.MonsterSanctuary.Client
                     }
                 }
 
-                var rareField = Traverse.Create(__instance).Field("rareRewards");
-                var rareRewards = rareField.GetValue<List<InventoryItem>>();
-                rareRewards.AddRange(items);
-                rareField.SetValue(rareRewards);
+                ___rareRewards.AddRange(items);
             }
         }
 
@@ -136,7 +133,7 @@ namespace Archipelago.MonsterSanctuary.Client
                 if (item is not Egg)
                     return true;
 
-                return items.All(i => i.Item != item);
+                return !items.Any(i => i.Item == item);
             }
         }
 

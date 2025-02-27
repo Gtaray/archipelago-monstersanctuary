@@ -25,11 +25,12 @@ namespace Archipelago.MonsterSanctuary.Client
         public float FadeOutAfterSeconds = 8f;
         public float FadeOutTime = 2f;
 
-        private GUIStyle _style = new() { richText = true };
+        private GUIStyle _style;
         private List<ItemHistoryEntry> _itemHistory = new();
 
         public void Awake()
         {
+            _style = new() { richText = true };
             _style.normal.textColor = Color.white;
         }
 
