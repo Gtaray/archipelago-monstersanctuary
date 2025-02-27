@@ -68,7 +68,11 @@ namespace Archipelago.MonsterSanctuary.Client
             Goal = GetEnumData(options, "goal", CompletionEvent.MadLord);
             ExpMultiplier = GetIntData(options, "exp_multiplier", 1);
             AlwaysGetEgg = GetBoolData(options, "monsters_always_drop_egg", false);
+#if DEBUG
+            SkipIntro = true;
+#else
             SkipIntro = GetBoolData(options, "skip_intro", false);
+#endif
             SkipPlot = GetBoolData(options, "skip_plot", false);
             MonsterShiftRule = GetEnumData(options, "monster_shift_rule", ShiftFlag.Normal);
             LockedDoors = GetEnumData(options, "remove_locked_doors", LockedDoorsFlag.All);

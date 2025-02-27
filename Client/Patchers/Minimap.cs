@@ -1,4 +1,5 @@
-﻿using HarmonyLib;
+﻿using Archipelago.MonsterSanctuary.Client.Persistence;
+using HarmonyLib;
 using JetBrains.Annotations;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,11 +11,8 @@ namespace Archipelago.MonsterSanctuary.Client
     {
         private static string GetCheckString(string region)
         {
-            int collected = 0;
+            int collected = ApData.GetCheckCounter(region);
             int max = 0;
-
-            if (Persistence.Instance.CheckCounter.ContainsKey(region))
-                collected = Persistence.Instance.CheckCounter[region];
 
             if (GameData.NumberOfChecks.ContainsKey(region))
                 max = GameData.NumberOfChecks[region];
@@ -112,7 +110,7 @@ namespace Archipelago.MonsterSanctuary.Client
                     return;
                 }
 
-                var checks = GameData.MapPins[key].Except(Persistence.Instance.LocationsChecked).Count();
+                var checks = GameData.MapPins[key].Except(ApData.GetLocationsChecked()).Count();
 
                 // If all map pins for this tile are contained within the _itemcache, then we can delete the marker
                 if (checks == 0)
@@ -154,7 +152,7 @@ namespace Archipelago.MonsterSanctuary.Client
                     if (!GameData.MapPins.ContainsKey(key))
                         continue;
 
-                    var checks = GameData.MapPins[key].Except(Persistence.Instance.LocationsChecked).Count();
+                    var checks = GameData.MapPins[key].Except(ApData.GetLocationsChecked()).Count();
                     if (checks == 0)
                     {
                         tile.MinimapEntry.DeleteMinimapMarker(tile.MinimapEntry.GetTileViewIndex(tile));
@@ -205,7 +203,7 @@ namespace Archipelago.MonsterSanctuary.Client
             if (SlotData.Goal == CompletionEvent.MadLord)
                 goalText = "Defeat the Mad Lord";
             else if (SlotData.Goal == CompletionEvent.Champions)
-                goalText = $"Defeat All Champions - {Persistence.Instance.ChampionsDefeated.Count()} / 27";
+                goalText = $"Defeat All Champions - {ApData.GetNumberOfChampionsDefeated()} / 27";
 
             if (APState.Completed)
             {

@@ -14,6 +14,7 @@
     </RestoreAdditionalProjectSources>
     <RootNamespace>Archipelago.MonsterSanctuary.Client</RootNamespace>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <DebugType>Full</DebugType>
   </PropertyGroup>
 
   <ItemGroup>
@@ -50,10 +51,16 @@
   <ItemGroup Condition="'$(TargetFramework.TrimEnd(`0123456789`))' == 'net'">
     <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.2" PrivateAssets="all" />
   </ItemGroup>
-  
+
   <ItemGroup>
     <Reference Include="Assembly-CSharp">
-      <HintPath>/mnt/GameCollectionDos/SteamLibrary/steamapps/common/Monster Sanctuary/Monster Sanctuary_Data/Managed/Assembly-CSharp.dll</HintPath>
+      <HintPath>..\Libraries\Assembly-CSharp.dll</HintPath>
     </Reference>
   </ItemGroup>
+
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="&quot;$(ProjectDir)pdb2mdb.exe&quot; &quot;$(TargetDir)$(SolutionName).$(ProjectName).dll&quot;" />
+    <Exec Command="copy /Y &quot;$(TargetDir)$(SolutionName).$(ProjectName).dll.mdb&quot; &quot;C:\Program Files (x86)\Steam\steamapps\common\Monster Sanctuary\BepInEx\plugins\Archipelago.MonsterSanctuary\$(SolutionName).$(ProjectName).dll.mdb&quot;" />
+    <Exec Command="copy /Y &quot;$(TargetDir)$(SolutionName).$(ProjectName).dll&quot; &quot;C:\Program Files (x86)\Steam\steamapps\common\Monster Sanctuary\BepInEx\plugins\Archipelago.MonsterSanctuary\$(SolutionName).$(ProjectName).dll&quot;" />
+  </Target>
 </Project>

@@ -1,4 +1,5 @@
-﻿using HarmonyLib;
+﻿using Archipelago.MonsterSanctuary.Client.Persistence;
+using HarmonyLib;
 using JetBrains.Annotations;
 using System;
 using System.Collections.Concurrent;
@@ -49,7 +50,7 @@ namespace Archipelago.MonsterSanctuary.Client
             var itemName = APState.Session.Items.GetItemName(itemId, itemGame);
 
             // If item index is null (meaning this is someone else's item), we can only rely on whether the location ID is checked.
-            if (itemIndex == null && Persistence.Instance.LocationsChecked.Contains(locationId))
+            if (itemIndex == null && ApData.IsLocationChecked(locationId))
             {
                 return;
             }
@@ -58,12 +59,12 @@ namespace Archipelago.MonsterSanctuary.Client
             // If the item action is either sent or acquired, we want to update the minimap. If we received the item then its not from us at all.
             if (action != ItemTransferType.Received)
             {
-                Persistence.AddAndUpdateCheckedLocations(locationId);
+                ApData.AddAndUpdateCheckedLocations(locationId);
             }   
 
             // Do not queue a new item if we've already received that item.
             // Do not queue an item if the queue already contains that index.
-            if (itemIndex != null && (Persistence.Instance.ItemsReceived.Contains(itemIndex.Value) || _itemQueue.Any(i => i.ItemIndex == itemIndex)))
+            if (itemIndex != null && (ApData.IsItemReceived(itemIndex.Value) || _itemQueue.Any(i => i.ItemIndex == itemIndex)))
             {
                 return;
             }
@@ -110,7 +111,7 @@ namespace Archipelago.MonsterSanctuary.Client
                     // For these, we just want to increment the counter and move on. Nothing else.
                     if (nextItem.ItemName == "Champion Defeated")
                     {
-                        if (Persistence.Instance.ChampionsDefeated.Count() >= 27 && SlotData.Goal == CompletionEvent.Champions)
+                        if (ApData.GetNumberOfChampionsDefeated() >= 27 && SlotData.Goal == CompletionEvent.Champions)
                         {
                             APState.CompleteGame();
                         }
@@ -152,7 +153,7 @@ namespace Archipelago.MonsterSanctuary.Client
 
                         // We only want to save items to the item cache if we're receiving the item. 
                         // Do not cache items we send to other people
-                        Persistence.AddToItemCache(nextItem.ItemIndex.Value);
+                        ApData.AddToItemCache(nextItem.ItemIndex.Value);
                     }
                 }
             }

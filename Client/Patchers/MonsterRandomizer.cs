@@ -1,4 +1,5 @@
-﻿using BepInEx;
+﻿using Archipelago.MonsterSanctuary.Client.Persistence;
+using BepInEx;
 using HarmonyLib;
 using JetBrains.Annotations;
 using System;
@@ -27,7 +28,7 @@ namespace Archipelago.MonsterSanctuary.Client
                 if (!GameData.ChampionScenes.ContainsKey(GameController.Instance.CurrentSceneName))
                     return;
 
-                __result = Persistence.Instance.ChampionsDefeated.Contains(GameController.Instance.CurrentSceneName);
+                __result = ApData.IsCampionDefeated(GameController.Instance.CurrentSceneName);
             }
         }
 

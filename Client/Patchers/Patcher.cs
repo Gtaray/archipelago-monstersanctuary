@@ -1,4 +1,5 @@
-﻿using Archipelago.MultiClient.Net.Models;
+﻿using Archipelago.MonsterSanctuary.Client.Persistence;
+using Archipelago.MultiClient.Net.Models;
 using BepInEx;
 using BepInEx.Logging;
 using HarmonyLib;
@@ -28,7 +29,7 @@ namespace Archipelago.MonsterSanctuary.Client
             new Harmony(MyPluginInfo.PLUGIN_GUID).PatchAll(Assembly.GetExecutingAssembly());
             SceneManager.sceneLoaded += new UnityAction<Scene, LoadSceneMode>(this.OnSceneLoaded);
 
-            Persistence.LoadFile();
+            ApData.InitializePersistenceFiles();
         }
 
         private void OnDestroy()
@@ -65,13 +66,6 @@ namespace Archipelago.MonsterSanctuary.Client
 
                 var guiObject = new GameObject("Archipelago UI");
                 Patcher.UI = guiObject.AddComponent<ArchipelagoUI>();
-
-                var rawPath = Environment.CurrentDirectory;
-                var lastConnection = ArchipelagoConnection.LoadFromFile(rawPath + "/archipelago_last_connection.json");
-                if (lastConnection != null)
-                {
-                    APState.ConnectionInfo = lastConnection;
-                }
             }
         }
 

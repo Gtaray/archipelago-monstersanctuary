@@ -1,4 +1,5 @@
-﻿using HarmonyLib;
+﻿using Archipelago.MonsterSanctuary.Client.Persistence;
+using HarmonyLib;
 using JetBrains.Annotations;
 namespace Archipelago.MonsterSanctuary.Client
 {
@@ -43,7 +44,7 @@ namespace Archipelago.MonsterSanctuary.Client
                     return;
                 }
 
-                Persistence.AddChampionDefeated(GameController.Instance.CurrentSceneName);
+                ApData.AddChampionDefeated(GameController.Instance.CurrentSceneName);
                 APState.CheckLocation(GameData.ChampionRankIds[locName]);
             }
         }

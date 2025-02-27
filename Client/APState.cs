@@ -9,6 +9,7 @@ using Archipelago.MultiClient.Net.Helpers;
 using Archipelago.MultiClient.Net.Packets;
 using Archipelago.MultiClient.Net.Models;
 using Archipelago.MultiClient.Net.BounceFeatures.DeathLink;
+using Archipelago.MonsterSanctuary.Client.Persistence;
 
 namespace Archipelago.MonsterSanctuary.Client
 {
@@ -21,11 +22,15 @@ namespace Archipelago.MonsterSanctuary.Client
             Connected
         }
 
-        public static int[] AP_VERSION = new int[] { 0, 4, 4 };
+        // These are cached when we connect simply so we have easy access to them
+        // Mostly for double checking that when we load a save file, we're connected to the right AP server
+        public static string HostName { get; set; }
+        public static string SlotName { get; set; }
+
+        public static int[] AP_VERSION = new int[] { 0, 5, 1 };
         public static ConnectionState State = ConnectionState.Disconnected;
         public static bool IsConnected => State == ConnectionState.Connected;
 
-        public static ArchipelagoConnectionInfo ConnectionInfo = new ArchipelagoConnectionInfo();
         public static ArchipelagoSession Session;
         public static bool Authenticated;
         public static bool Completed = false;
@@ -34,23 +39,26 @@ namespace Archipelago.MonsterSanctuary.Client
 
         private static DeathLinkService _deathLink;
 
-        public static bool Connect()
+        public static bool Connect(string hostname, string slotname, string password)
         {
             if (Authenticated)
             {
                 return true;
             }
 
-            if (string.IsNullOrEmpty(ConnectionInfo.host_name))
+            if (string.IsNullOrEmpty(hostname))
             {
                 return false;
             }
 
-            Patcher.Logger.LogInfo($"Connecting to {ConnectionInfo.host_name} as {ConnectionInfo.slot_name}...");
+            APState.HostName = hostname;
+            APState.SlotName = slotname;
+
+            Patcher.Logger.LogInfo($"Connecting to {hostname} as {slotname}...");
             State = ConnectionState.Connecting;
 
             // Start the archipelago session.
-            Session = ArchipelagoSessionFactory.CreateSession(ConnectionInfo.host_name);
+            Session = ArchipelagoSessionFactory.CreateSession(hostname);
             Session.MessageLog.OnMessageReceived += Session_MessageReceived;
             Session.Socket.ErrorReceived += Session_ErrorReceived;
             Session.Socket.SocketClosed += Session_SocketClosed;
@@ -60,22 +68,12 @@ namespace Archipelago.MonsterSanctuary.Client
             _deathLink = Session.CreateDeathLinkService();
             _deathLink.OnDeathLinkReceived += (deathLinkObject) => ReceiveDeathLink(deathLinkObject);
 
-            string rawPath = Environment.CurrentDirectory;
-            if (rawPath != null)
-            {
-                ArchipelagoConnection.WriteToFile(ConnectionInfo, rawPath + "/archipelago_last_connection.json");
-            }
-            else
-            {
-                Patcher.Logger.LogError("Could not write most recent connect info to file.");
-            }
-
             LoginResult loginResult = Session.TryConnectAndLogin(
                 "Monster Sanctuary",
-                ConnectionInfo.slot_name,
+                slotname,
                 ItemsHandlingFlags.AllItems,
                 new Version(AP_VERSION[0], AP_VERSION[1], AP_VERSION[2]),
-                password: ConnectionInfo.password);
+                password: password);
 
             if (loginResult is LoginSuccessful loginSuccess)
             {
@@ -89,7 +87,7 @@ namespace Archipelago.MonsterSanctuary.Client
                     _deathLink.EnableDeathLink();
 
                 GameData.LoadMinimap();
-                Persistence.RebuildCheckCounter();
+                ApData.RebuildCheckCounter();
 
                 // If the player opened chests while not connected, this get those items upon connection
                 if (OfflineChecks.Count() > 0)
@@ -152,6 +150,7 @@ namespace Archipelago.MonsterSanctuary.Client
             Authenticated = false;
             State = ConnectionState.Disconnected;
             Session = null;
+            ApData.UnloadCurrentFile();
         }
 
         public static void SendDeathLink()
