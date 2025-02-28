@@ -1,4 +1,5 @@
-﻿using Archipelago.MonsterSanctuary.Client.Persistence;
+﻿using Archipelago.MonsterSanctuary.Client.AP;
+using Archipelago.MonsterSanctuary.Client.Persistence;
 using BepInEx;
 using HarmonyLib;
 using JetBrains.Annotations;
@@ -22,13 +23,13 @@ namespace Archipelago.MonsterSanctuary.Client
         {
             private static void Postfix(ref bool __result, ProgressManager __instance, Monster champion)
             {
-                if (!APState.IsConnected)
+                if (!ApState.IsConnected)
                     return;
 
-                if (!GameData.ChampionScenes.ContainsKey(GameController.Instance.CurrentSceneName))
+                if (!Champions.DoesSceneHaveAChampion(GameController.Instance.CurrentSceneName))
                     return;
 
-                __result = ApData.IsCampionDefeated(GameController.Instance.CurrentSceneName);
+                __result = ApData.IsChampionDefeated(GameController.Instance.CurrentSceneName);
             }
         }
 
@@ -37,7 +38,7 @@ namespace Archipelago.MonsterSanctuary.Client
         {
             private static bool Prefix(ref SkillManager __instance, ref PassiveChampion __result, ref bool recursive, ref int monsterIndex)
             {
-                if (!APState.IsConnected)
+                if (!ApState.IsConnected)
                     return true;
 
                 var monster = __instance.GetComponent<Monster>();
@@ -55,12 +56,16 @@ namespace Archipelago.MonsterSanctuary.Client
                     }
                 }
                 
-                if (!GameData.OriginalChampions.ContainsKey(GameController.Instance.CurrentSceneName))
+                if (!Champions.DoesSceneHaveAChampion(GameController.Instance.CurrentSceneName))
                 {
                     return true;
                 }
 
-                var champ = GameData.GetMonsterByName(GameData.OriginalChampions[GameController.Instance.CurrentSceneName]);
+                string originalChampName = Champions.GetOriginalChampionForScene(GameController.Instance.CurrentSceneName);
+                if (string.IsNullOrEmpty(originalChampName))
+                    return true;
+
+                var champ = Monsters.GetMonsterByName(originalChampName);
                 if (champ == null)
                     return true;
 
@@ -84,14 +89,12 @@ namespace Archipelago.MonsterSanctuary.Client
             [UsedImplicitly]
             private static bool Prefix(ref Monster __result, ref Monster monster)
             {
-                if (!APState.IsConnected)
+                if (!ApState.IsConnected)
                     return true;
-
-                string loc = $"{GameController.Instance.CurrentSceneName}_{monster.Encounter?.ID}_{monster.Index}";
 
                 // If the monster we're checking for does not have an encounter, then we 
                 // default to the original function
-                if (!GameData.MonstersCache.ContainsKey(loc))
+                if (Monsters.IsMonsterCached(GameController.Instance.CurrentSceneName, monster.Encounter?.ID, monster.Index))
                 {
                     return true;
                 }
@@ -113,7 +116,7 @@ namespace Archipelago.MonsterSanctuary.Client
             [UsedImplicitly]
             private static bool Prefix(ref List<Monster> __result, CombatController __instance, MonsterEncounter encounter, bool isChampion)
             {
-                if (!APState.IsConnected)
+                if (!ApState.IsConnected)
                     return true;
 
                 // TODO: This doesn't seem to be changing the level of super champions
@@ -129,10 +132,11 @@ namespace Archipelago.MonsterSanctuary.Client
 
                 // Replace the monsters in encounterConfig. We do this outside of the foreach loop below because if a 1 monster champion fight is replaced with a 3 monster champion fight
                 // it breaks things really bad (there's only one monster in encounterConfig.Monster, so only the first replacement is ever applied).
-                List<GameObject> replacementMonsters = new List<GameObject>();
+                List<GameObject> replacementMonsters = new();
                 for (int i = 0; i < 3; i++)
                 {
-                    GameObject monsterPrefab = GameData.GetReplacementMonster($"{GameController.Instance.CurrentSceneName}_{encounter.ID}_{i}");
+                    
+                    GameObject monsterPrefab = Monsters.GetReplacementMonster(GameController.Instance.CurrentSceneName, encounter.ID, i);
                     if (monsterPrefab != null)
                     {
                         replacementMonsters.Add(monsterPrefab);
@@ -145,7 +149,7 @@ namespace Archipelago.MonsterSanctuary.Client
                 }
                 encounterConfig.Monster = replacementMonsters.ToArray();
 
-                List<Monster> list = new List<Monster>();
+                List<Monster> list = new();
                 int num = Mathf.Min(3, PlayerController.Instance.Monsters.Active.Count + PlayerController.Instance.Monsters.Permadead.Count);
                 int num2 = 0;
                 foreach (GameObject gameObject in encounterConfig.Monster)
@@ -174,8 +178,7 @@ namespace Archipelago.MonsterSanctuary.Client
                 {
                     if (!isChampion && encounter.IsNormalEncounter)
                     {
-                        EncounterShiftData encounterShiftData;
-                        if (ProgressManager.Instance.GetRecentEncounter(GameController.Instance.CurrentSceneName, encounter.ID, out encounterShiftData))
+                        if (ProgressManager.Instance.GetRecentEncounter(GameController.Instance.CurrentSceneName, encounter.ID, out EncounterShiftData encounterShiftData))
                         {
                             if (list.Count > 0)
                             {
@@ -214,16 +217,14 @@ namespace Archipelago.MonsterSanctuary.Client
                     {
                         if (encounter.PredefinedMonsters.level >= 160)
                         {
-                            using (List<Monster>.Enumerator enumerator = list.GetEnumerator())
+                            using List<Monster>.Enumerator enumerator = list.GetEnumerator();
+                            while (enumerator.MoveNext())
                             {
-                                while (enumerator.MoveNext())
-                                {
-                                    Monster monster2 = enumerator.Current;
-                                    __instance.GetType().GetMethod("SetupInfinityArenaMonsterShift", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(__instance, new object[] { monster2 });
-                                }
-                                __result = list;
-                                return false;
+                                Monster monster2 = enumerator.Current;
+                                __instance.GetType().GetMethod("SetupInfinityArenaMonsterShift", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(__instance, new object[] { monster2 });
                             }
+                            __result = list;
+                            return false;
                         }
                         if (encounter.PredefinedMonsters.level >= 130)
                         {
@@ -260,7 +261,7 @@ namespace Archipelago.MonsterSanctuary.Client
             [UsedImplicitly]
             private static bool Prefix(RandomizerMonsterReplacer __instance)
             {
-                if (!APState.IsConnected)
+                if (!ApState.IsConnected)
                 {
                     return true;
                 }
@@ -271,18 +272,17 @@ namespace Archipelago.MonsterSanctuary.Client
                     return true;
                 }
 
-                string monster_id = $"{GameController.Instance.CurrentSceneName}_{__instance.name}";
                 Monster component = __instance.OriginalMonster.GetComponent<Monster>();
                 Monster monster = null;
 
-
-                if (GameData.NPCs.ContainsKey(monster_id))
+                var npcLocationName = Monsters.GetNpcLocationName(GameController.Instance.CurrentSceneName, __instance.name);
+                if (!string.IsNullOrEmpty(npcLocationName))
                 {
-                    monster = GameData.GetReplacementMonster(GameData.NPCs[monster_id]).GetComponent<Monster>();
+                    monster = Monsters.GetReplacementMonster(npcLocationName).GetComponent<Monster>();
                 }
                 else if (__instance.name == "SkorchNPC" && !string.IsNullOrEmpty(SlotData.BexMonster))
                 {
-                    monster = GameData.GetMonsterByName(SlotData.BexMonster).GetComponent<Monster>();
+                    monster = Monsters.GetMonsterByName(SlotData.BexMonster).GetComponent<Monster>();
                 }
                 else
                 {
@@ -312,10 +312,7 @@ namespace Archipelago.MonsterSanctuary.Client
                 if (monster != component)
                 {
                     SpriteAnimator component2 = __instance.GetComponent<SpriteAnimator>();
-                    if (component2 != null)
-                    {
-                        component2.Initialize();
-                    }
+                    component2?.Initialize();
                     ParticleSystem[] componentsInChildren = __instance.GetComponentsInChildren<ParticleSystem>();
                     for (int i = 0; i < componentsInChildren.Length; i++)
                     {
@@ -326,12 +323,10 @@ namespace Archipelago.MonsterSanctuary.Client
                     {
                         component3.enabled = false;
                     }
+
                     tk2dBaseSprite component4 = monster.GetComponent<tk2dBaseSprite>();
-                    MonsterVisuals monsterVisuals = __instance.GetComponent<MonsterVisuals>();
-                    if (monsterVisuals == null)
-                    {
-                        monsterVisuals = __instance.gameObject.AddComponent<MonsterVisuals>();
-                    }
+                    MonsterVisuals monsterVisuals = __instance.GetComponent<MonsterVisuals>() ?? __instance.gameObject.AddComponent<MonsterVisuals>();
+
                     if (__instance.GetComponent<FamiliarNPC>() != null && ProgressManager.Instance.GetBool("SanctuaryShifted") && __instance.GetComponent<FamiliarNPC>().Shift != EShift.Normal)
                     {
                         __instance.GetComponent<MonsterVisuals>().ShiftOverride = __instance.GetComponent<FamiliarNPC>().Shift;
@@ -374,7 +369,7 @@ namespace Archipelago.MonsterSanctuary.Client
             [UsedImplicitly]
             private static void Postfix(GameModeManager __instance, GameObject monster, ref GameObject __result)
             {
-                if (!APState.IsConnected)
+                if (!ApState.IsConnected)
                 {
                     return;
                 }
@@ -382,11 +377,11 @@ namespace Archipelago.MonsterSanctuary.Client
                 
                 if (mon.Name == "Tanuki")
                 {
-                    __result = GameData.GetMonsterByName(SlotData.TanukiMonster);
+                    __result = Monsters.GetMonsterByName(SlotData.TanukiMonster);
                 }
                 else if (mon.Name == "Skorch")
                 {
-                    __result = GameData.GetMonsterByName(SlotData.BexMonster);
+                    __result = Monsters.GetMonsterByName(SlotData.BexMonster);
                 }
 
                 // Might need to add shockhopper cryomancer mon here

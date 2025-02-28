@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using Archipelago.MonsterSanctuary.Client.AP;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -15,6 +16,7 @@ namespace Archipelago.MonsterSanctuary.Client.Persistence
         public static string DataFolder => Path.Combine(Environment.CurrentDirectory, "Archipelago");
         public static string DataFileRegex = @"ap_data_(\d+).json$";
 
+        #region Data Files
         public static Dictionary<int, string> PersistenceFiles;
         public static void InitializePersistenceFiles()
         {
@@ -27,7 +29,7 @@ namespace Archipelago.MonsterSanctuary.Client.Persistence
             }
 
             var files = Directory.EnumerateFiles(DataFolder);
-            Regex r = new Regex(DataFileRegex, RegexOptions.IgnoreCase);
+            Regex r = new(DataFileRegex, RegexOptions.IgnoreCase);
             foreach (var fullFilePath in files)
             {
                 string file = Path.GetFileName(fullFilePath);
@@ -74,7 +76,7 @@ namespace Archipelago.MonsterSanctuary.Client.Persistence
                 return false;
             }
 
-            if (CurrentFile != null)
+            if (HasApDataFile())
             {
                 CurrentFile.SaveFile();
             }
@@ -91,7 +93,7 @@ namespace Archipelago.MonsterSanctuary.Client.Persistence
         public static void UnloadCurrentFile()
         {
             Patcher.Logger.LogDebug("Unloading current AP data file");
-            if (CurrentFile == null)
+            if (!HasApDataFile())
                 return;
 
             CurrentFile.SaveFile();
@@ -109,7 +111,7 @@ namespace Archipelago.MonsterSanctuary.Client.Persistence
 
             // If our current AP file is what we're deleting
             // then we can delete it from the file
-            if (CurrentFile != null && CurrentFile.SaveSlot == saveSlot)
+            if (HasApDataFile() && CurrentFile.SaveSlot == saveSlot)
             {
                 CurrentFile.DeleteFile();
                 CurrentFile = null;
@@ -128,7 +130,7 @@ namespace Archipelago.MonsterSanctuary.Client.Persistence
         public static void SetConnectionDataCurrentFile(string hostname, string slotname, string password)
         {
             Patcher.Logger.LogDebug("Adding connection data for current file");
-            if (CurrentFile != null)
+            if (HasApDataFile())
             {
                 CurrentFile.ConnectionInfo.HostName = hostname;
                 CurrentFile.ConnectionInfo.SlotName = slotname;
@@ -147,121 +149,198 @@ namespace Archipelago.MonsterSanctuary.Client.Persistence
             return PersistenceFiles.ContainsKey(saveSlot);
         }
 
+        public static bool HasApDataFile() => CurrentFile != null;
+        #endregion
 
-        public static void AddChampionDefeated(string scene)
+        #region Items Received
+        public static int GetItemsReceived()
         {
-            if (CurrentFile == null)
-                return;
-
-            CurrentFile.AddChampionDefeated(scene);
-        }
-
-        public static int GetNumberOfChampionsDefeated()
-        {
-            if (CurrentFile == null)
+            if (!HasApDataFile())
+            {
+                Patcher.Logger.LogError("Tried to get the Items Received index, except the current AP data file is null.");
                 return 0;
-            return CurrentFile.ChampionsDefeated.Count();
+            }
+            return CurrentFile.ItemsReceived;
         }
 
-        public static bool IsCampionDefeated(string scene)
+        public static bool IsItemReceived(int index)
         {
-            if (CurrentFile == null)
-                return false;
-            return CurrentFile.ChampionsDefeated.Contains(scene);
+            return index <= GetItemsReceived();
         }
 
-
-        public static void AddToItemCache(int id)
+        public static void SetItemsReceived(int index)
         {
-            if (CurrentFile == null)
+            if (!HasApDataFile())
+            {
+                Patcher.Logger.LogError("Tried to set the Items Received index, except the current AP data file is null.");
                 return;
+            }
+            if (index > CurrentFile.ItemsReceived)
+            {
+                CurrentFile.ItemsReceived = index;
+                CurrentFile.SaveFile();
+            }
+        }
+        #endregion
 
-            CurrentFile.AddToItemCache(id);
+        #region Locations Checked
+        public static bool HasLocationBeenChecked(string location)
+        {
+            if (!HasApDataFile())
+            {
+                Patcher.Logger.LogError("Tried to see if a location has been checked, except the current AP data file is null.");
+                return true;
+            }
+            return CurrentFile.LocationsChecked.Contains(location);
         }
 
-        public static bool IsItemReceived(long itemId)
+        /// <summary>
+        /// Marks a location as having been checked, even if the client is disconnected from Archipelago. Does nothing if no ApData file is loaded
+        /// </summary>
+        /// <param name="location"></param>
+        public static void MarkLocationAsChecked(string location)
         {
-            if (!APState.IsConnected)
-                return true;
-            if (CurrentFile == null)
-                return true;
-
-            return CurrentFile.LocationsChecked.Contains(itemId);
-        }
-
-
-        public static void AddAndUpdateCheckedLocations(long locationId)
-        {
-            if (CurrentFile == null)
+            // We want to be able to call this method even if we're offline or in a vanilla save with no AP data
+            if (!HasApDataFile())
+            {
                 return;
+            }
 
-            CurrentFile.AddAndUpdateCheckedLocations(locationId);
+            if (!HasLocationBeenChecked(location))
+            {
+                CurrentFile.LocationsChecked.Add(location);
+                CurrentFile.SaveFile();
+            }
         }
 
-
-        public static List<long> GetLocationsChecked()
+        public static List<string> GetCheckedLocations()
         {
-            if (CurrentFile == null)
+
+            if (!HasApDataFile())
+            {
+                Patcher.Logger.LogError("Tried to get checked locations, except the current AP data file is null.");
                 return new();
+            }
 
             return CurrentFile.LocationsChecked;
         }
 
-        public static bool IsLocationChecked(long locationId)
+        public static List<long> GetCheckedLocationsAsIds()
         {
-            if (!APState.IsConnected)
-                return true;
-            if (CurrentFile == null)
-                return true;
+            if (!HasApDataFile())
+            {
+                Patcher.Logger.LogError("Tried to get checked locations, except the current AP data file is null.");
+                return new();
+            }
 
-            return CurrentFile.LocationsChecked.Contains(locationId);
+            return GetCheckedLocations()
+                .Select(Locations.GetLocationId)
+                .Where(l => l.HasValue)
+                .Select(l => l.Value)
+                .ToList();
         }
+        #endregion
 
-
+        #region Check Counter
         public static void RebuildCheckCounter()
         {
-            if (!APState.IsConnected)
+            if (!HasApDataFile())
+            {
+                Patcher.Logger.LogError("Tried to rebuild the check counter, except the current AP data file is null.");
                 return;
+            }
 
-            if (CurrentFile == null)
-                return;
+            CurrentFile.CheckCounter = new();
+            var locations = ApState.Session.Locations.AllLocationsChecked.Except(Champions.GetChampionRankLocationIds());
 
-            CurrentFile.RebuildCheckCounter();
+            foreach (var location in locations)
+                IncrementCheckCounter(location);
+
+            CurrentFile.SaveFile();
         }
 
         public static void IncrementCheckCounter(long locationId)
         {
-            if (!APState.IsConnected)
+            if (!HasApDataFile())
+            {
+                Patcher.Logger.LogError("Tried to increment the check counter, except the current AP data file is null.");
                 return;
+            }
 
-            if (CurrentFile == null)
-                return;
+            // Add a check to our check counter base don the area
+            var name = Locations.GetLocationName(locationId);
+            if (!string.IsNullOrEmpty(name))
+            {
+                var regionName = Locations.GetAreaNameFromLocationName(name);
+                if (!IsRegionInCheckCounter(regionName))
+                    CurrentFile.CheckCounter[regionName] = 0;
 
-            CurrentFile.IncrementCheckCounter(locationId);
+                CurrentFile.CheckCounter[regionName] += 1;
+                CurrentFile.SaveFile();
+            }
         }
 
         public static bool IsRegionInCheckCounter(string region)
         {
-            if (!APState.IsConnected)
+            if (!HasApDataFile())
+            {
+                Patcher.Logger.LogError("Tried to check if region is in the check counter, except the current AP data file is null.");
                 return false;
-
-            if (CurrentFile == null)
-                return false;
+            }
 
             return CurrentFile.CheckCounter.ContainsKey(region);
         }
 
         public static int GetCheckCounter(string region)
         {
-            if (!APState.IsConnected)
+            if (!HasApDataFile())
+            {
+                Patcher.Logger.LogError("Tried to get the check counter, except the current AP data file is null.");
                 return 0;
-
-            if (CurrentFile == null)
-                return 0;
+            }
 
             if (IsRegionInCheckCounter(region))
                 return CurrentFile.CheckCounter[region];
             return 0;
         }
+        #endregion
+
+        #region Champions
+        public static void AddChampionAsDefeated(string scene)
+        {
+            if (!HasApDataFile())
+            {
+                Patcher.Logger.LogError("Tried to mark a champion as defeated, except the current AP data file is null.");
+                return;
+            }
+
+            if (IsChampionDefeated(scene))
+                return;
+
+            CurrentFile.ChampionsDefeated.Add(scene);
+            CurrentFile.SaveFile();
+        }
+
+        public static int GetNumberOfChampionsDefeated()
+        {
+            if (!HasApDataFile())
+            {
+                Patcher.Logger.LogError("Tried to get the number of champions defeated, except the current AP data file is null.");
+                return 0;
+            }
+            return CurrentFile.ChampionsDefeated.Count();
+        }
+
+        public static bool IsChampionDefeated(string scene)
+        {
+            if (!HasApDataFile())
+            {
+                Patcher.Logger.LogError("Tried to check if a champion as defeated, except the current AP data file is null.");
+                return false;
+            }
+
+            return CurrentFile.ChampionsDefeated.Contains(scene);
+        }
+        #endregion
     }
 }

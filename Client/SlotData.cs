@@ -1,4 +1,5 @@
-﻿using Archipelago.MultiClient.Net.Helpers;
+﻿using Archipelago.MonsterSanctuary.Client.AP;
+using Archipelago.MultiClient.Net.Helpers;
 using Newtonsoft
     .Json;
 using Newtonsoft.Json.Linq;
@@ -82,40 +83,41 @@ namespace Archipelago.MonsterSanctuary.Client
             TanukiMonster = GetStringData(monsterData, "tanuki");
             BexMonster = GetStringData(monsterData, "bex_monster");
 
-            GameData.MonstersCache = new();
+            Monsters.ClearApData();
             var monsterLocations = GetDictionaryData<string>(monsterData, "monster_locations");
             foreach (var location in monsterLocations)
-                GameData.AddMonster(location.Key, location.Value);
+                Monsters.AddMonster(location.Key, location.Value);
 
-            GameData.ChampionScenes = new();
-            GameData.ChampionScenes = GetDictionaryData<string>(monsterData, "champions");
+            Champions.ClearApData();
+            foreach (var kvp in GetDictionaryData<string>(monsterData, "champions"))
+            {
+                Champions.AddChampionScene(kvp.Key, kvp.Value);
+            }
 
             var itemLocations = GetDictionaryData<Dictionary<string, long>>(slotData, "locations");
 
             //  Have to do this first so we have a list of all rank item ids before we process the rest of the items
-            GameData.ChampionRankIds = new();
             foreach (var item in itemLocations["ranks"])
             {
-                GameData.ChampionRankIds.Add(item.Key, item.Value);
+                Champions.AddChampionRank(item.Key, item.Value);
             }
 
-            GameData.ItemChecks = new();
-            GameData.NumberOfChecks = new();
+            Locations.ClearApData();
             foreach (var locationGroup in itemLocations)
             {
                 // Each entry in itemLocations is a key value pair
                 // where the key is the area name, and the value is a dictionary of all item checks in that area
                 foreach (var check in locationGroup.Value)
                 {
-                    if (!GameData.ChampionRankIds.ContainsKey(check.Key))
-                        GameData.AddItemCheck(check.Key, check.Value, locationGroup.Key);
+                    if (!Champions.IsLocationAChampionRank(check.Key))
+                        Locations.AddLocation(check.Key, check.Value, locationGroup.Key);
                 }
             }
 
             var hints = GetListData<HintData>(slotData, "hints");
-            GameData.Hints = new();
+            Hints.ClearApData();
             foreach (var hint in hints)
-                GameData.AddHint(hint.ID, hint.Text, hint.IgnoreRemainingText);
+                Hints.AddHint(hint.ID, hint.Text, hint.IgnoreRemainingText);
 
             Patcher.Logger.LogInfo("Death Link: " + DeathLink);
             Patcher.Logger.LogInfo("Exp Multiplier: " + ExpMultiplier);
@@ -124,9 +126,9 @@ namespace Archipelago.MonsterSanctuary.Client
             Patcher.Logger.LogInfo("Locked Doors: " + Enum.GetName(typeof(LockedDoorsFlag), LockedDoors));
             Patcher.Logger.LogInfo("Skip Intro: " + SkipIntro);
             Patcher.Logger.LogInfo("Skip Plot: " + SkipPlot);
-            Patcher.Logger.LogInfo("Monster Locations: " + GameData.MonstersCache.Count());
-            Patcher.Logger.LogInfo("Champions: " + GameData.ChampionScenes.Count());
-            Patcher.Logger.LogInfo("Item Locations: " + GameData.ItemChecks.Count());
+            Patcher.Logger.LogInfo("Monster Locations: " + Monsters.MonstersCache.Count());
+            Patcher.Logger.LogInfo("Champions: " + Champions.ReplacedChampions.Count());
+            Patcher.Logger.LogInfo("Item Locations: " + Locations.IdToName.Count());
             Patcher.Logger.LogInfo("Hints: " + hints.Count());
         }
 

@@ -1,4 +1,5 @@
-﻿using Archipelago.MonsterSanctuary.Client.Persistence;
+﻿using Archipelago.MonsterSanctuary.Client.AP;
+using Archipelago.MonsterSanctuary.Client.Persistence;
 using Archipelago.MultiClient.Net.Models;
 using BepInEx;
 using BepInEx.Logging;
@@ -24,7 +25,11 @@ namespace Archipelago.MonsterSanctuary.Client
         private void Awake()
         {
             Logger = base.Logger;
-            GameData.Load();
+
+            Champions.Load();
+            Monsters.Load();
+            World.LoadStaticData();
+
             // Plugin startup logic
             new Harmony(MyPluginInfo.PLUGIN_GUID).PatchAll(Assembly.GetExecutingAssembly());
             SceneManager.sceneLoaded += new UnityAction<Scene, LoadSceneMode>(this.OnSceneLoaded);
@@ -45,12 +50,12 @@ namespace Archipelago.MonsterSanctuary.Client
             if (parts.Length != 2)
                 return;
 
-            if (!APState.IsConnected)
+            if (!ApState.IsConnected)
                 return;
 
             Task.Run(() =>
             {
-                APState.SetToDataStorage("CurrentArea", parts[0]);
+                ApState.SetToDataStorage("CurrentArea", parts[0]);
             });
         }
 
@@ -143,7 +148,7 @@ namespace Archipelago.MonsterSanctuary.Client
             [UsedImplicitly]
             private static void Postfix(InventoryManager __instance, BaseItem item) 
             {
-                if (!APState.IsConnected)
+                if (!ApState.IsConnected)
                     return;
 
                 if (item is not Egg)
@@ -164,7 +169,7 @@ namespace Archipelago.MonsterSanctuary.Client
             private static void Postfix(GameObject monsterPrefab, bool loadingSaveGame)
             {
 
-                if (!APState.IsConnected)
+                if (!ApState.IsConnected)
                     return;
 
                 // If we're loading a save game, don't check any locations
@@ -181,7 +186,7 @@ namespace Archipelago.MonsterSanctuary.Client
 
         private static void AddAbilityToDataStorage(GameObject monsterObj)
         {
-            if (!APState.IsConnected)
+            if (!ApState.IsConnected)
                 return;
 
             var monster = monsterObj.GetComponent<Monster>();
@@ -198,15 +203,15 @@ namespace Archipelago.MonsterSanctuary.Client
                 return;
             }
 
-            if (APState.ReadBoolFromDataStorage(ability.Name) == false)
+            if (ApState.ReadBoolFromDataStorage(ability.Name) == false)
             {
-                APState.SetToDataStorage(ability.Name, (DataStorageElement)true);
+                ApState.SetToDataStorage(ability.Name, (DataStorageElement)true);
             }
         }
 
         private static void AddMonsterToDataStorage(GameObject monsterObj)
         {
-            if (!APState.IsConnected)
+            if (!ApState.IsConnected)
                 return;
 
             var monster = monsterObj.GetComponent<Monster>();
@@ -216,9 +221,9 @@ namespace Archipelago.MonsterSanctuary.Client
                 return;
             }
 
-            if (APState.ReadBoolFromDataStorage(monster.Name) == false)
+            if (ApState.ReadBoolFromDataStorage(monster.Name) == false)
             {
-                APState.SetToDataStorage(monster.Name, (DataStorageElement)true);
+                ApState.SetToDataStorage(monster.Name, (DataStorageElement)true);
             }
         }
 

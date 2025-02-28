@@ -1,4 +1,5 @@
-﻿using Archipelago.MonsterSanctuary.Client.Persistence;
+﻿using Archipelago.MonsterSanctuary.Client.AP;
+using Archipelago.MonsterSanctuary.Client.Persistence;
 using HarmonyLib;
 using JetBrains.Annotations;
 using System.Linq;
@@ -16,7 +17,8 @@ namespace Archipelago.MonsterSanctuary.Client
             [UsedImplicitly]
             private static bool Prefix(GameController __instance, bool isNewGamePlus)
             {
-                APState.Resync();
+                // TODO: Eventually remove this and don't rely on full resyncing as much
+                Items.ResyncAllItems();
 
                 // if we're not skipping the intro, call the original function
                 if (!SlotData.SkipIntro)
@@ -44,7 +46,7 @@ namespace Archipelago.MonsterSanctuary.Client
             [UsedImplicitly]
             private static bool Prefix(KeepersIntro __instance)
             {
-                if (!APState.IsConnected)
+                if (!ApState.IsConnected)
                     return true;
                 if (!SlotData.SkipIntro)
                     return true;
@@ -88,7 +90,7 @@ namespace Archipelago.MonsterSanctuary.Client
         {
             private static void Postfix(ref bool __result, string name)
             {
-                if (!APState.IsConnected)
+                if (!ApState.IsConnected)
                     return;
 
                 if (name == "KeyOfPowerGained")
@@ -112,7 +114,7 @@ namespace Archipelago.MonsterSanctuary.Client
                     return;
                 }
 
-                if (SlotData.SkipPlot && GameData.Plotless.Contains(name) && __result == false)
+                if (SlotData.SkipPlot && World.ShouldSkipStoryFlagForPlotless(name) && __result == false)
                 {
                     ProgressManager.Instance.SetBool(name, true);
                     __result = true;
@@ -140,7 +142,7 @@ namespace Archipelago.MonsterSanctuary.Client
         {
             private static bool Prefix(TouchTrigger __instance)
             {
-                if (!APState.IsConnected)
+                if (!ApState.IsConnected)
                     return true;
 
                 if (GameController.Instance.CurrentSceneName == "StrongholdDungeon_SummonRoom")
@@ -178,7 +180,7 @@ namespace Archipelago.MonsterSanctuary.Client
         {
             private static bool Prefix(BoolSwitchLever __instance)
             {
-                if (!APState.IsConnected)
+                if (!ApState.IsConnected)
                     return true;
 
                 

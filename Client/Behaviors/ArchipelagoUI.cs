@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
+using Archipelago.MonsterSanctuary.Client.AP;
 using UnityEngine;
 
 namespace Archipelago.MonsterSanctuary.Client
@@ -26,7 +27,7 @@ namespace Archipelago.MonsterSanctuary.Client
         public float FadeOutTime = 2f;
 
         private GUIStyle _style;
-        private List<ItemHistoryEntry> _itemHistory = new();
+        private readonly List<ItemHistoryEntry> _itemHistory = new();
 
         public void Awake()
         {
@@ -71,7 +72,7 @@ namespace Archipelago.MonsterSanctuary.Client
             return val.ToString("X2").ToLower();
         }
 
-        public void AddItemToHistory(ItemTransfer itemTransfer)
+        public void AddItemToHistory(ItemTransferNotification itemTransfer)
         {
             var entry = new ItemHistoryEntry()
             {
@@ -90,8 +91,8 @@ namespace Archipelago.MonsterSanctuary.Client
 
         private string GetEntryText(string playerName, string itemName, ItemClassification classification, ItemTransferType action)
         {
-            var itemColor = Patcher.GetItemColor(classification);
-            if (action == ItemTransferType.Aquired)
+            var itemColor = Colors.GetItemColor(classification);
+            if (action == ItemTransferType.Acquired)
             {
                 return $"<color=#{Colors.Self}ff>You</color> found your <color=#{itemColor}ff>{itemName}</color>";
             }
@@ -115,11 +116,11 @@ namespace Archipelago.MonsterSanctuary.Client
 
         private static int DisplayConnectionInfo()
         {
-            string ap_ver = "Archipelago v" + APState.AP_VERSION[0] + "." + APState.AP_VERSION[1] + "." + APState.AP_VERSION[2];
+            string ap_ver = "Archipelago v" + ApState.AP_VERSION[0] + "." + ApState.AP_VERSION[1] + "." + ApState.AP_VERSION[2];
 
-            if (APState.Session != null)
+            if (ApState.Session != null)
             {
-                if (APState.Authenticated)
+                if (ApState.Authenticated)
                 {
                     GUI.Label(new Rect(16, 16, 300, 20), ap_ver + " Status: Connected");
                 }

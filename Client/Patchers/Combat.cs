@@ -1,4 +1,5 @@
-﻿using Archipelago.MonsterSanctuary.Client.Persistence;
+﻿using Archipelago.MonsterSanctuary.Client.AP;
+using Archipelago.MonsterSanctuary.Client.Persistence;
 using HarmonyLib;
 using JetBrains.Annotations;
 namespace Archipelago.MonsterSanctuary.Client
@@ -10,8 +11,8 @@ namespace Archipelago.MonsterSanctuary.Client
         {
             private static void Postfix()
             {
-                if (APState.IsConnected)
-                    APState.SendDeathLink();
+                if (ApState.IsConnected)
+                    ApState.SendDeathLink();
             }
         }
 
@@ -21,7 +22,7 @@ namespace Archipelago.MonsterSanctuary.Client
             [UsedImplicitly]
             private static void Prefix(CombatController __instance)
             {
-                if (!APState.IsConnected)
+                if (!ApState.IsConnected)
                     return;
 
                 if (__instance.CurrentEncounter.IsKeeperBattle)
@@ -33,19 +34,20 @@ namespace Archipelago.MonsterSanctuary.Client
                 // if victory condition is to beat the mad lord, check to see if we've done that
                 if (SlotData.Goal == CompletionEvent.MadLord && GameController.Instance.CurrentSceneName == "AbandonedTower_Final")
                 {
-                    APState.CompleteGame();
+                    ApState.CompleteGame();
                 }
 
                 // We only want to operate on champion encounters
                 string locName = $"{GameController.Instance.CurrentSceneName}_Champion";
-                if (!GameData.ChampionRankIds.ContainsKey(locName))
+                var locationId = Champions.GetChampionRankLocationId(locName);
+                if (locationId == null)
                 {
                     Patcher.Logger.LogWarning($"Location '{locName}' does not have a location ID assigned to it");
                     return;
                 }
 
-                ApData.AddChampionDefeated(GameController.Instance.CurrentSceneName);
-                APState.CheckLocation(GameData.ChampionRankIds[locName]);
+                ApData.AddChampionAsDefeated(GameController.Instance.CurrentSceneName);
+                ApState.CheckLocation(locationId.Value);
             }
         }
     }

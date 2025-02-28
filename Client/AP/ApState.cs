@@ -11,9 +11,9 @@ using Archipelago.MultiClient.Net.Models;
 using Archipelago.MultiClient.Net.BounceFeatures.DeathLink;
 using Archipelago.MonsterSanctuary.Client.Persistence;
 
-namespace Archipelago.MonsterSanctuary.Client
+namespace Archipelago.MonsterSanctuary.Client.AP
 {
-    public class APState
+    public class ApState
     {
         public enum ConnectionState
         {
@@ -22,11 +22,6 @@ namespace Archipelago.MonsterSanctuary.Client
             Connected
         }
 
-        // These are cached when we connect simply so we have easy access to them
-        // Mostly for double checking that when we load a save file, we're connected to the right AP server
-        public static string HostName { get; set; }
-        public static string SlotName { get; set; }
-
         public static int[] AP_VERSION = new int[] { 0, 5, 1 };
         public static ConnectionState State = ConnectionState.Disconnected;
         public static bool IsConnected => State == ConnectionState.Connected;
@@ -34,8 +29,6 @@ namespace Archipelago.MonsterSanctuary.Client
         public static ArchipelagoSession Session;
         public static bool Authenticated;
         public static bool Completed = false;
-        public static HashSet<string> OfflineChecks = new HashSet<string>(); // Keeps track of locations that were checked while offline
-        public static HashSet<long> CheckedLocations = new HashSet<long>(); // Keeps track of checked locations for the current session. Does not persist
 
         private static DeathLinkService _deathLink;
 
@@ -50,9 +43,6 @@ namespace Archipelago.MonsterSanctuary.Client
             {
                 return false;
             }
-
-            APState.HostName = hostname;
-            APState.SlotName = slotname;
 
             Patcher.Logger.LogInfo($"Connecting to {hostname} as {slotname}...");
             State = ConnectionState.Connecting;
@@ -78,7 +68,7 @@ namespace Archipelago.MonsterSanctuary.Client
             if (loginResult is LoginSuccessful loginSuccess)
             {
                 Authenticated = true;
-                
+
                 State = ConnectionState.Connected;
 
                 SlotData.LoadSlotData(loginSuccess.SlotData);
@@ -86,24 +76,19 @@ namespace Archipelago.MonsterSanctuary.Client
                 if (SlotData.DeathLink)
                     _deathLink.EnableDeathLink();
 
-                GameData.LoadMinimap();
-                ApData.RebuildCheckCounter();
+                World.LoadMapPins();
 
-                // If the player opened chests while not connected, this get those items upon connection
-                if (OfflineChecks.Count() > 0)
-                {
-                    Patcher.Logger.LogInfo("Number of Locations Checked While Offline: " + OfflineChecks.Count());
-                    var ids = OfflineChecks.Select(loc => GameData.ItemChecks[loc]).ToArray();
-                    CheckLocations(ids);
-                }
+                // Commenting this out for now to see if I even need it
+                // I'd ilke to avoid having to rebuild data if possible. The files should be reliable
+                //ApData.RebuildCheckCounter();
 
-                Resync();
+                Items.ResyncAllItems();
             }
             else if (loginResult is LoginFailure loginFailure)
             {
                 State = ConnectionState.Disconnected;
                 Authenticated = false;
-                Patcher.Logger.LogError(String.Join("\n", loginFailure.Errors));
+                Patcher.Logger.LogError(string.Join("\n", loginFailure.Errors));
                 Session = null;
             }
 
@@ -133,7 +118,7 @@ namespace Archipelago.MonsterSanctuary.Client
 
         public static void InitiateDisconnect()
         {
-            if (!APState.IsConnected)
+            if (!IsConnected)
                 return;
 
             if (Session != null && Session.Socket != null && Session.Socket.Connected)
@@ -144,7 +129,7 @@ namespace Archipelago.MonsterSanctuary.Client
         }
         public static void Disconnect()
         {
-            if (!APState.IsConnected)
+            if (!IsConnected)
                 return;
 
             Authenticated = false;
@@ -155,7 +140,7 @@ namespace Archipelago.MonsterSanctuary.Client
 
         public static void SendDeathLink()
         {
-            if (!APState.IsConnected)
+            if (!IsConnected)
                 return;
 
             if (!SlotData.DeathLink)
@@ -164,95 +149,111 @@ namespace Archipelago.MonsterSanctuary.Client
             _deathLink.SendDeathLink(new DeathLink(Session.Players.GetPlayerName(Session.ConnectionInfo.Slot), "lost a combat"));
         }
 
+        /// <summary>
+        /// Event handler for receiving a death link notification
+        /// Currently does nothing, but may eventually do something.
+        /// </summary>
+        /// <param name="deathLinkMessage"></param>
         public static void ReceiveDeathLink(DeathLink deathLinkMessage)
         {
-            if (!APState.IsConnected)
+            if (!IsConnected)
                 return;
-
-            // Nothing to do here
         }
 
-        public static void Resync()
-        {
-            if (!APState.IsConnected)
-                return;
-
-            for (int i = 1; i < Session.Items.AllItemsReceived.Count();  i++)
-            {
-                var item = Session.Items.AllItemsReceived[i];
-
-                var action = Session.ConnectionInfo.Slot == item.Player
-                    ? ItemTransferType.Aquired // We found our own item
-                    : ItemTransferType.Received; // Someone else found our item
-                var classification = (ItemClassification)((int)item.Flags);
-                Patcher.QueueItemTransfer(i, item.ItemGame, item.ItemId, item.Player, item.LocationId, classification, action);
-            }
-        }
-        
+        /// <summary>
+        /// Event handler for receiving an item from the AP server
+        /// This happens outside of the main thread
+        /// </summary>
+        /// <param name="helper"></param>
         public static void ReceiveItem(ReceivedItemsHelper helper)
         {
-            // I guess we're supposed to ignore index 0, as that's special and means something else.
-            if (helper.Index == 0)
-                return;
+            int receivedIndex = ApData.GetItemsReceived();
+            int receivedCount = Session.Items.AllItemsReceived.Count();
 
-            var item = helper.DequeueItem();
-            var name = helper.GetItemName(item.ItemId);
-            var action = Session.ConnectionInfo.Slot == item.Player
-                ? ItemTransferType.Aquired // We found our own item
-                : ItemTransferType.Received; // Someone else found our item
-            var classification = (ItemClassification)((int)item.Flags);
-
-            Patcher.QueueItemTransfer(helper.Index, item.ItemGame, item.ItemId, item.Player, item.LocationId, classification, action);
+            // When we receive items, we want to ensure that we process them in the correct order and never skip an index
+            // We do this by only processing items between the currently received index and the number of all received items
+            // We effectively ignore the helper parameter, and instead only use this as a trigger to process all un-received items
+            for (int i = receivedIndex + 1; i < receivedCount; i++)
+            {
+                var item = Session.Items.AllItemsReceived[i];
+                Items.QueueItemForDelivery(i, item);
+                Notifications.QueueItemTransferNotification(item);
+            }
         }
 
-        public static void CheckLocations(params long[] locationIds)
-        {
-            foreach (var locationId in locationIds)
-            {
-                CheckedLocations.Add(locationId);
-            };
-
-            if (!APState.IsConnected)
-                return;
-
-            var locationsToCheck = CheckedLocations.Except(Session.Locations.AllLocationsChecked);
-            Task.Run(() =>
-            {
-                Session.Locations.CompleteLocationChecksAsync(
-                    locationsToCheck.ToArray());
-            }).ConfigureAwait(false);
-
-            Task.Run(() => ScoutLocations(locationsToCheck.ToArray()));
-        }
-
+        /// <summary>
+        /// Sends a message to the AP server to check a location and deliver the item to the appropriate player
+        /// </summary>
+        /// <param name="locationId"></param>
         public static void CheckLocation(long locationId)
         {
             CheckLocations(locationId);
         }
 
-        private static async Task ScoutLocations(long[] locationsToCheck)
+        /// <summary>
+        /// Sends a message to the AP server to check one or more locations and deliver the item to the appropriate player
+        /// </summary>
+        /// <param name="locationIds"></param>
+        public static void CheckLocations(params long[] locationIds)
         {
-            // First we go through and 
+            if (!IsConnected)
+                return;
+             
+            // Last line of defense to not check places that have already been checked
+            var locationsToCheck = locationIds.Except(Session.Locations.AllLocationsChecked);
+            Task.Run(() =>
+            {
+                Session.Locations.CompleteLocationChecksAsync(locationsToCheck.ToArray());
+            }).ConfigureAwait(false);
+
+            Task.Run(() => NotifyPlayerOfItemChecks(locationsToCheck.ToArray()));
+        }
+
+        /// <summary>
+        /// Peeks at what items are at a list of location ids, and then places those results as messages on a notification queue
+        /// Used to deliver UI updates to the player to notify them of the items they're finding in their world
+        /// </summary>
+        /// <param name="locationsToCheck"></param>
+        /// <returns></returns>
+        private static async Task NotifyPlayerOfItemChecks(long[] locationsToCheck)
+        {
             var packet = await Session.Locations.ScoutLocationsAsync(false, locationsToCheck);
             foreach (var scout in packet.Values)
             {
-                if (Session.ConnectionInfo.Slot == scout.Player)
-                {
-                    continue;
-                }
-                var classification = (ItemClassification)((int)scout.Flags);
-                // This needs to work without an index (because sent items never have an index.
-                Patcher.QueueItemTransfer(null, scout.ItemGame, scout.ItemId, scout.Player, scout.LocationId, classification, ItemTransferType.Sent);
+                Notifications.QueueItemTransferNotification(scout);
             }
+        }
+
+        /// <summary>
+        /// Returns true if the AP server has marked a given location as checked
+        /// </summary>
+        /// <param name="locationId"></param>
+        /// <returns></returns>
+        public static bool HasApReceivedLocationCheck(long locationId)
+        {
+            return Session.Locations.AllLocationsChecked.Contains(locationId);
+        }
+
+        /// <summary>
+        /// Returns an item name given a game and an item ID
+        /// </summary>
+        /// <param name="game"></param>
+        /// <param name="itemId"></param>
+        /// <returns></returns>
+        public static string GetItemName(string game, long itemId)
+        {
+            return Session.Items.GetItemName(itemId, game);
         }
 
         public static void CompleteGame()
         {
-            if (!APState.IsConnected)
+            if (!IsConnected)
                 return;
 
-            var statusUpdatePacket = new StatusUpdatePacket();
-            statusUpdatePacket.Status = ArchipelagoClientState.ClientGoal;
+            var statusUpdatePacket = new StatusUpdatePacket
+            {
+                Status = ArchipelagoClientState.ClientGoal
+            };
             Session.Socket.SendPacket(statusUpdatePacket);
             Completed = true;
         }
@@ -260,7 +261,7 @@ namespace Archipelago.MonsterSanctuary.Client
         public static bool ReadBoolFromDataStorage(string key)
         {
             var value = Session.DataStorage[Scope.Slot, key].To<bool?>();
-            return value.HasValue ? value.Value : false;
+            return value ?? false;
         }
 
         public static void SetToDataStorage(string key, DataStorageElement value)

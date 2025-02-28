@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using Archipelago.MonsterSanctuary.Client.AP;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -20,101 +21,57 @@ namespace Archipelago.MonsterSanctuary.Client.Persistence
         [JsonProperty("ConnectionInfo")]
         public ArchipelagoConnectionInfo ConnectionInfo { get; set; } = new();
 
+        /// <summary>
+        /// The index that tracks what items have been received. 
+        /// The client has received up to and including this index in Session.Items.AllItemsReceived
+        /// </summary>
         [JsonProperty("ItemsReceived")]
-        public List<int> ItemsReceived = new List<int>();
+        public int ItemsReceived;
 
+        /// <summary>
+        /// A list of all locations within the game that have been checked.
+        /// Saves the locations in their string form (e.g. regionname_roomname_chestid) so that this will work even when offline
+        /// When connecting, compare this list to the list of ChecksSent to see what checks still need to be sent to AP
+        /// </summary>
         [JsonProperty("LocationsChecked")]
-        public List<long> LocationsChecked = new List<long>();  // Includes champion rank up items
+        public List<string> LocationsChecked = new();
 
+        /// <summary>
+        /// Tracks how many checks in each region have been completed, ignoring the checks for champion rank ups
+        /// </summary>
         [JsonProperty("CheckCounter")]
-        public Dictionary<string, int> CheckCounter = new Dictionary<string, int>();  // does NOT include champion rank up items
+        public Dictionary<string, int> CheckCounter = new Dictionary<string, int>();
 
+        /// <summary>
+        /// A list of scene names that tracks which champions have been defeated. If a scene name exists here, it means that scene's champion is defeated
+        /// </summary>
         [JsonProperty("ChampionsDefeated")]
-        public List<string> ChampionsDefeated = new List<string>(); // Tracks which champions have been defeated
+        public List<string> ChampionsDefeated = new List<string>();
 
         public void PrintData()
         {
             Patcher.Logger.LogInfo("Persistence:");
             Patcher.Logger.LogInfo("File Name: " + FileName);
-            Patcher.Logger.LogInfo("\tItems Received: " + ItemsReceived.Count());
-            Patcher.Logger.LogInfo("\tILocations Checked: " + LocationsChecked.Count());
+            Patcher.Logger.LogInfo("\tReceived Item Index: " + ItemsReceived);
+            Patcher.Logger.LogInfo("\tLocations Checked: " + LocationsChecked.Count());
             Patcher.Logger.LogInfo("\tChampions Defeated: " + ChampionsDefeated.Count());
-        }
-
-        public void AddToItemCache(int id)
-        {
-            if (ItemsReceived.Contains(id))
-                return;
-
-            ItemsReceived.Add(id);
-            SaveFile();
-        }
-
-        public void AddAndUpdateCheckedLocations(long locationId)
-        {
-            if (LocationsChecked.Contains(locationId))
-                return;
-
-            LocationsChecked.Add(locationId);
-            SaveFile();
-
-            // If the item we just recieved is a rank up item, we don't increment the counter
-            if (GameData.ChampionRankIds.ContainsValue(locationId))
-                return;
-
-            IncrementCheckCounter(locationId);
-        }
-
-        public void RebuildCheckCounter()
-        {
-            if (!APState.IsConnected)
-                return;
-
-            CheckCounter = new();
-            var locations = LocationsChecked.Except(GameData.ChampionRankIds.Values);
-
-            foreach (var location in locations)
-                IncrementCheckCounter(location);
-        }
-
-        public void IncrementCheckCounter(long locationId)
-        {
-            if (!APState.IsConnected)
-                return;
-
-            // Add a check to our check counter base don the area
-            var locationName = APState.Session.Locations.GetLocationNameFromId(locationId);
-            var regionName = locationName.Replace(" ", "").Split('-').First();
-            if (!CheckCounter.ContainsKey(regionName))
-                CheckCounter[regionName] = 0;
-            CheckCounter[regionName] += 1;
-        }
-
-        public void AddChampionDefeated(string scene)
-        {
-            if (ChampionsDefeated.Contains(scene))
-                return;
-
-            ChampionsDefeated.Add(scene);
-            SaveFile();
         }
 
         #region File Management
         public void DeleteFile()
         {
-            Patcher.Logger.LogInfo("Deleting file: " + FileName);
+            Patcher.Logger.LogDebug("Deleting file: " + FileName);
             if (File.Exists(FileName))
                 File.Delete(FileName);
 
             this.ItemsReceived = new();
             this.CheckCounter = new();
-            this.LocationsChecked = new();
             this.ChampionsDefeated = new();
         }
 
         public void SaveFile()
         {
-            Patcher.Logger.LogInfo("Saving file: " + FileName);
+            Patcher.Logger.LogDebug("Saving file: " + FileName);
             string rawPath = Environment.CurrentDirectory;
             if (rawPath != null)
             {
@@ -127,15 +84,15 @@ namespace Archipelago.MonsterSanctuary.Client.Persistence
 
         public void LoadFile()
         {
-            Patcher.Logger.LogInfo("Loading file: " + FileName);
+            Patcher.Logger.LogDebug("Loading file: " + FileName);
             if (File.Exists(FileName))
             {
                 var json = File.ReadAllText(FileName);
                 var file = JsonConvert.DeserializeObject<ApDataFile>(json);
                 this.ConnectionInfo = file.ConnectionInfo;
                 this.ItemsReceived = file.ItemsReceived;
-                this.CheckCounter = file.CheckCounter;
                 this.LocationsChecked = file.LocationsChecked;
+                this.CheckCounter = file.CheckCounter;
                 this.ChampionsDefeated = file.ChampionsDefeated;
             }
         }

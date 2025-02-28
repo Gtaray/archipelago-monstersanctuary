@@ -1,4 +1,5 @@
-﻿using HarmonyLib;
+﻿using Archipelago.MonsterSanctuary.Client.AP;
+using HarmonyLib;
 
 namespace Archipelago.MonsterSanctuary.Client.Patchers
 {
@@ -9,7 +10,7 @@ namespace Archipelago.MonsterSanctuary.Client.Patchers
         {
             private static void Prefix(DialogueAction __instance)
             {
-                if (!APState.IsConnected)
+                if (!ApState.IsConnected)
                     return;
 
                 // If the player loses the duel with will in the duel circle, end early
@@ -18,13 +19,13 @@ namespace Archipelago.MonsterSanctuary.Client.Patchers
                     __instance.Connections.Clear();
                 }
 
-                var hint = GameData.GetHint(__instance.ID);
+                var hint = Hints.GetHintText(__instance.ID);
                 if (string.IsNullOrEmpty(hint))
                     return;
                 __instance.Text = hint;
 
                 // This might be too extreme and cause things to break
-                if (GameData.EndHintDialog(__instance.ID))
+                if (Hints.ShouldEndHintDialog(__instance.ID))
                     __instance.Connections.Clear();
             }
         }

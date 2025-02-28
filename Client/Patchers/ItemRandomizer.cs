@@ -1,4 +1,5 @@
-﻿using Archipelago.MonsterSanctuary.Client.Persistence;
+﻿using Archipelago.MonsterSanctuary.Client.AP;
+using Archipelago.MonsterSanctuary.Client.Persistence;
 using HarmonyLib;
 using JetBrains.Annotations;
 using System;
@@ -6,164 +7,270 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
+using UnityEngine.Playables;
 using static PopupController;
 
 namespace Archipelago.MonsterSanctuary.Client
-{
-    public enum ItemTransferType
-    {
-        Aquired = 0,
-        Received = 1,
-        Sent = 2
-    }
-    public class ItemTransfer
-    {
-        public string ItemName { get; set; }
-        public string PlayerName { get; set; }
-        public ItemTransferType Action { get; set; }
-
-        public int? ItemIndex { get; set; }
-        public long ItemID { get; set; }
-        public int PlayerID { get; set; }
-        public long LocationID { get; set; }
-        public string LocationName { get; set; }
-        public ItemClassification Classification { get; set; }
-    }
-
+{   
     public partial class Patcher
     {
-        private static ConcurrentDictionary<long, GrantItemsAction> _giftActions = new();
+        // When receiving items as part of a dialog chain, we want the game to pause until we receive this item
+        // But since we're receiving items asynchronously, we need a way to keep track of which gift actions are waiting on a response from AP
+        // We use this dictionary to do that, so we can quickly test if the location ID (key) of a received check is for the gift action we're waiting on
+        private static readonly ConcurrentDictionary<long, GrantItemsAction> _grantItemActions = new();
 
-        #region Queue Functions
-        // Because both items sent and received use the same pop up system to inform the player
-        // we use this item queue to merge item received messages from AP as well as items sent
-        // messages from the client.
-        private static ConcurrentQueue<ItemTransfer> _itemQueue = new();
-
-        // When skipping dialog that gives the player multiple items, calling CheckLocation back to back that fast
-        // can cause problems, especially when finding other players' items. In those cases we batch all item checks
-        // until the player is able to move again, then check all of them at once.
-        private static List<long> _giftQueue = new();
-
-        public static void QueueItemTransfer(int? itemIndex, string itemGame, long itemId, int playerId, long locationId, ItemClassification classification, ItemTransferType action)
-        {
-            var itemName = APState.Session.Items.GetItemName(itemId, itemGame);
-
-            // If item index is null (meaning this is someone else's item), we can only rely on whether the location ID is checked.
-            if (itemIndex == null && ApData.IsLocationChecked(locationId))
-            {
-                return;
-            }
-
-            // We need to do this here so that we know for sure when a check is done the map is updated
-            // If the item action is either sent or acquired, we want to update the minimap. If we received the item then its not from us at all.
-            if (action != ItemTransferType.Received)
-            {
-                ApData.AddAndUpdateCheckedLocations(locationId);
-            }   
-
-            // Do not queue a new item if we've already received that item.
-            // Do not queue an item if the queue already contains that index.
-            if (itemIndex != null && (ApData.IsItemReceived(itemIndex.Value) || _itemQueue.Any(i => i.ItemIndex == itemIndex)))
-            {
-                return;
-            }
-
-            var transfer = new ItemTransfer()
-            {
-                ItemIndex = itemIndex,
-                ItemID = itemId,
-                ItemName = itemName,
-                PlayerID = playerId,
-                PlayerName = APState.Session.Players.GetPlayerName(playerId),
-                LocationID = locationId,
-                LocationName = APState.Session.Locations.GetLocationNameFromId(locationId),
-                Classification = classification,
-                Action = action
-            };
-
-            _itemQueue.Enqueue(transfer);
-        }
-        #endregion
+        // When receiving an egg as a gift during dialog, we need to make sure that the egg the player receives is shifted correctly
+        // So we simply store the location ID and intended egg shift here, that way the item receiver an handle it appropriately
+        private static readonly ConcurrentDictionary<long, EShift> _eggShifts = new();
 
         #region Patches
         [HarmonyPatch(typeof(GameController), "Update")]
-        private class GameController_Update
+        private class GameController_Update_Items
         {
             private static void Postfix()
             {
-                // Showing a pop up takes the game out of the isExploring state so we
-                // should be guaranteed to never give an item until the pop up
-                // is closed.
                 if (!CanGiveItem())
                     return;
 
                 // If we've built up a list of items in the gift queue,
                 // check all of those locations at once and then clear the queue
-                if (_giftQueue.Count > 0)
+                if (Items.HasSkippedGiftChecks())
                 {
-                    APState.CheckLocations(_giftQueue.ToArray());
-                    _giftQueue.Clear();
+                    ApState.CheckLocations(Items.GetSkippedGiftChecks().ToArray());
+                    Items.ClearSkippedGiftChecks();
                 }
 
-                if (_itemQueue.TryDequeue(out ItemTransfer nextItem))
+                if (Items.TakeNextItem(out ItemTransfer nextItem))
                 {
-                    // For these, we just want to increment the counter and move on. Nothing else.
+                    // Only care about champion items to check if we've hit the goal of having them all defeated
                     if (nextItem.ItemName == "Champion Defeated")
                     {
                         if (ApData.GetNumberOfChampionsDefeated() >= 27 && SlotData.Goal == CompletionEvent.Champions)
                         {
-                            APState.CompleteGame();
+                            ApState.CompleteGame();
                         }
                         return;
                     }
 
-                    Patcher.UI.AddItemToHistory(nextItem);
-
-                    PopupController.PopupDelegate callback = null;
                     EShift eggShift = EShift.Normal;
-                    if (_giftActions.ContainsKey(nextItem.LocationID))
+                    if (_eggShifts.ContainsKey(nextItem.LocationID))
                     {
-                        eggShift = _giftActions[nextItem.LocationID].EggShift;
-
-                        callback = () =>
-                        {
-                            _giftActions[nextItem.LocationID].Finish();
-                            _giftActions.TryRemove(nextItem.LocationID, out var action);
-                        };
+                        _eggShifts.TryRemove(nextItem.LocationID, out eggShift);
                     }
 
-                    if (nextItem.Action == ItemTransferType.Sent)
-                    {
-                        SentItem(
-                            nextItem.ItemName,
-                            nextItem.PlayerName,
-                            nextItem.Classification,
-                            callback);
-                    }
-                    else
-                    {
-                        ReceiveItem(
-                            nextItem.ItemName,
-                            nextItem.PlayerName,
-                            nextItem.Classification,
-                            nextItem.Action == ItemTransferType.Aquired,
-                            eggShift,
-                            callback);
+                    ReceiveItem(nextItem.ItemName, eggShift);
 
-                        // We only want to save items to the item cache if we're receiving the item. 
-                        // Do not cache items we send to other people
-                        ApData.AddToItemCache(nextItem.ItemIndex.Value);
-                    }
+                    // We want to do this immediately after adding the item to the player inventory
+                    ApData.SetItemsReceived(nextItem.ItemIndex);
                 }
             }
 
             private static bool CanGiveItem()
             {
-                // If we're in the intro, then don't send items
+                // We can give the player items all the time, since giving the item is distinct from notifying the player that the item was given
+                return true;
+            }
+
+            public static void ReceiveItem(string itemName, EShift eggShift)
+            {
+                if (itemName == null)
+                {
+                    Logger.LogError("Null item was received");
+                    return;
+                }
+
+                var gold = GetGoldQuantity(itemName);
+                if (gold > 0)
+                {
+                    GiveGoldToPlayer(gold);
+                    return;
+                }
+
+                var quantity = GetQuantityOfItem(ref itemName);
+                var newItem = GetItemByName(itemName);
+
+                if (newItem == null)
+                {
+                    // This shouldn't happen. Might need a smarter way to solve this.
+                    Logger.LogError($"No item reference was found matching the name '{itemName}'.");
+                    return;
+                }
+
+                AddItemToPlayerInventory(ref newItem, quantity, eggShift);
+            }
+
+            static void GiveGoldToPlayer(int amount)
+            {
+                PlayerController.Instance.Gold += amount;
+            }
+
+            static void AddItemToPlayerInventory(ref BaseItem item, int quantity = 1, EShift eggShift = EShift.Normal)
+            {
+                if (item != null)
+                {
+                    item = Utils.CheckForCostumeReplacement(item);
+                    PlayerController.Instance.Inventory.AddItem(item, quantity, (int)eggShift);
+                }
+            }
+
+            static BaseItem GetItemByName(string name)
+            {
+                if (name.EndsWith(" Egg"))
+                    return GetItemByName<Egg>(name);
+
+                return GetItemByName<BaseItem>(name);
+            }
+
+            static BaseItem GetItemByName<T>(string name) where T : BaseItem
+            {
+                return GameController.Instance.WorldData.Referenceables
+                    .Where(x => x?.gameObject.GetComponent<T>() != null)
+                    .Select(x => x.gameObject.GetComponent<T>())
+                    .SingleOrDefault(i => string.Equals(i.GetName(), name, StringComparison.OrdinalIgnoreCase));
+            }
+        }
+
+        [HarmonyPatch(typeof(GameController), "Update")]
+        private class GameController_Update_Notifications
+        {
+            private static void Postfix()
+            {
+                // Showing a pop up takes the game out of the isExploring state so we
+                // should be guaranteed to never give an item until the pop up is closed.
+                // Notably, this needs to return true when waiting on a gift action response
+                if (!CanNotifyPlayerOfItemTransfer())
+                    return;
+
+                if (Notifications.TakeNextNotification(out ItemTransferNotification nextItem))
+                {
+                    // Ignore champion rank up item notifications
+                    if (nextItem.ItemName == "Champion Defeated")
+                        return;
+
+                    NotifyPlayer(nextItem);
+                }
+            }
+
+            private static bool CanNotifyPlayerOfItemTransfer()
+            {
+                // Don't notify if we're in the intro
                 if (!ProgressManager.Instance.GetBool("FinishedIntro"))
                     return false;
+                // Only notify if we're exploring and grounded
                 return GameStateManager.Instance.IsExploring() && PlayerController.Instance.Physics.PhysObject.Collisions.below;
+            }
+
+            private static void NotifyPlayer(ItemTransferNotification notification)
+            {
+                Patcher.UI.AddItemToHistory(notification);
+
+                // For gift actions specifically, we need to make sure we handle the callback of the popup
+                PopupController.PopupDelegate callback = null;
+                if (_grantItemActions.ContainsKey(notification.LocationID))
+                {
+                    callback = () =>
+                    {
+                        _grantItemActions.TryRemove(notification.LocationID, out var action);
+                        action.Finish();
+                    };
+                }
+
+                string msg = "";
+                string itemName = notification.ItemName;
+                bool selfFound = notification.Action == ItemTransferType.Acquired;
+                int gold = GetGoldQuantity(itemName);
+
+                if (gold > 0)
+                {
+                    msg = FormatGoldReceivedMessage(gold, notification.PlayerName, selfFound);
+                }
+                else
+                {
+                    switch (notification.Action)
+                    {
+                        case ItemTransferType.Sent:
+                            msg = FormatItemSentMessage(
+                                notification.ItemName,
+                                notification.PlayerName,
+                                notification.Classification);
+                            break;
+                        default:
+                            int quantity = GetQuantityOfItem(ref itemName);
+                            msg = FormatItemReceivedMessage(
+                                itemName,
+                                quantity,
+                                notification.PlayerName,
+                                notification.Classification,
+                                selfFound);
+                            break;
+                    }
+                }
+
+                PopupController.Instance.ShowMessage(
+                    Utils.LOCA("Archipelago"),
+                    msg,
+                    callback);
+            }
+
+            private static string FormatItemSentMessage(string itemName, string playerName, ItemClassification classification)
+            {
+                return string.Format("Sent {0} to {1}",
+                    FormatItem(itemName,
+                    classification),
+                    FormatPlayer(playerName));
+            }
+
+            private static string FormatItemReceivedMessage(string item, int quantity, string player, ItemClassification classification, bool self)
+            {
+                string updatedItem = FormatItem(item, classification);
+
+                if (self)
+                {
+                    if (quantity > 1)
+                        return string.Format("{0} found {1} of your {2}",
+                            FormatSelf("You"),
+                            quantity,
+                            updatedItem);
+
+                    return string.Format("{0} found your {1}",
+                        FormatSelf("You"),
+                        updatedItem);
+                }
+                else
+                {
+                    if (quantity > 1)
+                        updatedItem = string.Format("{0}x {1}", quantity, updatedItem);
+
+                    return string.Format("Received {0} from {1}",
+                        updatedItem,
+                        FormatPlayer(player));
+                }
+            }
+
+            private static string FormatGoldReceivedMessage(int quantity, string player, bool self)
+            {
+                string gold = FormatItem(string.Format("{0} Gold", quantity), ItemClassification.Filler);
+
+                if (self)
+                    return string.Format("{0} found {1}",
+                        FormatSelf("You"),
+                        gold);
+                else
+                    return string.Format("Received {0} from {1}",
+                        gold,
+                        FormatPlayer(player));
+            }
+
+            public static string FormatSelf(string text)
+            {
+                var newtext = RemoveProblematicCharacters(text);
+                return GameDefines.FormatString(Colors.Self, newtext, true);
+            }
+
+            public static string FormatPlayer(string text)
+            {
+                var newtext = RemoveProblematicCharacters(text);
+                return GameDefines.FormatString(Colors.OtherPlayer, newtext, true);
             }
         }
 
@@ -175,23 +282,35 @@ namespace Archipelago.MonsterSanctuary.Client
             {
                 string locName = $"{GameController.Instance.CurrentSceneName}_{__instance.ID}";
 
-                // If we're not connected, we add this location to a list of locations that need to be checked once we are connected
-                if (!APState.IsConnected)
+                // Mark this location as checked the instant we interact with it, even if we're offline
+                ApData.MarkLocationAsChecked(locName);
+
+                // If we're not connected, but we have an AP Data file, we want to empty the chest so the player doesn't receive the normal item
+                if (!ApState.IsConnected)
                 {
-                    APState.OfflineChecks.Add(locName);
-                    return;
+                    if (ApData.HasApDataFile())
+                    {
+                        EmptyChest(__instance);
+                    }
                 }
 
-                if (!GameData.ItemChecks.ContainsKey(locName))
+                if (!Locations.DoesLocationExist(locName))
                 {
                     Patcher.Logger.LogWarning($"Location '{locName}' does not have a location ID assigned to it");
                     return;
                 }
 
+                // Empty the chest so it doesn't give the player anything
+                EmptyChest(__instance);
+
+                // We're guaranteed to have a location ID at this point, we can safely use .Value
+                ApState.CheckLocation(Locations.GetLocationId(locName).Value);
+            }
+
+            private static void EmptyChest(Chest __instance)
+            {
                 __instance.Item = null;
                 __instance.Gold = 0;
-
-                APState.CheckLocation(GameData.ItemChecks[locName]);
             }
         }
 
@@ -204,88 +323,57 @@ namespace Archipelago.MonsterSanctuary.Client
             {
                 string locName = $"{GameController.Instance.CurrentSceneName}_{__instance.ID}";
 
-                // If we're not connected, we add this location to a list of locations that need to be checked once we are connected
-                if (!APState.IsConnected)
-                {
-                    APState.OfflineChecks.Add(locName);
-                    return true;
-                }
+                // Mark this location as opened the instant we interact with it, even if we're offline
+                ApData.MarkLocationAsChecked(locName);
 
-                if (!GameData.ItemChecks.ContainsKey(locName))
+                // If we're not connected, then one of two things happens:
+                // There's no AP Data File associated with this file slot, in which case we let the normal code take over
+                // If there IS an AP Data File associated with this file slot (and it is loaded), we do skip this event and move on (without giving the player anything)
+                if (!ApState.IsConnected)
+                {
+                    if (ApData.HasApDataFile())
+                    {
+                        __instance.Finish();
+                        return false;
+                    }
+                    else
+                    {
+                        return true;
+                    }
+                }
+                
+                if (!Locations.DoesLocationExist(locName))
                 {
                     Patcher.Logger.LogWarning($"Location '{locName}' does not have a location ID assigned to it");
                     return true;
                 }
 
-                _giftActions.TryAdd(GameData.ItemChecks[locName], __instance);
+                long locationId = Locations.GetLocationId(locName).Value;
 
+                // We save this Action in the dictionary, indexed by its location ID
+                // that way when the player is notified on receiving the item, we can 
+                // continue this dialog
+                _grantItemActions.TryAdd(locationId, __instance);
+
+                // If this action would give an egg that is Light or Dark shifted, we save that so we can handle it when the player receives the item
+                if (__instance.EggShift != EShift.Normal)
+                    _eggShifts.TryAdd(locationId, __instance.EggShift);
+
+                // If the player is skipping this dialog,
+                // then we want to batch all skipped gift actions together
                 if (!showMessage)
                 {
-                    _giftQueue.Add(GameData.ItemChecks[locName]);
+                    Items.AddSkippedGiftCheck(locationId);
                 }
                 else
                 {
-                    APState.CheckLocation(GameData.ItemChecks[locName]);
+                    ApState.CheckLocation(locationId);
                 }
 
                 return false;
             }
         }
-        #endregion
-
-        public static void SentItem(string item, string player, ItemClassification classification, PopupDelegate confirmCallback)
-        {
-            var text = string.Format("Sent {0} to {1}", FormatItem(item, classification), FormatPlayer(player));
-            PopupController.Instance.ShowMessage(
-                    Utils.LOCA("Archipelago"),
-                    text, 
-                    confirmCallback);
-        }
-
-        public static void ReceiveItem(string itemName, string player, ItemClassification classification, bool self, EShift eggShift, PopupDelegate confirmCallback)
-        {
-            // Handle if you send someone else and item and show a message box for that.
-            if (itemName == null)
-            {
-                Logger.LogError("Null item was received");
-                return;
-            }
-
-            var gold = GetGoldQuantity(itemName);
-            if (gold > 0)
-            {
-                GiveGold(gold, player, self, true, confirmCallback);
-                return;
-            }
-
-            var quantity = GetQuantityOfItem(ref itemName);
-            var newItem = GetItemByName(itemName);
-
-            if (newItem == null)
-            {
-                // This shouldn't happen. Might need a smarter way to solve this.
-                Logger.LogError($"No item reference was found matching the name '{itemName}'.");
-                return;
-            }
-
-            GiveItem(newItem, player, classification, self, quantity, confirmCallback, eggShift);
-        }        
-
-        #region Give Items
-        static void GiveItem(BaseItem item, string player, ItemClassification classification, bool self, int quantity = 1, PopupDelegate callback = null, EShift eggShift = EShift.Normal)
-        {
-            if (item != null)
-            {
-                item = Utils.CheckForCostumeReplacement(item);
-
-                PopupController.Instance.ShowMessage(
-                    Utils.LOCA("Treasure"),
-                    FormatItemReceivedMessage(item.GetName(), quantity, player, classification, self),
-                    callback);
-
-                PlayerController.Instance.Inventory.AddItem(item, quantity, (int) eggShift);
-            }
-        }
+        #endregion       
 
         public static int GetQuantityOfItem(ref string name)
         {
@@ -305,62 +393,18 @@ namespace Archipelago.MonsterSanctuary.Client
             return quantity;
         }
 
-        static BaseItem GetItemByName(string name)
+        public static string FormatItem(string text, ItemClassification classification)
         {
-            if (name.EndsWith(" Egg"))
-                return GetItemByName<Egg>(name);
+            text = RemoveProblematicCharacters(text);
 
-            return GetItemByName<BaseItem>(name);
+            return GameDefines.FormatString(Colors.GetItemColor(classification), text, true);
         }
 
-        static BaseItem GetItemByName<T>(string name) where T : BaseItem
-        {       
-            return GameController.Instance.WorldData.Referenceables
-                .Where(x => x?.gameObject.GetComponent<T>() != null)
-                .Select(x => x.gameObject.GetComponent<T>())
-                .SingleOrDefault(i => string.Equals(i.GetName(), name, StringComparison.OrdinalIgnoreCase));
-        }
-
-        private static string FormatItemReceivedMessage(string item, int quantity, string player, ItemClassification classification, bool self)
+        public static string RemoveProblematicCharacters(string text)
         {
-            item = FormatItem(item, classification);
-
-            if (self)
-            {
-                if (quantity > 1)
-                    return string.Format("{0} found {1} of your {2}", 
-                        FormatSelf("You"),
-                        quantity, 
-                        item);
-
-                return string.Format("{0} found your {1}", 
-                    FormatSelf("You"),
-                    item);
-            }
-            else
-            {
-                if (quantity > 1)
-                    item = string.Format("{0}x {1}", quantity, item);
-
-                return string.Format("Received {0} from {1}", 
-                    item, 
-                    FormatPlayer(player));
-            }
-        }
-        #endregion
-
-        #region Give Gold
-        static void GiveGold(int amount, string player, bool self, bool showMsg = true, PopupController.PopupDelegate callback = null)
-        {
-            if (showMsg)
-            {
-                PopupController.Instance.ShowMessage(
-                    Utils.LOCA("Treasure"),
-                    FormatGoldReceivedMessage(amount, player, self),
-                    callback);
-            }
-
-            PlayerController.Instance.Gold += amount;
+            return text.Replace("<3", "heart")
+                .Replace("<", "")
+                .Replace(">", "");
         }
 
         public static int GetGoldQuantity(string itemName)
@@ -376,69 +420,5 @@ namespace Archipelago.MonsterSanctuary.Client
 
             return gold;
         }
-
-        private static string FormatGoldReceivedMessage(int quantity, string player, bool self)
-        {
-            string gold = FormatItem(string.Format("{0} Gold", quantity), ItemClassification.Filler);
-
-            if (self)
-                return string.Format("{0} found {1}", 
-                    FormatSelf("You"), 
-                    gold);
-            else
-                return string.Format("Received {0} from {1}", 
-                    gold, 
-                    FormatPlayer(player));
-        }
-        #endregion
-
-        #region String Formatting / Coloring
-        public static string GetItemColor(ItemClassification classification)
-        {
-            if (classification == ItemClassification.Progression)
-            {
-                return Colors.ProgressionItem;
-            }
-            else if (classification == ItemClassification.Useful)
-            {
-                return Colors.UsefulItem;
-            }
-            else if (classification == ItemClassification.Trap)
-            {
-                return Colors.TrapItem;
-            }
-
-            return Colors.FillerItem;
-        }
-
-        public static string FormatItem(string text, ItemClassification classification)
-        {
-            text = RemoveProblematicCharacters(text);
-            
-            return GameDefines.FormatString(GetItemColor(classification), text, true);
-        }
-
-        public static string FormatSelf(string text)
-        {
-            text = RemoveProblematicCharacters(text);
-            return GameDefines.FormatString(Colors.Self, text, true);
-        }
-
-        public static string FormatPlayer(string text)
-        {
-            text = RemoveProblematicCharacters(text);
-            return GameDefines.FormatString(Colors.OtherPlayer, text, true);
-        }
-
-        public static string RemoveProblematicCharacters(string text)
-        {
-            Logger.LogInfo("Haiii!");
-            if (text is null)
-            Logger.LogInfo($"Replacing {text}");
-            return text.Replace("<3", "heart")
-                .Replace("<", "")
-                .Replace(">", "");
-        }
-        #endregion
     }
 }

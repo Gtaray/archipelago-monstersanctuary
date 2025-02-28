@@ -1,9 +1,12 @@
-﻿using Archipelago.MonsterSanctuary.Client.Persistence;
+﻿using Archipelago.MonsterSanctuary.Client.AP;
+using Archipelago.MonsterSanctuary.Client.Persistence;
 using HarmonyLib;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
 using System.Reflection;
+using System.Reflection.Emit;
 using System.Security.Policy;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -19,6 +22,7 @@ namespace Archipelago.MonsterSanctuary.Client
         private static string host_name;
         private static string slot_name;
         private static string password;
+
         #region Main Menu
         [HarmonyPatch(typeof(MainMenu), "OnItemSelected")]
         public static class MainMenu_OnItemSelected
@@ -26,9 +30,9 @@ namespace Archipelago.MonsterSanctuary.Client
             public static bool Prefix(MainMenu __instance, MenuListItem item)
             {
                 // We should never be connected when we're on the main menu
-                if (APState.IsConnected)
+                if (ApState.IsConnected)
                 {
-                    APState.InitiateDisconnect();
+                    ApState.InitiateDisconnect();
                 }
 
                 // We only want to handle the New Game button, everything else goes through the normal flow
@@ -79,7 +83,7 @@ namespace Archipelago.MonsterSanctuary.Client
             // We never want to be connected to AP while on the main menu.
             private static void Prefix()
             {
-                APState.InitiateDisconnect();
+                ApState.InitiateDisconnect();
             }
         }
         #endregion
@@ -90,7 +94,7 @@ namespace Archipelago.MonsterSanctuary.Client
         {
             private static void Prefix(NewGameMenu __instance, ref bool ___relicMode)
             {
-                if (!APState.IsConnected)
+                if (!ApState.IsConnected)
                     return;
 
                 //___relicMode = SlotData.IncludeChaosRelics;
@@ -102,7 +106,7 @@ namespace Archipelago.MonsterSanctuary.Client
         {
             private static void Postfix(NewGameMenu __instance, ref bool ___timer)
             {
-                if (!APState.IsConnected)
+                if (!ApState.IsConnected)
                     return;
 
                 __instance.BraveryItem.SetDisabled(true);
@@ -146,7 +150,7 @@ namespace Archipelago.MonsterSanctuary.Client
                     // If we're not connected to AP, we can simply end early and let the normal process take over.
                     // This is because we should be connected to AP before selecting a New Game save file. 
                     // If we're not connected, it means we create this save outside of AP.
-                    if (!APState.IsConnected)
+                    if (!ApState.IsConnected)
                         return true;
 
                     if (component.SaveData != null)
@@ -163,8 +167,8 @@ namespace Archipelago.MonsterSanctuary.Client
                 else
                 {
                     // We never ever, ever want to be connected to AP while selecting a save file to Continue
-                    if (APState.IsConnected)
-                        APState.InitiateDisconnect();
+                    if (ApState.IsConnected)
+                        ApState.InitiateDisconnect();
 
                     // When continuing, we wait until the file is selected before we prompt the user to connect to AP
                     // This is because we can pull the connection info from the ApDataFile associated with the save slot
@@ -279,12 +283,17 @@ namespace Archipelago.MonsterSanctuary.Client
 
                 UIController.Instance.NameMenu.Open(
                     Utils.LOCA("Name your character"),
-                    string.IsNullOrEmpty(slot_name) ? string.Empty : slot_name,
+                    GetSlotName(),
                     new NameMenu.ConfirmNameDelegate((name) => menu.Method("ConfirmHeroName", name).GetValue(name)),
                     new Action(() => menu.Method("OnNameCancelled").GetValue()),
                     NameMenu.ENameType.PlayerName);
 
                 return false;
+            }
+
+            private static string GetSlotName()
+            {
+                return string.IsNullOrEmpty(slot_name) ? string.Empty : slot_name;
             }
         }
 
@@ -314,7 +323,7 @@ namespace Archipelago.MonsterSanctuary.Client
                 var saveSlot = ___currentPage * 10 + ___saveGameSlots.IndexOf(comp);
 
                 // We should never be connected to AP when deleting a file, since its from the Continue menu
-                if (APState.IsConnected)
+                if (ApState.IsConnected)
                 {
                     Patcher.Logger.LogError("Something went wrong. You are connected to AP after selecting the 'Continue' from the main menu, which shouldn't happen.");
                     return;
@@ -335,7 +344,7 @@ namespace Archipelago.MonsterSanctuary.Client
         {
             private static void Prefix(SaveGameMenu __instance, int ___slotToBeLoaded)
             {
-                if (!APState.IsConnected)
+                if (!ApState.IsConnected)
                 {
                     return;
                 }
@@ -450,7 +459,7 @@ namespace Archipelago.MonsterSanctuary.Client
         private static void ConnectToArchipelagoAndContinue<T>(T __instance, Action<T> postConnectAction = null, Action<T> failedConnectionAction = null) where T : MonoBehaviour
         {
             Patcher.Logger.LogInfo("ConnectToArchipelagoAndContinue()");
-            if (APState.Connect(host_name, slot_name, password))
+            if (ApState.Connect(host_name, slot_name, password))
             {
                 if (postConnectAction != null)
                 {

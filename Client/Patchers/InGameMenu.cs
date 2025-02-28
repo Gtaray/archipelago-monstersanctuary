@@ -1,4 +1,5 @@
-﻿using HarmonyLib;
+﻿using Archipelago.MonsterSanctuary.Client.AP;
+using HarmonyLib;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -118,7 +119,7 @@ namespace Archipelago.MonsterSanctuary.Client
     {
         private static void Postfix()
         {
-            APState.InitiateDisconnect();
+            ApState.InitiateDisconnect();
         }
     }
 }
