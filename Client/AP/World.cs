@@ -118,7 +118,7 @@ namespace Archipelago.MonsterSanctuary.Client.AP
                 foreach (var location in pin.Value)
                 {
                     var id = Locations.GetLocationId(location);
-                    if (id.HasValue)
+                    if (!id.HasValue)
                     {
                         Patcher.Logger.LogWarning($"\t{location} does not have an id.");
                         continue;

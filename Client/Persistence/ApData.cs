@@ -34,11 +34,12 @@ namespace Archipelago.MonsterSanctuary.Client.Persistence
             {
                 string file = Path.GetFileName(fullFilePath);
                 var match = r.Match(file);
-                int.TryParse(match.Groups[0].Value, out int slotid);
+
                 if (match.Success)
                 {
+                    int.TryParse(match.Groups[1].Value, out int slotid);
                     Patcher.Logger.LogInfo($"\t{file}: Save slot {slotid}");
-                    PersistenceFiles.Add(slotid, file);
+                    PersistenceFiles.Add(slotid, fullFilePath);
                 }
                 else
                 {
@@ -153,31 +154,31 @@ namespace Archipelago.MonsterSanctuary.Client.Persistence
         #endregion
 
         #region Items Received
-        public static int GetItemsReceived()
+        public static int GetNextExpectedItemIndex()
         {
             if (!HasApDataFile())
             {
                 Patcher.Logger.LogError("Tried to get the Items Received index, except the current AP data file is null.");
                 return 0;
             }
-            return CurrentFile.ItemsReceived;
+            return CurrentFile.NextExpectedItemIndex;
         }
 
         public static bool IsItemReceived(int index)
         {
-            return index <= GetItemsReceived();
+            return index < GetNextExpectedItemIndex();
         }
 
-        public static void SetItemsReceived(int index)
+        public static void SetNextExpectedItemIndex(int index)
         {
             if (!HasApDataFile())
             {
                 Patcher.Logger.LogError("Tried to set the Items Received index, except the current AP data file is null.");
                 return;
             }
-            if (index > CurrentFile.ItemsReceived)
+            if (index > CurrentFile.NextExpectedItemIndex)
             {
-                CurrentFile.ItemsReceived = index;
+                CurrentFile.NextExpectedItemIndex = index;
                 CurrentFile.SaveFile();
             }
         }
@@ -210,6 +211,11 @@ namespace Archipelago.MonsterSanctuary.Client.Persistence
             {
                 CurrentFile.LocationsChecked.Add(location);
                 CurrentFile.SaveFile();
+            }
+
+            if (Locations.DoesLocationExist(location))
+            {
+                AddLocationToCheckCounter(Locations.GetLocationId(location).Value);
             }
         }
 
@@ -254,12 +260,12 @@ namespace Archipelago.MonsterSanctuary.Client.Persistence
             var locations = ApState.Session.Locations.AllLocationsChecked.Except(Champions.GetChampionRankLocationIds());
 
             foreach (var location in locations)
-                IncrementCheckCounter(location);
+                AddLocationToCheckCounter(location);
 
             CurrentFile.SaveFile();
         }
 
-        public static void IncrementCheckCounter(long locationId)
+        public static void AddLocationToCheckCounter(long locationId)
         {
             if (!HasApDataFile())
             {

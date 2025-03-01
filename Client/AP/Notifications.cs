@@ -33,7 +33,6 @@ namespace Archipelago.MonsterSanctuary.Client.AP
     public class ItemTransferNotification
     {
         public long LocationID { get; set; }
-        public int PlayerID { get; set; }
         public string PlayerName { get; set; }
         public string ItemName { get; set; }
         public ItemTransferType Action { get; set; }
@@ -42,7 +41,7 @@ namespace Archipelago.MonsterSanctuary.Client.AP
 
     public class Notifications
     {
-        public static ConcurrentQueue<ItemTransferNotification> NotificationQueue { get; set; }
+        public static ConcurrentQueue<ItemTransferNotification> NotificationQueue { get; set; } = new();
 
         /// <summary>
         /// Adds a new entry to the notification queue for a sent, received, or acquired item
@@ -50,17 +49,15 @@ namespace Archipelago.MonsterSanctuary.Client.AP
         /// </summary>
         /// <param name="itemIndex"></param>
         /// <param name="apItem"></param>
-        public static void QueueItemTransferNotification(ItemInfo apItem)
+        public static void QueueItemTransferNotification(int? itemIndex, ItemInfo apItem, ItemTransferType action)
         {
+            var itemName = ApState.GetItemName(apItem.LocationGame, apItem.ItemId);
             QueueItemTransferNotification(
-                    apItem.LocationGame,
-                    apItem.ItemId,
-                    apItem.Player,
-                    apItem.LocationId,
-                    (ItemClassification)(int)apItem.Flags,
-                    ApState.Session.Players.ActivePlayer == apItem.Player
-                        ? ItemTransferType.Acquired
-                        : ItemTransferType.Sent);
+                itemName,
+                apItem.Player,
+                apItem.LocationId,
+                (ItemClassification)(int)apItem.Flags,
+                action);
         }
 
         /// <summary>
@@ -68,22 +65,15 @@ namespace Archipelago.MonsterSanctuary.Client.AP
         /// This queue is used to notify the player when an item is sent or received
         /// </summary>
         public static void QueueItemTransferNotification(
-            string itemGame, 
-            long itemId, 
-            int playerId, 
-            long locationId, 
-            ItemClassification classification, 
+            string itemName,
+            int playerId,
+            long locationId,
+            ItemClassification classification,
             ItemTransferType action)
         {
-            // Do not queue up a notification if the queue already has a message for the same location ID and player ID
-            if (NotificationQueue.Any(n => n.LocationID == locationId && n.PlayerID == playerId))
-                return;
-
-            var itemName = ApState.GetItemName(itemGame, itemId);
             var transfer = new ItemTransferNotification()
             {
                 ItemName = itemName,
-                PlayerID = playerId,
                 PlayerName = ApState.Session.Players.GetPlayerName(playerId),
                 LocationID = locationId,
                 Classification = classification,

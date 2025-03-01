@@ -82,7 +82,7 @@ namespace Archipelago.MonsterSanctuary.Client.AP
                 // I'd ilke to avoid having to rebuild data if possible. The files should be reliable
                 //ApData.RebuildCheckCounter();
 
-                Items.ResyncAllItems();
+                //Items.ResyncAllItems();
             }
             else if (loginResult is LoginFailure loginFailure)
             {
@@ -163,21 +163,27 @@ namespace Archipelago.MonsterSanctuary.Client.AP
         /// <summary>
         /// Event handler for receiving an item from the AP server
         /// This happens outside of the main thread
+        /// This event is also raised for every item the player has received when they connecte to the AP server
         /// </summary>
         /// <param name="helper"></param>
         public static void ReceiveItem(ReceivedItemsHelper helper)
         {
-            int receivedIndex = ApData.GetItemsReceived();
+            // Don't receive items until we have a loaded data file
+            // The only time we would be connected and receive items but not have a data file is when selecting "New Game" from the main menu
+            // And in the case of new games, we resync all items when loading the first in-game scene anyway
+            if (!ApData.HasApDataFile())
+                return;
+
+            int receivedIndex = ApData.GetNextExpectedItemIndex();
             int receivedCount = Session.Items.AllItemsReceived.Count();
 
             // When we receive items, we want to ensure that we process them in the correct order and never skip an index
             // We do this by only processing items between the currently received index and the number of all received items
             // We effectively ignore the helper parameter, and instead only use this as a trigger to process all un-received items
-            for (int i = receivedIndex + 1; i < receivedCount; i++)
+            for (int i = receivedIndex; i < receivedCount; i++)
             {
                 var item = Session.Items.AllItemsReceived[i];
                 Items.QueueItemForDelivery(i, item);
-                Notifications.QueueItemTransferNotification(item);
             }
         }
 
@@ -201,12 +207,13 @@ namespace Archipelago.MonsterSanctuary.Client.AP
              
             // Last line of defense to not check places that have already been checked
             var locationsToCheck = locationIds.Except(Session.Locations.AllLocationsChecked);
+
             Task.Run(() =>
             {
                 Session.Locations.CompleteLocationChecksAsync(locationsToCheck.ToArray());
             }).ConfigureAwait(false);
 
-            Task.Run(() => NotifyPlayerOfItemChecks(locationsToCheck.ToArray()));
+            Task.Run(() => NotifyPlayerOfSentChecks(locationsToCheck.ToArray()));
         }
 
         /// <summary>
@@ -215,12 +222,15 @@ namespace Archipelago.MonsterSanctuary.Client.AP
         /// </summary>
         /// <param name="locationsToCheck"></param>
         /// <returns></returns>
-        private static async Task NotifyPlayerOfItemChecks(long[] locationsToCheck)
+        private static async Task NotifyPlayerOfSentChecks(long[] locationsToCheck)
         {
             var packet = await Session.Locations.ScoutLocationsAsync(false, locationsToCheck);
             foreach (var scout in packet.Values)
             {
-                Notifications.QueueItemTransferNotification(scout);
+                // We only want to notify the player when they send another player an item
+                // Notifying when they receive an item is done elsewhere
+                if (scout.Player !=  Session.Players.ActivePlayer)
+                    Notifications.QueueItemTransferNotification(null, scout, ItemTransferType.Sent);
             }
         }
 

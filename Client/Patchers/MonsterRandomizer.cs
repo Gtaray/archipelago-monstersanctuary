@@ -119,6 +119,10 @@ namespace Archipelago.MonsterSanctuary.Client
                 if (!ApState.IsConnected)
                     return true;
 
+                // Do not randomize the infinity arena
+                if (encounter.IsInfinityArena)
+                    return true;
+
                 // TODO: This doesn't seem to be changing the level of super champions
                 // Need to double check this.
                 if (isChampion)
@@ -173,6 +177,13 @@ namespace Archipelago.MonsterSanctuary.Client
                     num2++;
                 }
 
+
+                if (list.Count() == 0)
+                {
+                    Patcher.Logger.LogWarning($"Ended up with an encounter that has zero monsters. Scene: {GameController.Instance.CurrentSceneName}, ID: {encounter.ID}");
+                    return true;
+                }
+
                 // Eventually want this to include rando settings so things can be shifted any time
                 if (SlotData.MonsterShiftRule != ShiftFlag.Never && (ProgressManager.Instance.GetBool("SanctuaryShifted") || SlotData.MonsterShiftRule == ShiftFlag.Any))
                 {
@@ -203,44 +214,13 @@ namespace Archipelago.MonsterSanctuary.Client
                                 list[index].SetShift(shift);
                                 ProgressManager.Instance.SetBool("LastMonsterShifted", !@bool, true);
                             }
+
                             ProgressManager.Instance.AddRecentEncounter(
                                 GameController.Instance.CurrentSceneName,
                                 encounter.ID,
                                 (list.Count > 0) ? list[0].Shift : EShift.Normal,
                                 (list.Count > 1) ? list[1].Shift : EShift.Normal,
                                 (list.Count > 2) ? list[2].Shift : EShift.Normal);
-                        }
-                    }
-
-                    // Infinity arena stuff. This will probably remain untested for a long long while, and could possibly break things.
-                    else if (encounter.IsInfinityArena)
-                    {
-                        if (encounter.PredefinedMonsters.level >= 160)
-                        {
-                            using List<Monster>.Enumerator enumerator = list.GetEnumerator();
-                            while (enumerator.MoveNext())
-                            {
-                                Monster monster2 = enumerator.Current;
-                                __instance.GetType().GetMethod("SetupInfinityArenaMonsterShift", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(__instance, new object[] { monster2 });
-                            }
-                            __result = list;
-                            return false;
-                        }
-                        if (encounter.PredefinedMonsters.level >= 130)
-                        {
-                            int num3 = UnityEngine.Random.Range(0, 3);
-                            for (int j = 0; j < 3; j++)
-                            {
-                                if (j != num3)
-                                {
-                                    __instance.GetType().GetMethod("SetupInfinityArenaMonsterShift", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(__instance, new object[] { list[j] });
-                                }
-                            }
-                        }
-                        else if (encounter.PredefinedMonsters.level >= 70)
-                        {
-                            int index2 = UnityEngine.Random.Range(0, 3);
-                            __instance.GetType().GetMethod("SetupInfinityArenaMonsterShift", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(__instance, new object[] { list[index2] });
                         }
                     }
                 }

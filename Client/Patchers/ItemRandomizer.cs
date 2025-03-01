@@ -9,6 +9,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using UnityEngine.Playables;
 using static PopupController;
+using static System.Collections.Specialized.BitVector32;
 
 namespace Archipelago.MonsterSanctuary.Client
 {   
@@ -42,6 +43,10 @@ namespace Archipelago.MonsterSanctuary.Client
 
                 if (Items.TakeNextItem(out ItemTransfer nextItem))
                 {
+                    // If we try to queue an item that we've already received, don't
+                    if (ApData.IsItemReceived(nextItem.ItemIndex))
+                        return;
+
                     // Only care about champion items to check if we've hit the goal of having them all defeated
                     if (nextItem.ItemName == "Champion Defeated")
                     {
@@ -61,10 +66,25 @@ namespace Archipelago.MonsterSanctuary.Client
                     ReceiveItem(nextItem.ItemName, eggShift);
 
                     // We want to do this immediately after adding the item to the player inventory
-                    ApData.SetItemsReceived(nextItem.ItemIndex);
+                    ApData.SetNextExpectedItemIndex(nextItem.ItemIndex + 1);
+
+                    // We only queue notifications for received/acquired items after the player actually receives it.
+                    // Notifications for Sent items are handled when the location is checked
+                    // We do this here because the Notification queue should be fire and forget
+                    // The queue does not do any filtering or conditional checks for what should be shown. If it's on the queue, it gets shown.
+                    Notifications.QueueItemTransferNotification(
+                        nextItem.ItemName,
+                        nextItem.PlayerID,
+                        nextItem.LocationID,
+                        nextItem.ItemClassification,
+                        nextItem.PlayerID == ApState.Session.Players.ActivePlayer
+                            ? ItemTransferType.Acquired
+                            : ItemTransferType.Received);
+                        
                 }
             }
 
+            #region Item Handling
             private static bool CanGiveItem()
             {
                 // We can give the player items all the time, since giving the item is distinct from notifying the player that the item was given
@@ -128,6 +148,7 @@ namespace Archipelago.MonsterSanctuary.Client
                     .Select(x => x.gameObject.GetComponent<T>())
                     .SingleOrDefault(i => string.Equals(i.GetName(), name, StringComparison.OrdinalIgnoreCase));
             }
+            #endregion
         }
 
         [HarmonyPatch(typeof(GameController), "Update")]
@@ -151,6 +172,7 @@ namespace Archipelago.MonsterSanctuary.Client
                 }
             }
 
+            #region Notifications
             private static bool CanNotifyPlayerOfItemTransfer()
             {
                 // Don't notify if we're in the intro
@@ -272,6 +294,7 @@ namespace Archipelago.MonsterSanctuary.Client
                 var newtext = RemoveProblematicCharacters(text);
                 return GameDefines.FormatString(Colors.OtherPlayer, newtext, true);
             }
+            #endregion
         }
 
         [HarmonyPatch(typeof(Chest), "OpenChest")]

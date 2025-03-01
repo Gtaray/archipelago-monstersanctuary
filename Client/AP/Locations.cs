@@ -99,7 +99,7 @@ namespace Archipelago.MonsterSanctuary.Client.AP
 
             return locationName
                 .Replace(" ", "")
-                .Split('-')
+                .Split('_')
                 .First();
         }
 

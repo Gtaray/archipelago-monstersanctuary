@@ -23,10 +23,11 @@ namespace Archipelago.MonsterSanctuary.Client.Persistence
 
         /// <summary>
         /// The index that tracks what items have been received. 
-        /// The client has received up to and including this index in Session.Items.AllItemsReceived
+        /// This is the next index that the client expects to receive when handling items. 
+        /// Indirectly, all items with indexes lower than this number have been received
         /// </summary>
-        [JsonProperty("ItemsReceived")]
-        public int ItemsReceived;
+        [JsonProperty("NextExpectedItemIndex")]
+        public int NextExpectedItemIndex { get; set; } = 0;
 
         /// <summary>
         /// A list of all locations within the game that have been checked.
@@ -52,7 +53,7 @@ namespace Archipelago.MonsterSanctuary.Client.Persistence
         {
             Patcher.Logger.LogInfo("Persistence:");
             Patcher.Logger.LogInfo("File Name: " + FileName);
-            Patcher.Logger.LogInfo("\tReceived Item Index: " + ItemsReceived);
+            Patcher.Logger.LogInfo("\tNext Expected Item Index: " + NextExpectedItemIndex);
             Patcher.Logger.LogInfo("\tLocations Checked: " + LocationsChecked.Count());
             Patcher.Logger.LogInfo("\tChampions Defeated: " + ChampionsDefeated.Count());
         }
@@ -64,7 +65,7 @@ namespace Archipelago.MonsterSanctuary.Client.Persistence
             if (File.Exists(FileName))
                 File.Delete(FileName);
 
-            this.ItemsReceived = new();
+            this.NextExpectedItemIndex = new();
             this.CheckCounter = new();
             this.ChampionsDefeated = new();
         }
@@ -90,7 +91,7 @@ namespace Archipelago.MonsterSanctuary.Client.Persistence
                 var json = File.ReadAllText(FileName);
                 var file = JsonConvert.DeserializeObject<ApDataFile>(json);
                 this.ConnectionInfo = file.ConnectionInfo;
-                this.ItemsReceived = file.ItemsReceived;
+                this.NextExpectedItemIndex = file.NextExpectedItemIndex;
                 this.LocationsChecked = file.LocationsChecked;
                 this.CheckCounter = file.CheckCounter;
                 this.ChampionsDefeated = file.ChampionsDefeated;

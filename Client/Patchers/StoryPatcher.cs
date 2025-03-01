@@ -17,8 +17,10 @@ namespace Archipelago.MonsterSanctuary.Client
             [UsedImplicitly]
             private static bool Prefix(GameController __instance, bool isNewGamePlus)
             {
-                // TODO: Eventually remove this and don't rely on full resyncing as much
-                Items.ResyncAllItems();
+                // Starting a new game is a little different than loading.
+                // When creating a new save file, we connect BEFORE creating the AP data file, and thus the resync on connection can't happen.
+                // So instead we manually resync here
+                Items.ResyncReceivedItems();
 
                 // if we're not skipping the intro, call the original function
                 if (!SlotData.SkipIntro)

@@ -61,6 +61,9 @@ namespace Archipelago.MonsterSanctuary.Client
                 if (!ApState.IsConnected)
                     return;
 
+                if (!ApData.HasApDataFile())
+                    return;
+
                 if (GameController.Instance == null)
                     return;
 

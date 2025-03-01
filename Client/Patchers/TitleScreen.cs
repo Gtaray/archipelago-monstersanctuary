@@ -187,6 +187,7 @@ namespace Archipelago.MonsterSanctuary.Client
                             "Error",
                             $"Failed to load Archipelago data file for slot {___slotToBeLoaded}. Check the logs for more details.",
                             OnLoadCancelled);
+                        __instance.MenuList.SetLocked(true);
                         return false;
                     }
 
@@ -200,6 +201,7 @@ namespace Archipelago.MonsterSanctuary.Client
                             "Error",
                             $"Saved Host Name was empty. Something has happened to the data file for this save, and must be manually fixed",
                             OnLoadCancelled);
+                        __instance.MenuList.SetLocked(true);
                         return false;
                     }
                     if (string.IsNullOrEmpty(ApData.CurrentFile.ConnectionInfo.SlotName))
@@ -209,6 +211,7 @@ namespace Archipelago.MonsterSanctuary.Client
                             "Error",
                             $"Saved Slot Name was empty. Something has happened to the data file for this save, and must be manually fixed",
                             OnLoadCancelled);
+                        __instance.MenuList.SetLocked(true);
                         return false;
                     }
 
@@ -223,6 +226,7 @@ namespace Archipelago.MonsterSanctuary.Client
                         LoadGame, // If the player accepts and the connection is successful
                         OnLoadCancelled, // If the player accepts and the connectoin fails
                         (connected, notconnected, cancelled) => OnLoadCancelled(__instance)); // If the player cancels
+                    __instance.MenuList.SetLocked(true);
 
                     return false;
                 }
@@ -239,8 +243,8 @@ namespace Archipelago.MonsterSanctuary.Client
             private static void PromptToDeleteExistingFile(SaveGameMenu __instance, int slotToBeLoaded)
             {
                 string warning = ApData.ApDataExistsForSaveSlot(slotToBeLoaded)
-                    ? Utils.LOCA("Delete existing progress?")
-                    : Utils.LOCA("This file has Archipelago data. Delete existing progress?");
+                    ? Utils.LOCA("This file has Archipelago data. Delete existing progress?")
+                    : Utils.LOCA("Delete existing progress?");
 
                 PopupController.Instance.ShowRequest(
                     Utils.LOCA("Delete?"),

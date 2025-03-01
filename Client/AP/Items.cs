@@ -24,6 +24,7 @@ namespace Archipelago.MonsterSanctuary.Client.AP
     { 
         public int ItemIndex { get; set; }
         public string ItemName { get; set; }
+        public int PlayerID { get; set; }
         public ItemClassification ItemClassification { get; set; }
         public long LocationID { get; set; }
     }
@@ -77,6 +78,7 @@ namespace Archipelago.MonsterSanctuary.Client.AP
             QueueItemForDelivery(
                 itemIndex, 
                 name, 
+                apItem.Player,
                 classification, 
                 apItem.LocationId);
         }
@@ -90,14 +92,13 @@ namespace Archipelago.MonsterSanctuary.Client.AP
         public static void QueueItemForDelivery(
             int itemIndex, 
             string itemName, 
+            int playerId,
             ItemClassification classification,
             long locationId)
         {
-            // Item index should never be null because this is only called for items we receive
-
-            // If we try to queue an item that we've already received, don't
-            if (ApData.IsItemReceived(itemIndex))
-                return;
+            // Special note, we enqueue items that the player has already received
+            // We do this so that the recieved message can place on the queue irrespective of whether the player has loaded their save (an AP data file is set)
+            // We just need to make sure to filter out those items in the handler
 
             // If we try to queue an item that's already queued, don't
             if (ItemQueue.Any(i => i.ItemIndex == itemIndex))
@@ -107,6 +108,7 @@ namespace Archipelago.MonsterSanctuary.Client.AP
             { 
                 ItemIndex = itemIndex,
                 ItemName = itemName,
+                PlayerID = playerId,
                 ItemClassification = classification,
                 LocationID = locationId
             };
@@ -134,6 +136,11 @@ namespace Archipelago.MonsterSanctuary.Client.AP
             if (!ApState.IsConnected)
                 return;
 
+            // This method runs when an AP connection is established, and when creating a new file, that can happen before save file is selected and an AP data file is created
+            // So we just need to bail early when that happens
+            if (!ApData.HasApDataFile())
+                return;
+
             var toCheck = ApData.GetCheckedLocationsAsIds()
                 .Except(ApState.Session.Locations.AllLocationsChecked);
 
@@ -148,13 +155,18 @@ namespace Archipelago.MonsterSanctuary.Client.AP
             if (!ApState.IsConnected)
                 return;
 
-            var itemReceivedIndex = ApData.GetItemsReceived();
+            // We shouldn't be receiving checks unless we have a data file loaded
+            // and are ready to handle the responses
+            if (!ApData.HasApDataFile())
+                return;
+
+            var itemReceivedIndex = ApData.GetNextExpectedItemIndex();
 
             // Start at index 1 because 0 means something special and we should ignore it.
-            for (int i = 1; i < ApState.Session.Items.AllItemsReceived.Count(); i++)
+            for (int i = 0; i < ApState.Session.Items.AllItemsReceived.Count(); i++)
             {
                 // Only queue up items that haven't already been received
-                if (i <= itemReceivedIndex)
+                if (i < itemReceivedIndex)
                     continue;
 
                 var item = ApState.Session.Items.AllItemsReceived[i];
