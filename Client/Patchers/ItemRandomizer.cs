@@ -1,4 +1,5 @@
 ﻿using Archipelago.MonsterSanctuary.Client.AP;
+using Archipelago.MonsterSanctuary.Client.Options;
 using Archipelago.MonsterSanctuary.Client.Persistence;
 using HarmonyLib;
 using JetBrains.Annotations;
@@ -12,14 +13,9 @@ using static PopupController;
 using static System.Collections.Specialized.BitVector32;
 
 namespace Archipelago.MonsterSanctuary.Client
-{   
+{
     public partial class Patcher
     {
-        // When receiving items as part of a dialog chain, we want the game to pause until we receive this item
-        // But since we're receiving items asynchronously, we need a way to keep track of which gift actions are waiting on a response from AP
-        // We use this dictionary to do that, so we can quickly test if the location ID (key) of a received check is for the gift action we're waiting on
-        private static readonly ConcurrentDictionary<long, GrantItemsAction> _grantItemActions = new();
-
         // When receiving an egg as a gift during dialog, we need to make sure that the egg the player receives is shifted correctly
         // So we simply store the location ID and intended egg shift here, that way the item receiver an handle it appropriately
         private static readonly ConcurrentDictionary<long, EShift> _eggShifts = new();
@@ -99,6 +95,7 @@ namespace Archipelago.MonsterSanctuary.Client
                     return;
                 }
 
+                Patcher.Logger.LogInfo("Received item: " + itemName);
                 var gold = GetGoldQuantity(itemName);
                 if (gold > 0)
                 {
@@ -132,22 +129,6 @@ namespace Archipelago.MonsterSanctuary.Client
                     PlayerController.Instance.Inventory.AddItem(item, quantity, (int)eggShift);
                 }
             }
-
-            static BaseItem GetItemByName(string name)
-            {
-                if (name.EndsWith(" Egg"))
-                    return GetItemByName<Egg>(name);
-
-                return GetItemByName<BaseItem>(name);
-            }
-
-            static BaseItem GetItemByName<T>(string name) where T : BaseItem
-            {
-                return GameController.Instance.WorldData.Referenceables
-                    .Where(x => x?.gameObject.GetComponent<T>() != null)
-                    .Select(x => x.gameObject.GetComponent<T>())
-                    .SingleOrDefault(i => string.Equals(i.GetName(), name, StringComparison.OrdinalIgnoreCase));
-            }
             #endregion
         }
 
@@ -179,28 +160,27 @@ namespace Archipelago.MonsterSanctuary.Client
                 if (!ProgressManager.Instance.GetBool("FinishedIntro"))
                     return false;
                 // Only notify if we're exploring and grounded
-                return GameStateManager.Instance.IsExploring() && PlayerController.Instance.Physics.PhysObject.Collisions.below;
+                return GameStateManager.Instance.IsExploring() && (PlayerController.Instance.Physics.IsSwimming || PlayerController.Instance.Physics.PhysObject.Collisions.below);
             }
 
             private static void NotifyPlayer(ItemTransferNotification notification)
             {
                 Patcher.UI.AddItemToHistory(notification);
 
-                // For gift actions specifically, we need to make sure we handle the callback of the popup
-                PopupController.PopupDelegate callback = null;
-                if (_grantItemActions.ContainsKey(notification.LocationID))
-                {
-                    callback = () =>
-                    {
-                        _grantItemActions.TryRemove(notification.LocationID, out var action);
-                        action.Finish();
-                    };
-                }
+                if (!ShowPopupNotifications.Value)
+                    return;
 
                 string msg = "";
                 string itemName = notification.ItemName;
+                Patcher.Logger.LogInfo("Notification for item: " + itemName);
                 bool selfFound = notification.Action == ItemTransferType.Acquired;
-                int gold = GetGoldQuantity(itemName);
+                int gold = 0;
+
+                // Only try to parse gold quantity if we're receiving the item.
+                if (notification.Action != ItemTransferType.Sent) 
+                {
+                    gold = GetGoldQuantity(itemName);
+                }
 
                 if (gold > 0)
                 {
@@ -230,8 +210,7 @@ namespace Archipelago.MonsterSanctuary.Client
 
                 PopupController.Instance.ShowMessage(
                     Utils.LOCA("Archipelago"),
-                    msg,
-                    callback);
+                    msg);
             }
 
             private static string FormatItemSentMessage(string itemName, string playerName, ItemClassification classification)
@@ -376,22 +355,15 @@ namespace Archipelago.MonsterSanctuary.Client
                 // We save this Action in the dictionary, indexed by its location ID
                 // that way when the player is notified on receiving the item, we can 
                 // continue this dialog
-                _grantItemActions.TryAdd(locationId, __instance);
+                //_grantItemActions.TryAdd(locationId, __instance);
 
                 // If this action would give an egg that is Light or Dark shifted, we save that so we can handle it when the player receives the item
                 if (__instance.EggShift != EShift.Normal)
                     _eggShifts.TryAdd(locationId, __instance.EggShift);
 
-                // If the player is skipping this dialog,
-                // then we want to batch all skipped gift actions together
-                if (!showMessage)
-                {
-                    Items.AddSkippedGiftCheck(locationId);
-                }
-                else
-                {
-                    ApState.CheckLocation(locationId);
-                }
+                // Batch all items given in a dialog together into a single call
+                Items.AddSkippedGiftCheck(locationId);
+                __instance.Finish();
 
                 return false;
             }
@@ -442,6 +414,22 @@ namespace Archipelago.MonsterSanctuary.Client
             }
 
             return gold;
+        }
+
+        static BaseItem GetItemByName(string name)
+        {
+            if (name.EndsWith(" Egg"))
+                return GetItemByName<Egg>(name);
+
+            return GetItemByName<BaseItem>(name);
+        }
+
+        static BaseItem GetItemByName<T>(string name) where T : BaseItem
+        {
+            return GameController.Instance.WorldData.Referenceables
+                .Where(x => x?.gameObject.GetComponent<T>() != null)
+                .Select(x => x.gameObject.GetComponent<T>())
+                .SingleOrDefault(i => string.Equals(i.GetName(), name, StringComparison.OrdinalIgnoreCase));
         }
     }
 }

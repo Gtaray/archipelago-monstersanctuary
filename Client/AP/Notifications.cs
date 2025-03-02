@@ -49,9 +49,14 @@ namespace Archipelago.MonsterSanctuary.Client.AP
         /// </summary>
         /// <param name="itemIndex"></param>
         /// <param name="apItem"></param>
-        public static void QueueItemTransferNotification(int? itemIndex, ItemInfo apItem, ItemTransferType action)
+        public static void QueueItemTransferNotification(ItemInfo apItem, ItemTransferType action)
         {
-            var itemName = ApState.GetItemName(apItem.LocationGame, apItem.ItemId);
+            var itemName = ApState.GetItemName(apItem.ItemGame, apItem.ItemId);
+            if (string.IsNullOrEmpty(itemName))
+            {
+                Patcher.Logger.LogWarning($"Could not fetch an item name from the AP server. Game: {apItem.ItemGame}, Item ID: {apItem.ItemId}");
+                itemName = "???";
+            }
             QueueItemTransferNotification(
                 itemName,
                 apItem.Player,

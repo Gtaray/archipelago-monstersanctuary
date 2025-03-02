@@ -1,5 +1,7 @@
 ﻿using Archipelago.MonsterSanctuary.Client.AP;
+using Archipelago.MonsterSanctuary.Client.Options;
 using Archipelago.MonsterSanctuary.Client.Persistence;
+using Archipelago.MultiClient.Net.Models;
 using HarmonyLib;
 using JetBrains.Annotations;
 using System.Linq;
@@ -17,14 +19,13 @@ namespace Archipelago.MonsterSanctuary.Client
             [UsedImplicitly]
             private static bool Prefix(GameController __instance, bool isNewGamePlus)
             {
+                if (!ApState.IsConnected)
+                    return true;
+
                 // Starting a new game is a little different than loading.
                 // When creating a new save file, we connect BEFORE creating the AP data file, and thus the resync on connection can't happen.
                 // So instead we manually resync here
                 Items.ResyncReceivedItems();
-
-                // if we're not skipping the intro, call the original function
-                if (!SlotData.SkipIntro)
-                    return true;
 
                 // We have to duplicate the original code here so we can change the current scene name
                 __instance.IsStoryMode = true;
@@ -32,10 +33,16 @@ namespace Archipelago.MonsterSanctuary.Client
                 {
                     __instance.InitPlayerStartSetup();
                 }
+
                 __instance.ChangeType = GameController.SceneChangeType.ToStartScene;
                 __instance.CurrentSceneName = "MountainPath_North1";
                 SceneManager.LoadScene(__instance.CurrentSceneName, LoadSceneMode.Additive);
                 PlayerController.Instance.TimerAvailable = true;
+
+                // Do this after InitPlayerStartSetup()
+                if (SlotData.AddSmokeBombs)
+                    PlayerController.Instance.Inventory.AddItem(GetItemByName("Smoke Bomb"), 50, 0);
+                PlayerController.Instance.Gold = SlotData.StartingGold * 100;
 
 
                 return false;
@@ -49,8 +56,6 @@ namespace Archipelago.MonsterSanctuary.Client
             private static bool Prefix(KeepersIntro __instance)
             {
                 if (!ApState.IsConnected)
-                    return true;
-                if (!SlotData.SkipIntro)
                     return true;
 
                 ProgressManager.Instance.SetBool("FinishedFirstEncounter", true, true);
@@ -158,8 +163,8 @@ namespace Archipelago.MonsterSanctuary.Client
                 if (GameController.Instance.CurrentSceneName == "MountainPath_North1" 
                     && __instance.ID == 18)
                 {
-                    // Skipping intro should disable the touch trigger in the first room
-                    return !SlotData.SkipIntro;
+                    // Disable the touch trigger in the first room
+                    return false;
                 }
 
                 if (GameController.Instance.CurrentSceneName == "MountainPath_North5"

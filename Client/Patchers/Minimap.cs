@@ -1,4 +1,5 @@
 ﻿using Archipelago.MonsterSanctuary.Client.AP;
+using Archipelago.MonsterSanctuary.Client.Options;
 using Archipelago.MonsterSanctuary.Client.Persistence;
 using HarmonyLib;
 using JetBrains.Annotations;

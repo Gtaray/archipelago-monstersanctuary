@@ -1,8 +1,12 @@
 ﻿using Archipelago.MonsterSanctuary.Client.AP;
+using Archipelago.MonsterSanctuary.Client.Options;
 using Archipelago.MonsterSanctuary.Client.Persistence;
 using Archipelago.MultiClient.Net.Models;
 using BepInEx;
+using BepInEx.Configuration;
 using BepInEx.Logging;
+using garfieldbanks.MonsterSanctuary.ModsMenu;
+using garfieldbanks.MonsterSanctuary.ModsMenu.Extensions;
 using HarmonyLib;
 using JetBrains.Annotations;
 using System;
@@ -22,9 +26,41 @@ namespace Archipelago.MonsterSanctuary.Client
         public static new ManualLogSource Logger;
         public static ArchipelagoUI UI;
 
+        private static ConfigEntry<bool> ShowPopupNotifications;
+        private static ConfigEntry<int> ExpMultiplier;
+
         private void Awake()
         {
             Logger = base.Logger;
+
+            // OPTIONS
+            ShowPopupNotifications = Config.Bind("Archipelago", "Show popup notifications", true, "Show popup notifications for sending and receiving items");
+            ExpMultiplier = Config.Bind("Archipelago", "Exp Multiplier", 1, "Multiplier for experienced gained");
+
+            if (ExpMultiplier.Value < 0)
+            {
+                ExpMultiplier.Value = 1;
+            }
+
+            ModList.RegisterOptionsEvt += (_, _) =>
+            {
+                ModList.TryAddOption(
+                    "AP Client",
+                    "Show Popup Notifications",
+                    () => ShowPopupNotifications.Value ? "Enabled" : "Disabled",
+                    _ => ShowPopupNotifications.Value = !ShowPopupNotifications.Value,
+                    setDefaultValueFunc: () => ShowPopupNotifications.Value = true);
+
+                ModList.TryAddOption(
+                    "AP Client",
+                    "Exp Multiplier",
+                    () => $"{ExpMultiplier.Value}x Exp",
+                    direction => ExpMultiplier.Value = (ExpMultiplier.Value + direction).Clamp(1, 10),
+                    possibleValuesFunc: () => ModList.CreateOptionsIntRange(1, 10),
+                    onValueSelectFunc: newValue => ExpMultiplier.Value = int.Parse(newValue.Replace("x Exp", "")),
+                    setDefaultValueFunc: () => ExpMultiplier.Value = 1);
+            };
+
 
             Champions.Load();
             Monsters.Load();
@@ -71,200 +107,6 @@ namespace Archipelago.MonsterSanctuary.Client
 
                 var guiObject = new GameObject("Archipelago UI");
                 Patcher.UI = guiObject.AddComponent<ArchipelagoUI>();
-            }
-        }
-
-        [HarmonyPatch(typeof(Monster), "GetExpReward")]
-        private class Monster_GetExpReward
-        {
-            [UsedImplicitly]
-            private static void Postfix(ref int __result)
-            {
-                // Only multiply reward if we're in combat
-                // This should prevent the game from using this multiplier when scaling enemies.
-                if (GameStateManager.Instance.IsCombat())
-                {
-                    __result = __result * SlotData.ExpMultiplier;
-                }
-            }
-        }
-
-        /// <summary>
-        /// After an encounter, this will add monster eggs to the rare rewards list
-        /// which are then given to the player. Controlled by SlotData.AlwaysGetEgg
-        /// </summary>
-        [HarmonyPatch(typeof(CombatController), "GrantReward")]
-        private class CombatController_GrantRewards
-        {
-            [UsedImplicitly]
-            private static void Prefix(CombatController __instance, List<InventoryItem> ___rareRewards)
-            {
-                if(__instance.CurrentEncounter.EncounterType == EEncounterType.InfinityArena 
-                    || GameModeManager.Instance.BraveryMode
-                    || __instance.CurrentEncounter.IsChampionChallenge
-                    || !SlotData.AlwaysGetEgg)
-                {
-                    return;
-                }
-
-                var items = new List<InventoryItem>();
-                foreach (Monster enemy in __instance.Enemies)
-                {
-                    // Get the rare egg reward for this enemy
-                    var egg = enemy.RewardsRare
-                        .Select(i => i.GetComponent<BaseItem>())
-                        .FirstOrDefault(i => i is Egg);
-
-                    if (egg != null)
-                    {
-                        Patcher.Logger.LogInfo($"Adding Egg: {egg.Name} ({(int)enemy.Shift})");
-                        __instance.AddRewardItem(items, egg, 1, (int)enemy.Shift);
-                    }
-                }
-
-                ___rareRewards.AddRange(items);
-            }
-        }
-
-        /// <summary>
-        /// When giving a reward, this ensures that only one egg of a given monster is ever added
-        /// </summary>
-        [HarmonyPatch(typeof(CombatController), "AddRewardItem")]
-        private class CombatController_AddRewardItem
-        {
-            [UsedImplicitly]
-            private static bool Prefix(List<InventoryItem> items, BaseItem item, int quantity, int variation)
-            {
-                if (item is not Egg)
-                    return true;
-
-                return !items.Any(i => i.Item == item);
-            }
-        }
-
-        [HarmonyPatch(typeof(InventoryManager), "AddItem")]
-        private class InventoryManager_AddItem 
-        {
-            [UsedImplicitly]
-            private static void Postfix(InventoryManager __instance, BaseItem item) 
-            {
-                if (!ApState.IsConnected)
-                    return;
-
-                if (item is not Egg)
-                    return;
-
-                var egg = (Egg)item;
-                Task.Run(() =>
-                {
-                    AddAbilityToDataStorage(egg.Monster);
-                });
-            }
-        }
-
-        [HarmonyPatch(typeof(MonsterManager), "AddMonsterByPrefab")]
-        private class MonsterManager_AddMonsterByPrefab
-        {
-            [UsedImplicitly]
-            private static void Postfix(GameObject monsterPrefab, bool loadingSaveGame)
-            {
-
-                if (!ApState.IsConnected)
-                    return;
-
-                // If we're loading a save game, don't check any locations
-                if (loadingSaveGame)
-                    return;
-
-                Task.Run(() =>
-                {
-                    AddMonsterToDataStorage(monsterPrefab);
-                    AddAbilityToDataStorage(monsterPrefab);
-                });
-            }
-        }
-
-        private static void AddAbilityToDataStorage(GameObject monsterObj)
-        {
-            if (!ApState.IsConnected)
-                return;
-
-            var monster = monsterObj.GetComponent<Monster>();
-            if (monster == null)
-            {
-                Patcher.Logger.LogWarning($"No monster component found for game object '{monsterObj.name}'");
-                return;
-            }
-
-            var ability = monster.ExploreAction.GetComponent<ExploreAbility>();
-            if (ability == null)
-            {
-                Patcher.Logger.LogError($"{monster.Name} has a null ExploreAbility component");
-                return;
-            }
-
-            if (ApState.ReadBoolFromDataStorage(ability.Name) == false)
-            {
-                ApState.SetToDataStorage(ability.Name, (DataStorageElement)true);
-            }
-        }
-
-        private static void AddMonsterToDataStorage(GameObject monsterObj)
-        {
-            if (!ApState.IsConnected)
-                return;
-
-            var monster = monsterObj.GetComponent<Monster>();
-            if (monster == null)
-            {
-                Patcher.Logger.LogWarning($"No monster component found for game object '{monsterObj.name}'");
-                return;
-            }
-
-            if (ApState.ReadBoolFromDataStorage(monster.Name) == false)
-            {
-                ApState.SetToDataStorage(monster.Name, (DataStorageElement)true);
-            }
-        }
-
-        [HarmonyPatch(typeof(PopupController), "ShowRewards")]
-        private class PopupController_ShowRewards
-        {
-            private static void Prefix(
-                ref List<InventoryItem> commonItems,
-                ref List<InventoryItem> rareItems,
-                ref int gold)
-            {
-                var toRemove = ((gold > 0 ? 1 : 0) + (commonItems == null ? 0 : commonItems.Count) + (rareItems == null ? 0 : rareItems.Count)) - 8;
-
-                // In this case, we don't need to remove anything
-                if (toRemove <= 0)
-                    return;
-
-                // The rewards screen is limited to 7 items + gold and a continue button
-                // so we need to truncate items displayed until we're down to that amount
-                while (toRemove > 0)
-                {
-                    if (commonItems.Count > 0)
-                    {
-                        // Start by removing common items
-                        Patcher.Logger.LogWarning("Too many items in reward screen. Truncating " + commonItems.First().GetName());
-                        commonItems.RemoveAt(0);
-                    }
-                    else if (rareItems.Count > 0)
-                    {
-                        // if there aren't any common items to remove, remove rare items
-                        Patcher.Logger.LogWarning("Too many items in reward screen. Truncating " + commonItems.First().GetName());
-                        rareItems.RemoveAt(0);
-                    }
-                    else
-                    {
-                        // this should never happen, but just in case, we clear out gold
-                        Patcher.Logger.LogWarning("Too many items in reward screen. Truncating gold");
-                        gold = 0;
-                    }
-                    toRemove--;
-                }
             }
         }
     }

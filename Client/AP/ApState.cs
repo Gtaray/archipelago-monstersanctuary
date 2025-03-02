@@ -10,6 +10,7 @@ using Archipelago.MultiClient.Net.Packets;
 using Archipelago.MultiClient.Net.Models;
 using Archipelago.MultiClient.Net.BounceFeatures.DeathLink;
 using Archipelago.MonsterSanctuary.Client.Persistence;
+using Archipelago.MonsterSanctuary.Client.Options;
 
 namespace Archipelago.MonsterSanctuary.Client.AP
 {
@@ -230,7 +231,7 @@ namespace Archipelago.MonsterSanctuary.Client.AP
                 // We only want to notify the player when they send another player an item
                 // Notifying when they receive an item is done elsewhere
                 if (scout.Player !=  Session.Players.ActivePlayer)
-                    Notifications.QueueItemTransferNotification(null, scout, ItemTransferType.Sent);
+                    Notifications.QueueItemTransferNotification(scout, ItemTransferType.Sent);
             }
         }
 
