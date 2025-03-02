@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
+using Archipelago.MonsterSanctuary.Client.AP;
 using UnityEngine;
 
 namespace Archipelago.MonsterSanctuary.Client
@@ -25,11 +26,12 @@ namespace Archipelago.MonsterSanctuary.Client
         public float FadeOutAfterSeconds = 8f;
         public float FadeOutTime = 2f;
 
-        private GUIStyle _style = new() { richText = true };
-        private List<ItemHistoryEntry> _itemHistory = new();
+        private GUIStyle _style;
+        private readonly List<ItemHistoryEntry> _itemHistory = new();
 
         public void Awake()
         {
+            _style = new() { richText = true };
             _style.normal.textColor = Color.white;
         }
 
@@ -70,7 +72,7 @@ namespace Archipelago.MonsterSanctuary.Client
             return val.ToString("X2").ToLower();
         }
 
-        public void AddItemToHistory(ItemTransfer itemTransfer)
+        public void AddItemToHistory(ItemTransferNotification itemTransfer)
         {
             var entry = new ItemHistoryEntry()
             {
@@ -89,8 +91,8 @@ namespace Archipelago.MonsterSanctuary.Client
 
         private string GetEntryText(string playerName, string itemName, ItemClassification classification, ItemTransferType action)
         {
-            var itemColor = Patcher.GetItemColor(classification);
-            if (action == ItemTransferType.Aquired)
+            var itemColor = Colors.GetItemColor(classification);
+            if (action == ItemTransferType.Acquired)
             {
                 return $"<color=#{Colors.Self}ff>You</color> found your <color=#{itemColor}ff>{itemName}</color>";
             }
@@ -114,11 +116,11 @@ namespace Archipelago.MonsterSanctuary.Client
 
         private static int DisplayConnectionInfo()
         {
-            string ap_ver = "Archipelago v" + APState.AP_VERSION[0] + "." + APState.AP_VERSION[1] + "." + APState.AP_VERSION[2];
+            string ap_ver = "Archipelago v" + ApState.AP_VERSION[0] + "." + ApState.AP_VERSION[1] + "." + ApState.AP_VERSION[2];
 
-            if (APState.Session != null)
+            if (ApState.Session != null)
             {
-                if (APState.Authenticated)
+                if (ApState.Authenticated)
                 {
                     GUI.Label(new Rect(16, 16, 300, 20), ap_ver + " Status: Connected");
                 }
@@ -133,34 +135,34 @@ namespace Archipelago.MonsterSanctuary.Client
             }
 
             // Login details
-            if ((APState.Session == null || !APState.Authenticated) && APState.State != APState.ConnectionState.Connected)
-            {
-                GUI.Label(new Rect(16, 36, 150, 20), "Host: ");
-                GUI.Label(new Rect(16, 56, 150, 20), "PlayerName: ");
-                GUI.Label(new Rect(16, 76, 150, 20), "Password: ");
+            //if ((APState.Session == null || !APState.Authenticated) && APState.State != APState.ConnectionState.Connected)
+            //{
+            //    GUI.Label(new Rect(16, 36, 150, 20), "Host: ");
+            //    GUI.Label(new Rect(16, 56, 150, 20), "PlayerName: ");
+            //    GUI.Label(new Rect(16, 76, 150, 20), "Password: ");
 
-                bool submit = Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.Return;
+            //    bool submit = Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.Return;
 
-                APState.ConnectionInfo.host_name = GUI.TextField(new Rect(150 + 16 + 8, 36, 150, 20),
-                    APState.ConnectionInfo.host_name);
-                APState.ConnectionInfo.slot_name = GUI.TextField(new Rect(150 + 16 + 8, 56, 150, 20),
-                    APState.ConnectionInfo.slot_name);
-                APState.ConnectionInfo.password = GUI.TextField(new Rect(150 + 16 + 8, 76, 150, 20),
-                    APState.ConnectionInfo.password);
+            //    APState.ConnectionInfo.host_name = GUI.TextField(new Rect(150 + 16 + 8, 36, 150, 20),
+            //        APState.ConnectionInfo.host_name);
+            //    APState.ConnectionInfo.slot_name = GUI.TextField(new Rect(150 + 16 + 8, 56, 150, 20),
+            //        APState.ConnectionInfo.slot_name);
+            //    APState.ConnectionInfo.password = GUI.TextField(new Rect(150 + 16 + 8, 76, 150, 20),
+            //        APState.ConnectionInfo.password);
 
-                if (submit && Event.current.type == EventType.KeyDown)
-                {
-                    // The text fields have not consumed the event, which means they were not focused.
-                    submit = false;
-                }
+            //    if (submit && Event.current.type == EventType.KeyDown)
+            //    {
+            //        // The text fields have not consumed the event, which means they were not focused.
+            //        submit = false;
+            //    }
 
-                if ((GUI.Button(new Rect(16, 96, 100, 20), "Connect") || submit) && APState.ConnectionInfo.Valid)
-                {
-                    APState.Connect();
-                }
+            //    if ((GUI.Button(new Rect(16, 96, 100, 20), "Connect") || submit) && APState.ConnectionInfo.Valid)
+            //    {
+            //        APState.Connect();
+            //    }
 
-                return 120;
-            }
+            //    return 120;
+            //}
 
             return 40;
         }

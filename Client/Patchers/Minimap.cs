@@ -1,4 +1,7 @@
-﻿using HarmonyLib;
+﻿using Archipelago.MonsterSanctuary.Client.AP;
+using Archipelago.MonsterSanctuary.Client.Options;
+using Archipelago.MonsterSanctuary.Client.Persistence;
+using HarmonyLib;
 using JetBrains.Annotations;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,14 +13,8 @@ namespace Archipelago.MonsterSanctuary.Client
     {
         private static string GetCheckString(string region)
         {
-            int collected = 0;
-            int max = 0;
-
-            if (Persistence.Instance.CheckCounter.ContainsKey(region))
-                collected = Persistence.Instance.CheckCounter[region];
-
-            if (GameData.NumberOfChecks.ContainsKey(region))
-                max = GameData.NumberOfChecks[region];
+            int collected = ApData.GetCheckCounter(region);
+            int max = Locations.GetNumberOfChecksForRegion(region);
 
             return string.Format("{0,2} / {1,-2}", collected, max);
         }
@@ -62,7 +59,10 @@ namespace Archipelago.MonsterSanctuary.Client
 
             private static void Postfix(MinimapView __instance)
             {
-                if (!APState.IsConnected)
+                if (!ApState.IsConnected)
+                    return;
+
+                if (!ApData.HasApDataFile())
                     return;
 
                 if (GameController.Instance == null)
@@ -97,13 +97,13 @@ namespace Archipelago.MonsterSanctuary.Client
             [UsedImplicitly]
             private static void Prefix(MinimapTileView __instance, MinimapEntry entry, int posX, int posY)
             {
-                if (!APState.IsConnected)
+                if (!ApState.IsConnected)
                     return;
 
-                string key = $"{entry.MapData.SceneName}_{posX}_{posY}";
+                var pins = World.GetMapPinsForMinimapCell(entry.MapData.SceneName, posX, posY);
 
                 // If there are no checks at this spot, bail
-                if (!GameData.MapPins.ContainsKey(key))
+                if (pins.Count() == 0)
                     return;
 
                 var tileIndex = entry.GetIndex(posX, posY);
@@ -112,7 +112,7 @@ namespace Archipelago.MonsterSanctuary.Client
                     return;
                 }
 
-                var checks = GameData.MapPins[key].Except(Persistence.Instance.LocationsChecked).Count();
+                var checks = pins.Except(ApData.GetCheckedLocationsAsIds()).Count();
 
                 // If all map pins for this tile are contained within the _itemcache, then we can delete the marker
                 if (checks == 0)
@@ -122,6 +122,7 @@ namespace Archipelago.MonsterSanctuary.Client
                     return;
                 }
 
+                // Guaranteed 1 or more checks at this cell, so we can create/update the map pin
                 string name = checks == 1
                     ? "1 Check"
                     : $"{checks} Checks";
@@ -135,7 +136,7 @@ namespace Archipelago.MonsterSanctuary.Client
         {
             private static void Postfix(MapMenu __instance)
             {
-                if (!APState.IsConnected)
+                if (!ApState.IsConnected)
                     return;
 
                 var tiles = Traverse.Create(UIController.Instance.IngameMenu.Map).Field("tiles").GetValue<List<MinimapTileView>>();
@@ -149,12 +150,13 @@ namespace Archipelago.MonsterSanctuary.Client
                     int posX = index % (int)tile.MinimapEntry.MapData.Size.x;
                     int posY = index / (int)tile.MinimapEntry.MapData.Size.x;
 
-                    string key = $"{tile.MinimapEntry.MapData.SceneName}_{posX}_{posY}";
+                    var pins = World.GetMapPinsForMinimapCell(tile.MinimapEntry.MapData.SceneName, posX, posY);
 
-                    if (!GameData.MapPins.ContainsKey(key))
-                        continue;
+                    // If there are no checks at this spot, bail
+                    if (pins.Count() == 0)
+                        return;
 
-                    var checks = GameData.MapPins[key].Except(Persistence.Instance.LocationsChecked).Count();
+                    var checks = pins.Except(ApData.GetCheckedLocationsAsIds()).Count();
                     if (checks == 0)
                     {
                         tile.MinimapEntry.DeleteMinimapMarker(tile.MinimapEntry.GetTileViewIndex(tile));
@@ -178,7 +180,7 @@ namespace Archipelago.MonsterSanctuary.Client
         {
             private static void Postfix(MapMenu __instance)
             {
-                if (!APState.IsConnected)
+                if (!ApState.IsConnected)
                     return;
 
                 __instance.AreaPercentText.maxChars = 150;
@@ -191,7 +193,7 @@ namespace Archipelago.MonsterSanctuary.Client
         {
             private static void Postfix(MapMenu __instance)
             {
-                if (!APState.IsConnected)
+                if (!ApState.IsConnected)
                     return;
 
                 __instance.AreaPercentText.maxChars = 150;
@@ -205,9 +207,9 @@ namespace Archipelago.MonsterSanctuary.Client
             if (SlotData.Goal == CompletionEvent.MadLord)
                 goalText = "Defeat the Mad Lord";
             else if (SlotData.Goal == CompletionEvent.Champions)
-                goalText = $"Defeat All Champions - {Persistence.Instance.ChampionsDefeated.Count()} / 27";
+                goalText = $"Defeat All Champions - {ApData.GetNumberOfChampionsDefeated()} / 27";
 
-            if (APState.Completed)
+            if (ApState.Completed)
             {
                 // Formats the text to be green
                 goalText = FormatItem(goalText, ItemClassification.Useful);

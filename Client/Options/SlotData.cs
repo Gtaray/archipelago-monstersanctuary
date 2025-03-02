@@ -1,4 +1,5 @@
-﻿using Archipelago.MultiClient.Net.Helpers;
+﻿using Archipelago.MonsterSanctuary.Client.AP;
+using Archipelago.MultiClient.Net.Helpers;
 using Newtonsoft
     .Json;
 using Newtonsoft.Json.Linq;
@@ -10,7 +11,7 @@ using System.Text;
 using System.Threading.Tasks;
 using static System.Collections.Specialized.BitVector32;
 
-namespace Archipelago.MonsterSanctuary.Client
+namespace Archipelago.MonsterSanctuary.Client.Options
 {
     public enum ShiftFlag
     {
@@ -52,77 +53,76 @@ namespace Archipelago.MonsterSanctuary.Client
         // END UNUSED
 
         public static CompletionEvent Goal { get; set; } = CompletionEvent.MadLord;
-        public static int ExpMultiplier { get; set; } = 1;
         public static bool AlwaysGetEgg { get; set; } = false;
-        public static bool SkipIntro { get; set; } = false;
         public static bool SkipPlot { get; set; } = false;
         public static ShiftFlag MonsterShiftRule { get; set; } = ShiftFlag.Normal;
         public static LockedDoorsFlag LockedDoors { get; set; } = 0;
         public static bool DeathLink { get; set; } = false;
         public static string TanukiMonster { get; set; }
-        public static string BexMonster{ get; set; }
+        public static string BexMonster { get; set; }
+        public static bool AddSmokeBombs { get; set; }
+        public static int StartingGold { get; set; }
 
         public static void LoadSlotData(Dictionary<string, object> slotData)
         {
             var options = GetDictionaryData<object>(slotData, "options");
             Goal = GetEnumData(options, "goal", CompletionEvent.MadLord);
-            ExpMultiplier = GetIntData(options, "exp_multiplier", 1);
             AlwaysGetEgg = GetBoolData(options, "monsters_always_drop_egg", false);
-            SkipIntro = GetBoolData(options, "skip_intro", false);
             SkipPlot = GetBoolData(options, "skip_plot", false);
             MonsterShiftRule = GetEnumData(options, "monster_shift_rule", ShiftFlag.Normal);
             LockedDoors = GetEnumData(options, "remove_locked_doors", LockedDoorsFlag.All);
+            AddSmokeBombs = GetBoolData(options, "add_smoke_bombs", false);
+            StartingGold = GetIntData(options, "starting_gold", 1);
             DeathLink = GetBoolData(options, "death_link", false);
 
             var monsterData = GetDictionaryData<object>(slotData, "monsters");
             TanukiMonster = GetStringData(monsterData, "tanuki");
             BexMonster = GetStringData(monsterData, "bex_monster");
 
-            GameData.MonstersCache = new();
+            Monsters.ClearApData();
             var monsterLocations = GetDictionaryData<string>(monsterData, "monster_locations");
             foreach (var location in monsterLocations)
-                GameData.AddMonster(location.Key, location.Value);
+                Monsters.AddMonster(location.Key, location.Value);
 
-            GameData.ChampionScenes = new();
-            GameData.ChampionScenes = GetDictionaryData<string>(monsterData, "champions");
+            Champions.ClearApData();
+            foreach (var kvp in GetDictionaryData<string>(monsterData, "champions"))
+            {
+                Champions.AddChampionScene(kvp.Key, kvp.Value);
+            }
 
             var itemLocations = GetDictionaryData<Dictionary<string, long>>(slotData, "locations");
 
             //  Have to do this first so we have a list of all rank item ids before we process the rest of the items
-            GameData.ChampionRankIds = new();
             foreach (var item in itemLocations["ranks"])
             {
-                GameData.ChampionRankIds.Add(item.Key, item.Value);
+                Champions.AddChampionRank(item.Key, item.Value);
             }
 
-            GameData.ItemChecks = new();
-            GameData.NumberOfChecks = new();
+            Locations.ClearApData();
             foreach (var locationGroup in itemLocations)
             {
                 // Each entry in itemLocations is a key value pair
                 // where the key is the area name, and the value is a dictionary of all item checks in that area
                 foreach (var check in locationGroup.Value)
                 {
-                    if (!GameData.ChampionRankIds.ContainsKey(check.Key))
-                        GameData.AddItemCheck(check.Key, check.Value, locationGroup.Key);
+                    if (!Champions.IsLocationAChampionRank(check.Key))
+                        Locations.AddLocation(check.Key, check.Value, locationGroup.Key);
                 }
             }
 
             var hints = GetListData<HintData>(slotData, "hints");
-            GameData.Hints = new();
+            Hints.ClearApData();
             foreach (var hint in hints)
-                GameData.AddHint(hint.ID, hint.Text, hint.IgnoreRemainingText);
+                Hints.AddHint(hint.ID, hint.Text, hint.IgnoreRemainingText);
 
             Patcher.Logger.LogInfo("Death Link: " + DeathLink);
-            Patcher.Logger.LogInfo("Exp Multiplier: " + ExpMultiplier);
             Patcher.Logger.LogInfo("Force Egg Drop: " + AlwaysGetEgg);
             Patcher.Logger.LogInfo("Monster Shift Rule: " + Enum.GetName(typeof(ShiftFlag), MonsterShiftRule));
             Patcher.Logger.LogInfo("Locked Doors: " + Enum.GetName(typeof(LockedDoorsFlag), LockedDoors));
-            Patcher.Logger.LogInfo("Skip Intro: " + SkipIntro);
             Patcher.Logger.LogInfo("Skip Plot: " + SkipPlot);
-            Patcher.Logger.LogInfo("Monster Locations: " + GameData.MonstersCache.Count());
-            Patcher.Logger.LogInfo("Champions: " + GameData.ChampionScenes.Count());
-            Patcher.Logger.LogInfo("Item Locations: " + GameData.ItemChecks.Count());
+            Patcher.Logger.LogInfo("Monster Locations: " + Monsters.MonstersCache.Count());
+            Patcher.Logger.LogInfo("Champions: " + Champions.ReplacedChampions.Count());
+            Patcher.Logger.LogInfo("Item Locations: " + Locations.IdToName.Count());
             Patcher.Logger.LogInfo("Hints: " + hints.Count());
         }
 
@@ -138,7 +138,7 @@ namespace Archipelago.MonsterSanctuary.Client
             var str = GetStringData(data, key);
             if (str == null)
                 return defaultValue;
-            return int.Parse(str);            
+            return int.Parse(str);
         }
 
         private static bool GetBoolData(Dictionary<string, object> data, string key, bool defaultValue)
@@ -149,7 +149,7 @@ namespace Archipelago.MonsterSanctuary.Client
             return int.Parse(value) == 1;
         }
 
-        private static T GetEnumData<T>(Dictionary<string, object> data, string key, T defaultValue) where T: Enum
+        private static T GetEnumData<T>(Dictionary<string, object> data, string key, T defaultValue) where T : Enum
         {
             var intFlag = GetIntData(data, key, -1);
             if (intFlag == -1)

@@ -1,4 +1,6 @@
-﻿using HarmonyLib;
+﻿using Archipelago.MonsterSanctuary.Client.AP;
+using Archipelago.MonsterSanctuary.Client.Options;
+using HarmonyLib;
 using JetBrains.Annotations;
 using System;
 using UnityEngine;
@@ -13,16 +15,19 @@ namespace Archipelago.MonsterSanctuary.Client
             [UsedImplicitly]
             private static bool Prefix(ref Door __instance)
             {
-                if (!APState.IsConnected)
+                if (!ApState.IsConnected)
                     return true;
 
                 string id = $"{GameController.Instance.CurrentSceneName}_{__instance.ID}";
+                bool isMinimal = World.IsLockedDoorMinimal(id);
 
-                Patcher.Logger.LogInfo("CheckIfDoorWasOpen");
-                Patcher.Logger.LogInfo("Flag: " + Enum.GetName(typeof(LockedDoorsFlag), SlotData.LockedDoors));
-                Patcher.Logger.LogInfo("Is minimal door: " + GameData.LockedDoors.Contains(id));
+                Patcher.Logger.LogDebug("CheckIfDoorWasOpen");
+                Patcher.Logger.LogDebug("Flag: " + Enum.GetName(typeof(LockedDoorsFlag), SlotData.LockedDoors));
+                Patcher.Logger.LogDebug("Is minimal door: " + isMinimal);
+
+                // Remove the locked door if either ALL locked doors are removed, or there's only minimal doors and this isn't a minimal door
                 if (SlotData.LockedDoors == LockedDoorsFlag.None 
-                    || (SlotData.LockedDoors == LockedDoorsFlag.Minimal && !GameData.LockedDoors.Contains(id)))
+                    || (SlotData.LockedDoors == LockedDoorsFlag.Minimal && !isMinimal))
                 {
                     GameObject.Destroy(__instance.gameObject);
                     return false;
@@ -31,6 +36,5 @@ namespace Archipelago.MonsterSanctuary.Client
                 return true;
             }
         }
-
     }
 }
