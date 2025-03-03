@@ -93,13 +93,13 @@ Many thanks for Cybe3R for getting us set up with a [PopTracker pack](https://gi
 	- Are chaos relics included in the random item pool?
 	- 0: No
 	- 1: Yes
-- `exp_multiplier`:
-	- Multiplier for experienced gained.
-	- Range from 1 to 5
- - `skip_intro`:
-	- Skip the cut scenes, dialog, and tutorial fight at the beginning of the game.
- 	- 0: No
-  	- 1: Yes
+- `add_smoke_bombs`:
+	- Start with 50 smoke bombs.
+	- 0: No
+ 	- 1: Yes
+ - `starting_gold`:
+	- Set your starting gold. This value is multiplied by 100 to determine starting gold.
+ 	- Range from 0 to 1000
 - `skip_plot`
 	- Disable all flags and checks that require progressing the game's story. This allows entering areas before you would normally be able to
  	- 0: No
