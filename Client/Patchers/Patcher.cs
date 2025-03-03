@@ -26,7 +26,10 @@ namespace Archipelago.MonsterSanctuary.Client
         public static new ManualLogSource Logger;
         public static ArchipelagoUI UI;
 
-        private static ConfigEntry<bool> ShowPopupNotifications;
+        private static ConfigEntry<bool> ShowNotificationFiller;
+        private static ConfigEntry<bool> ShowNotificationUseful;
+        private static ConfigEntry<bool> ShowNotificationTrap;
+        private static ConfigEntry<bool> ShowNotificationProgression;
         private static ConfigEntry<int> ExpMultiplier;
 
         private void Awake()
@@ -34,7 +37,10 @@ namespace Archipelago.MonsterSanctuary.Client
             Logger = base.Logger;
 
             // OPTIONS
-            ShowPopupNotifications = Config.Bind("Archipelago", "Show popup notifications", true, "Show popup notifications for sending and receiving items");
+            ShowNotificationFiller = Config.Bind("Archipelago", "Notification Filler", false, "Show pop-up notifications for filler items");
+            ShowNotificationUseful = Config.Bind("Archipelago", "Notification Useful", false, "Show pop-up notifications for useful items");
+            ShowNotificationTrap = Config.Bind("Archipelago", "Notification Trap", true, "Show pop-up notifications for trap items");
+            ShowNotificationProgression = Config.Bind("Archipelago", "Notification Progression", true, "Show pop-up notifications for progression items");
             ExpMultiplier = Config.Bind("Archipelago", "Exp Multiplier", 1, "Multiplier for experienced gained");
 
             if (ExpMultiplier.Value < 0)
@@ -46,10 +52,31 @@ namespace Archipelago.MonsterSanctuary.Client
             {
                 ModList.TryAddOption(
                     "AP Client",
-                    "Show Popup Notifications",
-                    () => ShowPopupNotifications.Value ? "Enabled" : "Disabled",
-                    _ => ShowPopupNotifications.Value = !ShowPopupNotifications.Value,
-                    setDefaultValueFunc: () => ShowPopupNotifications.Value = true);
+                    "Notifications: Filler",
+                    () => ShowNotificationFiller.Value ? "Yes" : "No",
+                    onValueChangeFunc: _ => ShowNotificationFiller.Value = !ShowNotificationFiller.Value,
+                    setDefaultValueFunc: () => ShowNotificationFiller.Value = false);
+
+                ModList.TryAddOption(
+                    "AP Client",
+                    "Notifications: Useful",
+                    () => ShowNotificationUseful.Value ? "Yes" : "No",
+                    onValueChangeFunc: _ => ShowNotificationUseful.Value = !ShowNotificationUseful.Value,
+                    setDefaultValueFunc: () => ShowNotificationUseful.Value = false);
+
+                ModList.TryAddOption(
+                   "AP Client",
+                   "Notifications: Traps",
+                   () => ShowNotificationTrap.Value ? "Yes" : "No",
+                   onValueChangeFunc: _ => ShowNotificationTrap.Value = !ShowNotificationTrap.Value,
+                   setDefaultValueFunc: () => ShowNotificationTrap.Value = true);
+
+                ModList.TryAddOption(
+                   "AP Client",
+                   "Notifications: Progression",
+                   () => ShowNotificationProgression.Value ? "Yes" : "No",
+                   onValueChangeFunc: _ => ShowNotificationProgression.Value = !ShowNotificationProgression.Value,
+                   setDefaultValueFunc: () => ShowNotificationProgression.Value = true);
 
                 ModList.TryAddOption(
                     "AP Client",

@@ -167,7 +167,26 @@ namespace Archipelago.MonsterSanctuary.Client
             {
                 Patcher.UI.AddItemToHistory(notification);
 
-                if (!ShowPopupNotifications.Value)
+                bool showPopup = false;
+                switch (notification.Classification)
+                {
+                    case ItemClassification.Filler:
+                        showPopup = ShowNotificationFiller.Value;
+                        break;
+                    case ItemClassification.Useful:
+                        showPopup = ShowNotificationUseful.Value;
+                        break;
+                    case ItemClassification.Trap:
+                        showPopup = ShowNotificationTrap.Value;
+                        break;
+                    case ItemClassification.Progression:
+                        showPopup = ShowNotificationProgression.Value;
+                        break;
+                    default:
+                        break;
+                }
+
+                if (!showPopup)
                     return;
 
                 string msg = "";
