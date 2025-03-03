@@ -102,7 +102,9 @@ namespace Archipelago.MonsterSanctuary.Client
 
                 if (name == "KeyOfPowerGained")
                 {
-                    __result = PlayerController.Instance.Inventory.Uniques.Any(i => i.GetName() == "Key of Power");
+                    __result = PlayerController.Instance.Inventory.Uniques.Any(i => i.GetName() == "Key of Power")
+                        || SlotData.OpenAbandonedTower == OpenWorldSetting.Entrances
+                        || SlotData.OpenAbandonedTower == OpenWorldSetting.Full;
                     ProgressManager.Instance.SetBool(name, __result);
                     return;
                 }
@@ -121,7 +123,8 @@ namespace Archipelago.MonsterSanctuary.Client
                     return;
                 }
 
-                if (SlotData.SkipPlot && World.ShouldSkipStoryFlagForPlotless(name) && __result == false)
+                var shouldSetFlag = World.ShouldSetProgressionFlag(name);
+                if (shouldSetFlag && __result == false)
                 {
                     ProgressManager.Instance.SetBool(name, true);
                     __result = true;
@@ -179,6 +182,27 @@ namespace Archipelago.MonsterSanctuary.Client
                 }
 
                 return true;
+            }
+        }
+
+        [HarmonyPatch(typeof(MinimapEntry), "IsInteractableActivated")]
+        private class MinimapEntry_IsInteractableActivated
+        {
+            private static void Postfix(MinimapEntry __instance, ref bool __result, int ID)
+            {
+                if (!ApState.IsConnected)
+                    return;
+
+                string id = $"{__instance.MapData.SceneName}_{ID}";
+
+                if (!World.ShouldInteractableBeActivated(id))
+                    return;
+
+                if (!__result)
+                {
+                    __instance.ActivateInteractable(ID);
+                    __result = true;
+                }
             }
         }
 

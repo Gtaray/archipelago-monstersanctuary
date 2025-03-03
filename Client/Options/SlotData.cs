@@ -33,6 +33,14 @@ namespace Archipelago.MonsterSanctuary.Client.Options
         Champions = 1
     }
 
+    public enum OpenWorldSetting
+    {
+        Closed = 0,
+        Entrances = 1,
+        Interior = 2,
+        Full = 3
+    }
+
     public class HintData
     {
         [JsonProperty("id")]
@@ -53,27 +61,94 @@ namespace Archipelago.MonsterSanctuary.Client.Options
         // END UNUSED
 
         public static CompletionEvent Goal { get; set; } = CompletionEvent.MadLord;
-        public static bool AlwaysGetEgg { get; set; } = false;
-        public static bool SkipPlot { get; set; } = false;
-        public static ShiftFlag MonsterShiftRule { get; set; } = ShiftFlag.Normal;
-        public static LockedDoorsFlag LockedDoors { get; set; } = 0;
         public static bool DeathLink { get; set; } = false;
+
+        public static bool SkipPlot { get; set; } = false;
+        public static LockedDoorsFlag LockedDoors { get; set; } = 0;
+        public static bool OpenBlueCaves { get; set; } = false;
+        public static OpenWorldSetting OpenStrongholdDungeon { get; set; } = OpenWorldSetting.Closed;
+        public static bool OpenSnowyPeaks { get; set; } = false;
+        public static bool OpenAncientWoods { get; set; } = false;
+        public static OpenWorldSetting OpenSunPalace { get; set; } = OpenWorldSetting.Closed;
+        public static OpenWorldSetting OpenHorizonBeach { get; set; } = OpenWorldSetting.Closed;
+        public static OpenWorldSetting OpenMagmaChamber { get; set; } = OpenWorldSetting.Closed;
+        public static OpenWorldSetting OpenBlobBurg { get; set; } = OpenWorldSetting.Closed;
+        public static OpenWorldSetting OpenForgottenWorld { get; set; } = OpenWorldSetting.Closed;
+        public static bool OpenMysticalWorkshop { get; set; } = false;
+        public static OpenWorldSetting OpenUnderworld { get; set; } = OpenWorldSetting.Closed;
+        public static OpenWorldSetting OpenAbandonedTower { get; set; } = OpenWorldSetting.Closed;
+
+        public static bool AlwaysGetEgg { get; set; } = false;
+        public static ShiftFlag MonsterShiftRule { get; set; } = ShiftFlag.Normal;
         public static string TanukiMonster { get; set; }
         public static string BexMonster { get; set; }
+
         public static bool AddSmokeBombs { get; set; }
         public static int StartingGold { get; set; }
 
         public static void LoadSlotData(Dictionary<string, object> slotData)
         {
             var options = GetDictionaryData<object>(slotData, "options");
+
             Goal = GetEnumData(options, "goal", CompletionEvent.MadLord);
-            AlwaysGetEgg = GetBoolData(options, "monsters_always_drop_egg", false);
+            Patcher.Logger.LogInfo("Goal: " + Enum.GetName(typeof(CompletionEvent), Goal));
+
             SkipPlot = GetBoolData(options, "skip_plot", false);
-            MonsterShiftRule = GetEnumData(options, "monster_shift_rule", ShiftFlag.Normal);
+            Patcher.Logger.LogInfo("Skip Plot: " + SkipPlot);
+
+            OpenBlueCaves = GetBoolData(options, "open_blue_caves", false);
+            Patcher.Logger.LogInfo("Open Blue Caves: " + OpenBlueCaves);
+
+            OpenStrongholdDungeon = GetEnumData(options, "open_stronghold_dungeon", OpenWorldSetting.Closed);
+            Patcher.Logger.LogInfo("Open Stronghold Dungeon: " + Enum.GetName(typeof(OpenWorldSetting), OpenStrongholdDungeon));
+
+            OpenSnowyPeaks = GetBoolData(options, "open_snowy_peaks", false);
+            Patcher.Logger.LogInfo("Open Snowy Peaks: " + OpenSnowyPeaks);
+
+            OpenAncientWoods = GetBoolData(options, "open_ancient_woods", false);
+            Patcher.Logger.LogInfo("Open Ancient Woods: " + OpenAncientWoods);
+
+            OpenSunPalace = GetEnumData(options, "open_sun_palace", OpenWorldSetting.Closed);
+            Patcher.Logger.LogInfo("Open Sun Palace: " + Enum.GetName(typeof(OpenWorldSetting), OpenSunPalace));
+
+            OpenHorizonBeach = GetEnumData(options, "open_horizon_beach", OpenWorldSetting.Closed);
+            Patcher.Logger.LogInfo("Open Horizon Beach: " + Enum.GetName(typeof(OpenWorldSetting), OpenHorizonBeach));
+
+            OpenMagmaChamber = GetEnumData(options, "open_magma_chamber", OpenWorldSetting.Closed);
+            Patcher.Logger.LogInfo("Open Magma Chamber: " + Enum.GetName(typeof(OpenWorldSetting), OpenMagmaChamber));
+
+            OpenBlobBurg = GetEnumData(options, "open_blob_burg", OpenWorldSetting.Closed);
+            Patcher.Logger.LogInfo("Open Open Blurg: " + Enum.GetName(typeof(OpenWorldSetting), OpenBlobBurg));
+
+            OpenForgottenWorld = GetEnumData(options, "open_forgotten_world", OpenWorldSetting.Closed);
+            Patcher.Logger.LogInfo("Open Forgotten World: " + Enum.GetName(typeof(OpenWorldSetting), OpenForgottenWorld));
+
+            OpenMysticalWorkshop = GetBoolData(options, "open_mystical_workshop", false);
+            Patcher.Logger.LogInfo("Open Mystical Workshop: " + Enum.GetName(typeof(OpenWorldSetting), OpenMysticalWorkshop));
+
+            OpenUnderworld = GetEnumData(options, "open_underworld", OpenWorldSetting.Closed);
+            Patcher.Logger.LogInfo("Open Underworld: " + Enum.GetName(typeof(OpenWorldSetting), OpenUnderworld));
+
+            OpenAbandonedTower = GetEnumData(options, "open_abandoned_tower", OpenWorldSetting.Closed);
+            Patcher.Logger.LogInfo("Open Abandoned Tower: " + Enum.GetName(typeof(OpenWorldSetting), OpenAbandonedTower));
+
             LockedDoors = GetEnumData(options, "remove_locked_doors", LockedDoorsFlag.All);
+            Patcher.Logger.LogInfo("Locked Doors: " + Enum.GetName(typeof(LockedDoorsFlag), LockedDoors));
+
+            AlwaysGetEgg = GetBoolData(options, "monsters_always_drop_egg", false);
+            Patcher.Logger.LogInfo("Always Drop Egg: " + AlwaysGetEgg);
+
+            MonsterShiftRule = GetEnumData(options, "monster_shift_rule", ShiftFlag.Normal);
+            Patcher.Logger.LogInfo("Monster Shift Rule: " + Enum.GetName(typeof(ShiftFlag), MonsterShiftRule));
+
+            //IncludeChaosRelics = GetBoolData(options, "include_chaos_relics", false);
+            //Patcher.Logger.LogInfo("Include Chaos Relics: " + IncludeChaosRelics);
+
             AddSmokeBombs = GetBoolData(options, "add_smoke_bombs", false);
+            Patcher.Logger.LogInfo("Add Smoke Bombs: " + AddSmokeBombs);
+
             StartingGold = GetIntData(options, "starting_gold", 1);
-            DeathLink = GetBoolData(options, "death_link", false);
+            Patcher.Logger.LogInfo("Starting Gold: " + StartingGold * 100);
 
             var monsterData = GetDictionaryData<object>(slotData, "monsters");
             TanukiMonster = GetStringData(monsterData, "tanuki");
@@ -115,7 +190,6 @@ namespace Archipelago.MonsterSanctuary.Client.Options
             foreach (var hint in hints)
                 Hints.AddHint(hint.ID, hint.Text, hint.IgnoreRemainingText);
 
-            Patcher.Logger.LogInfo("Death Link: " + DeathLink);
             Patcher.Logger.LogInfo("Force Egg Drop: " + AlwaysGetEgg);
             Patcher.Logger.LogInfo("Monster Shift Rule: " + Enum.GetName(typeof(ShiftFlag), MonsterShiftRule));
             Patcher.Logger.LogInfo("Locked Doors: " + Enum.GetName(typeof(LockedDoorsFlag), LockedDoors));

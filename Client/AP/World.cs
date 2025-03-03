@@ -1,4 +1,5 @@
-﻿using Archipelago.MonsterSanctuary.Client.Persistence;
+﻿using Archipelago.MonsterSanctuary.Client.Options;
+using Archipelago.MonsterSanctuary.Client.Persistence;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -18,9 +19,21 @@ namespace Archipelago.MonsterSanctuary.Client.AP
         /// A list of story flags that are skipped when Plotless is enabled
         /// Story flags are skipped by flipping their value to true prior to that flag being read
         /// </summary>
-        public static List<string> Plotless = new();
+        public static ProgressionFlagSkips ProgressionFlags = new();
 
-        public static bool ShouldSkipStoryFlagForPlotless(string flag) => Plotless.Contains(flag);
+        /// <summary>
+        /// Returns true if a given progression flag should set to true, overriding the normal behavior of that flag
+        /// </summary>
+        /// <param name="flag"></param>
+        /// <returns></returns>
+        public static bool ShouldSetProgressionFlag(string flag) => ProgressionFlags.ShouldSetFlag(flag);
+
+        /// <summary>
+        /// Returns true if a given interactable item should be marked as having been interacted with, overriding the normal behavior of that interactable object
+        /// </summary>
+        /// <param name="flag"></param>
+        /// <returns></returns>
+        public static bool ShouldInteractableBeActivated(string flag) => ProgressionFlags.ShouldInteractableBeActivated(flag);
 
         /// <summary>
         /// A list of all locked doors that are considered 'minimal', meaning they will not be removed when the locked doors setting is set to minimal
@@ -76,13 +89,13 @@ namespace Archipelago.MonsterSanctuary.Client.AP
         {
             var assembly = Assembly.GetExecutingAssembly();
 
-            // Loads script nodes that are skipped with plotless
+            // Loads Game flags
             using (Stream stream = assembly.GetManifestResourceStream(
-                "Archipelago.MonsterSanctuary.Client.data.plotless_flags.json"))
-            using (StreamReader reader = new(stream))
+                "Archipelago.MonsterSanctuary.Client.data.progression_flags.json"))
+            using (StreamReader reader = new StreamReader(stream))
             {
                 string json = reader.ReadToEnd();
-                Plotless = JsonConvert.DeserializeObject<List<string>>(json);
+                ProgressionFlags = JsonConvert.DeserializeObject<ProgressionFlagSkips>(json);
             }
 
             // Loads script nodes that are skipped with plotless
@@ -129,6 +142,161 @@ namespace Archipelago.MonsterSanctuary.Client.AP
                 }
             }
             Patcher.Logger.LogInfo($"Loaded {MapPins.Count()} map pins");
+        }
+    }
+
+    public class ProgressionFlagSkips
+    {
+        public List<string> Plotless = new();
+        public OpenWorldCollection BlueCaves = new();
+        public OpenWorldCollection StrongholdDungeon = new();
+        public OpenWorldCollection SnowyPeaks = new();
+        public OpenWorldCollection AncientWoods = new();
+        public OpenWorldCollection SunPalace = new();
+        public OpenWorldCollection HorizonBeach = new();
+        public OpenWorldCollection MagmaChamber = new();
+        public OpenWorldCollection BlobBurg = new();
+        public OpenWorldCollection ForgottenWorld = new();
+        public OpenWorldCollection MysticalWorkshop = new();
+        public OpenWorldCollection Underworld = new();
+        public OpenWorldCollection AbandonedTower = new();
+
+        public bool ShouldSetFlag(string flag)
+        {
+            if (!ApState.IsConnected)
+                return false;
+
+            if (Plotless.Contains(flag))
+                return SlotData.SkipPlot;
+
+            if (BlueCaves.Contains(flag))
+                return SlotData.OpenBlueCaves;
+
+            if (StrongholdDungeon.Contains(SlotData.OpenStrongholdDungeon, flag))
+                return true;
+
+            if (SnowyPeaks.Contains(flag))
+                return SlotData.OpenSnowyPeaks;
+
+            if (SunPalace.Contains(SlotData.OpenSunPalace, flag))
+                return true;
+
+            if (AncientWoods.Contains(flag))
+                return SlotData.OpenAncientWoods;
+
+            if (HorizonBeach.Contains(SlotData.OpenHorizonBeach, flag))
+                return true;
+
+            if (MagmaChamber.Contains(SlotData.OpenMagmaChamber, flag))
+                return true;
+
+            if (BlobBurg.Contains(SlotData.OpenBlobBurg, flag))
+                return true;
+
+            if (ForgottenWorld.Contains(SlotData.OpenForgottenWorld, flag))
+                return true;
+
+            if (MysticalWorkshop.Contains(flag))
+                return SlotData.OpenMysticalWorkshop;
+
+            if (Underworld.Contains(SlotData.OpenUnderworld, flag))
+                return true;
+
+            if (AbandonedTower.Contains(SlotData.OpenAbandonedTower, flag))
+                return true;
+
+            return false;
+        }
+
+        public bool ShouldInteractableBeActivated(string interactable)
+        {
+            return ShouldSetFlag(interactable);
+        }
+
+        public void PrintDebug()
+        {
+            Patcher.Logger.LogInfo("Story Skips");
+            foreach (var skip in Plotless)
+                Patcher.Logger.LogInfo("\t" + skip);
+
+            Patcher.Logger.LogInfo("Blue Caves");
+            BlueCaves.Print();
+
+            Patcher.Logger.LogInfo("Stronghold Dungeon");
+            StrongholdDungeon.Print();
+
+            Patcher.Logger.LogInfo("Snowy Peaks");
+            SnowyPeaks.Print();
+
+            Patcher.Logger.LogInfo("Ancient Woods");
+            AncientWoods.Print();
+
+            Patcher.Logger.LogInfo("Sun Palace");
+            SunPalace.Print();
+
+            Patcher.Logger.LogInfo("Horizon Beach");
+            HorizonBeach.Print();
+
+            Patcher.Logger.LogInfo("Magma Chamber");
+            MagmaChamber.Print();
+
+            Patcher.Logger.LogInfo("Blob Burg");
+            BlobBurg.Print();
+
+            Patcher.Logger.LogInfo("Forgotten World");
+            ForgottenWorld.Print();
+
+            Patcher.Logger.LogInfo("Underworld");
+            Underworld.Print();
+
+            Patcher.Logger.LogInfo("Mystical Workshop");
+            MysticalWorkshop.Print();
+
+            Patcher.Logger.LogInfo("Abandoned Tower");
+            AbandonedTower.Print();
+        }
+    }
+
+    public class OpenWorldCollection
+    {
+        public List<string> Entrances = new();
+        public List<string> Interior = new();
+        public IEnumerable<string> Everything => Entrances.Union(Interior);
+
+        public IEnumerable<string> this[OpenWorldSetting setting]
+        {
+            get
+            {
+                return setting == OpenWorldSetting.Full
+                    ? Everything
+                    : setting == OpenWorldSetting.Entrances
+                        ? Entrances
+                        : Interior;
+            }
+        }
+
+        public bool Contains(OpenWorldSetting setting, string key)
+        {
+            if (setting == OpenWorldSetting.Closed)
+                return false;
+
+            return this[setting].Contains(key);
+        }
+
+        public bool Contains(string key)
+        {
+            return Everything.Contains(key);
+        }
+
+        public void Print()
+        {
+            Patcher.Logger.LogInfo("\tEntrances");
+            foreach (var item in Entrances)
+                Patcher.Logger.LogInfo("\t\t" + item);
+
+            Patcher.Logger.LogInfo("\tInterior");
+            foreach (var item in Interior)
+                Patcher.Logger.LogInfo("\t\t" + item);
         }
     }
 }
