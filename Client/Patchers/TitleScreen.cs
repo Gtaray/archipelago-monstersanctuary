@@ -1,4 +1,5 @@
 ﻿using Archipelago.MonsterSanctuary.Client.AP;
+using Archipelago.MonsterSanctuary.Client.Options;
 using Archipelago.MonsterSanctuary.Client.Persistence;
 using HarmonyLib;
 using System;
@@ -360,6 +361,48 @@ namespace Archipelago.MonsterSanctuary.Client
         }
         #endregion
 
+        #region Save Game Slots
+        [HarmonyPatch(typeof(SaveGameSlot), "SetData")]
+        public static class SaveGameSlot_SetData
+        {
+            private static void Postfix(SaveGameSlot __instance, int slot)
+            {
+                var playerGameObject = __instance.PlayerName.transform.parent.gameObject;
+                var apmarker = playerGameObject.transform.Find("ArchipelagoMarker");
+                if (apmarker == null)
+                {
+                    var go = GameObject.Instantiate(__instance.PlayerName.gameObject, playerGameObject.transform);
+                    go.name = "ArchipelagoMarker";
+
+                    var mesh = go.GetComponent<tk2dTextMesh>();
+                    mesh.text = "AP";
+
+                    apmarker = go.transform;
+                    apmarker.localPosition = new Vector3(-25, -23, 0f);
+                }
+
+                if (apmarker == null)
+                {
+                    Patcher.Logger.LogError("Failed to create or find AP marker for save slot " + slot);
+                    return;
+                }
+
+                apmarker.gameObject.SetActive(ApData.ApDataExistsForSaveSlot(slot));
+            }
+        }
+        #endregion
+
+        #region Version information
+        [HarmonyPatch(typeof(UIController), "Start")]
+        public static class UIController_Start
+        {
+            private static void Postfix(UIController __instance)
+            {
+                __instance.VersionString.text = "AP Client v" + ApState.ModVersion;
+            }
+        }
+        #endregion
+
         #region Connection Prompts and Helpers
         private static void PromptToEnterArchipelagoConnectionInfo<T>(T __instance, Action<T> postConnectAction = null, Action<T> failedConnectionAction = null) where T : MonoBehaviour
         {
@@ -465,6 +508,12 @@ namespace Archipelago.MonsterSanctuary.Client
             Patcher.Logger.LogInfo("ConnectToArchipelagoAndContinue()");
             if (ApState.Connect(host_name, slot_name, password))
             {
+                if (SlotData.Version != ApState.ModVersion)
+                {
+                    ShowVersionMismatchErrorAndDisconnect(__instance, failedConnectionAction);
+                    return;
+                }
+                
                 if (postConnectAction != null)
                 {
                     postConnectAction.Invoke(__instance);
@@ -482,6 +531,19 @@ namespace Archipelago.MonsterSanctuary.Client
                             failedConnectionAction.Invoke(__instance);
                     }));
             }
+        }
+
+        private static void ShowVersionMismatchErrorAndDisconnect<T>(T __instance, Action<T> onCloseAction = null) where T : MonoBehaviour
+        {
+            Timer.StartTimer(__instance.gameObject, 0.25f, () => PopupController.Instance.ShowMessage(
+                "Version Mismatch",
+                $"Detected a version mismatch between the client ({ApState.ModVersion}) and AP world ({SlotData.Version}). Disconnecting.",
+                () =>
+                {
+                    ApState.InitiateDisconnect();
+                    if (onCloseAction != null)
+                        onCloseAction.Invoke(__instance);
+                }));
         }
 
         private static void MainMenuSetupCancelled(MainMenu __instance) => __instance.MenuList.SetLocked(false);

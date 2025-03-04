@@ -25,6 +25,7 @@ namespace Archipelago.MonsterSanctuary.Client
     {
         public static new ManualLogSource Logger;
         public static ArchipelagoUI UI;
+        public static string ClientVersion = "v#.#.#";
 
         private static ConfigEntry<bool> ShowNotificationFiller;
         private static ConfigEntry<bool> ShowNotificationUseful;
@@ -98,6 +99,8 @@ namespace Archipelago.MonsterSanctuary.Client
             SceneManager.sceneLoaded += new UnityAction<Scene, LoadSceneMode>(this.OnSceneLoaded);
 
             ApData.InitializePersistenceFiles();
+
+            ClientVersion = System.Diagnostics.FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).FileVersion;
         }
 
         private void OnDestroy()

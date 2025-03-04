@@ -23,6 +23,7 @@ namespace Archipelago.MonsterSanctuary.Client.AP
             Connected
         }
 
+        public static string ModVersion = "1.2.1";
         public static int[] AP_VERSION = new int[] { 0, 5, 1 };
         public static ConnectionState State = ConnectionState.Disconnected;
         public static bool IsConnected => State == ConnectionState.Connected;
@@ -115,6 +116,7 @@ namespace Archipelago.MonsterSanctuary.Client.AP
             Patcher.Logger.LogError("Session_ErrorReceived: " + message);
             if (e != null) Patcher.Logger.LogError(e.ToString());
             InitiateDisconnect();
+            Disconnect();
         }
 
         public static void InitiateDisconnect()

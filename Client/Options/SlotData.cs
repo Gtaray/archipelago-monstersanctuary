@@ -60,6 +60,8 @@ namespace Archipelago.MonsterSanctuary.Client.Options
         public static bool SkipKeeperBattles { get; set; } = false;
         // END UNUSED
 
+        public static string Version { get; set; }
+
         public static CompletionEvent Goal { get; set; } = CompletionEvent.MadLord;
         public static bool DeathLink { get; set; } = false;
 
@@ -89,6 +91,9 @@ namespace Archipelago.MonsterSanctuary.Client.Options
         public static void LoadSlotData(Dictionary<string, object> slotData)
         {
             var options = GetDictionaryData<object>(slotData, "options");
+
+            Version = GetStringData(slotData, "version");
+            Patcher.Logger.LogInfo("AP World Version: " + Version);
 
             Goal = GetEnumData(options, "goal", CompletionEvent.MadLord);
             Patcher.Logger.LogInfo("Goal: " + Enum.GetName(typeof(CompletionEvent), Goal));

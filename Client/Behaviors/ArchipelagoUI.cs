@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Text.RegularExpressions;
 using Archipelago.MonsterSanctuary.Client.AP;
+using Archipelago.MonsterSanctuary.Client.Options;
 using UnityEngine;
 
 namespace Archipelago.MonsterSanctuary.Client
@@ -28,6 +29,8 @@ namespace Archipelago.MonsterSanctuary.Client
 
         private GUIStyle _style;
         private readonly List<ItemHistoryEntry> _itemHistory = new();
+
+        private bool _lastKnownConnectionToAp = false;
 
         public void Awake()
         {
@@ -63,6 +66,20 @@ namespace Archipelago.MonsterSanctuary.Client
 
             foreach (var entry in toRemove)
                 _itemHistory.Remove(entry);
+
+            // If we weren't connected to AP, but we become connected, update the last known state
+            if (!_lastKnownConnectionToAp && ApState.IsConnected)
+            {
+                _lastKnownConnectionToAp = true;
+            }
+            // if we were connect to AP but become disconnected, show the message
+            else if (_lastKnownConnectionToAp && !ApState.IsConnected && GameStateManager.Instance.IsExploring())
+            {
+                PopupController.Instance.ShowMessage(
+                    "Disconnect",
+                    "Disconnected from Archipelago server. It is recommended to exit to the menu and reconnect.");
+                _lastKnownConnectionToAp = false;
+            }
         }
 
         private string FloatToHex(float f)
@@ -116,53 +133,21 @@ namespace Archipelago.MonsterSanctuary.Client
 
         private static int DisplayConnectionInfo()
         {
-            string ap_ver = "Archipelago v" + ApState.AP_VERSION[0] + "." + ApState.AP_VERSION[1] + "." + ApState.AP_VERSION[2];
-
             if (ApState.Session != null)
             {
                 if (ApState.Authenticated)
                 {
-                    GUI.Label(new Rect(16, 16, 300, 20), ap_ver + " Status: Connected");
+                    GUI.Label(new Rect(16, 16, 300, 20), "Status: Connected");
                 }
                 else
                 {
-                    GUI.Label(new Rect(16, 16, 300, 20), ap_ver + " Status: Authentication failed");
+                    GUI.Label(new Rect(16, 16, 300, 20), "Status: Authentication failed");
                 }
             }
             else
             {
-                GUI.Label(new Rect(16, 16, 300, 20), ap_ver + " Status: Not Connected");
+                GUI.Label(new Rect(16, 16, 300, 20), "Status: Not Connected");
             }
-
-            // Login details
-            //if ((APState.Session == null || !APState.Authenticated) && APState.State != APState.ConnectionState.Connected)
-            //{
-            //    GUI.Label(new Rect(16, 36, 150, 20), "Host: ");
-            //    GUI.Label(new Rect(16, 56, 150, 20), "PlayerName: ");
-            //    GUI.Label(new Rect(16, 76, 150, 20), "Password: ");
-
-            //    bool submit = Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.Return;
-
-            //    APState.ConnectionInfo.host_name = GUI.TextField(new Rect(150 + 16 + 8, 36, 150, 20),
-            //        APState.ConnectionInfo.host_name);
-            //    APState.ConnectionInfo.slot_name = GUI.TextField(new Rect(150 + 16 + 8, 56, 150, 20),
-            //        APState.ConnectionInfo.slot_name);
-            //    APState.ConnectionInfo.password = GUI.TextField(new Rect(150 + 16 + 8, 76, 150, 20),
-            //        APState.ConnectionInfo.password);
-
-            //    if (submit && Event.current.type == EventType.KeyDown)
-            //    {
-            //        // The text fields have not consumed the event, which means they were not focused.
-            //        submit = false;
-            //    }
-
-            //    if ((GUI.Button(new Rect(16, 96, 100, 20), "Connect") || submit) && APState.ConnectionInfo.Valid)
-            //    {
-            //        APState.Connect();
-            //    }
-
-            //    return 120;
-            //}
 
             return 40;
         }
