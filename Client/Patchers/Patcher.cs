@@ -37,6 +37,9 @@ namespace Archipelago.MonsterSanctuary.Client
         {
             Logger = base.Logger;
 
+            ClientVersion = System.Diagnostics.FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).FileVersion;
+            Patcher.Logger.LogInfo("AP CLIENT V" + ClientVersion);
+
             // OPTIONS
             ShowNotificationFiller = Config.Bind("Archipelago", "Notification Filler", false, "Show pop-up notifications for filler items");
             ShowNotificationUseful = Config.Bind("Archipelago", "Notification Useful", false, "Show pop-up notifications for useful items");
@@ -100,8 +103,6 @@ namespace Archipelago.MonsterSanctuary.Client
             SceneManager.sceneLoaded += new UnityAction<Scene, LoadSceneMode>(this.OnSceneLoaded);
 
             ApData.InitializePersistenceFiles();
-
-            ClientVersion = System.Diagnostics.FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).FileVersion;
         }
 
         private void OnDestroy()
