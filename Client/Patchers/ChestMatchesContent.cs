@@ -12,18 +12,6 @@ namespace Archipelago.MonsterSanctuary.Client.Patchers
 {
     public partial class Patcher
     {
-        #region Chest Matches Content
-        private static ConcurrentBag<long> _progressionItemChests = new();
-
-        public static void AddProgressionItemChest(NetworkItem packet)
-        {
-            var classification = (ItemClassification)(int)packet.Flags;
-            if (classification == ItemClassification.Progression)
-            {
-                _progressionItemChests.Add(packet.Location);
-            }
-        }
-
         [HarmonyPatch(typeof(Chest), "Start")]
         private class Chest_Start
         {
@@ -85,6 +73,5 @@ namespace Archipelago.MonsterSanctuary.Client.Patchers
                 //open.frames[0].spriteId = baseSprite + 2;
             }
         }
-        #endregion
     }
 }

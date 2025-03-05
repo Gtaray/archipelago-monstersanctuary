@@ -35,6 +35,7 @@ namespace Archipelago.MonsterSanctuary.Client.AP
 
     public class Items
     {
+        #region Skipped Gift Checks
         /// <summary>
         /// A list of locations to check that are batched together when skipping dialog that has multiple checks.
         /// When skipping dialog that gives the player multiple items, calling CheckLocation back to back that fast can cause problems, especially when finding other players' items. In those cases we batch all item checks until the player is able to move again, then check all of them at once.
@@ -63,7 +64,9 @@ namespace Archipelago.MonsterSanctuary.Client.AP
         /// </summary>
         /// <returns></returns>
         public static bool HasSkippedGiftChecks() => SkippedGiftChecks.Count() > 0;
+        #endregion
 
+        #region Item Queue
         /// <summary>
         /// A merged queue that handles both items sent to other players, and items received
         /// </summary>
@@ -186,7 +189,82 @@ namespace Archipelago.MonsterSanctuary.Client.AP
             ResyncReceivedItems();
             ResyncSentItems();
         }
+        #endregion
 
+        #region Chest Graphics Match Contents
+        public static HashSet<string> ProgressionLocations { get; set; } = new();
+        public static HashSet<string> UsefulLocations { get; set; } = new();
+        public static HashSet<string> TrapLocations { get; set; } = new();
+
+        public static void ClearLocationSets()
+        {
+            ProgressionLocations = new();
+            UsefulLocations = new();
+            TrapLocations = new(); 
+        }
+
+        /// <summary>
+        /// Adds a location to the list of locations where progression items are
+        /// </summary>
+        /// <param name="location"></param>
+        public static void AddProgressionLocation(string location)
+        {
+            if (ProgressionLocations.Contains(location)) 
+                return;
+            ProgressionLocations.Add(location);
+        }
+
+        /// <summary>
+        /// Returns true if a given location name has a progression item
+        /// </summary>
+        /// <returns></returns>
+        public static bool IsLocationProgression(string location)
+        {
+            return ProgressionLocations.Contains(location);
+        }
+
+        /// <summary>
+        /// Adds a location to the list of locations where useful items are
+        /// </summary>
+        /// <param name="location"></param>
+        public static void AddUsefulLocation(string location)
+        {
+            if (UsefulLocations.Contains(location))
+                return;
+            UsefulLocations.Add(location);
+        }
+
+        /// <summary>
+        /// Returns true if a given location name has a useful item
+        /// </summary>
+        /// <returns></returns>
+        public static bool IsLocationUseful(string location)
+        {
+            return UsefulLocations.Contains(location);
+        }
+
+        /// <summary>
+        /// Adds a location to the list of locations where trap items are
+        /// </summary>
+        /// <param name="location"></param>
+        public static void AddTrapLocation(string location)
+        {
+            if (TrapLocations.Contains(location))
+                return;
+            TrapLocations.Add(location);
+        }
+
+        /// <summary>
+        /// Returns true if a given location name has a trap item
+        /// </summary>
+        /// <returns></returns>
+        public static bool IsLocationTrap(string location)
+        {
+            return TrapLocations.Contains(location);
+        }
+        #endregion
+
+        #region New Items
         public static List<string> ItemIcons = new();
         public static NewItemList NewItems = new();
         //public static Dictionary<ExploreAbilityLockType, List<ExploreActionUnlockItem>> ExploreActionUnlockItems = new();
@@ -212,6 +290,7 @@ namespace Archipelago.MonsterSanctuary.Client.AP
                 Patcher.Logger.LogInfo($"Loaded {NewItems.Items.Count()} new items");
             }
         }
+        #endregion
     }
 
     public class NewItemList
