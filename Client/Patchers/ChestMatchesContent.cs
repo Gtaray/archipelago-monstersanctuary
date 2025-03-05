@@ -1,14 +1,17 @@
 ﻿using Archipelago.MonsterSanctuary.Client.AP;
+using Archipelago.MonsterSanctuary.Client.Behaviors;
 using Archipelago.MultiClient.Net.Models;
 using HarmonyLib;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using UnityEngine;
 
-namespace Archipelago.MonsterSanctuary.Client.Patchers
+namespace Archipelago.MonsterSanctuary.Client
 {
     public partial class Patcher
     {
@@ -17,23 +20,10 @@ namespace Archipelago.MonsterSanctuary.Client.Patchers
         {
             private static void Postfix(Chest __instance)
             {
-                //if (!ApState.IsConnected)
-                //    return;
+                if (!ApState.IsConnected)
+                    return;
 
-                //string locName = $"{GameController.Instance.CurrentSceneName}_{__instance.ID}";
-                //if (!GameData.ItemChecks.ContainsKey(locName))
-                //    return;
-
-                //var locId = GameData.ItemChecks[locName];
-                //var progression = _progressionItemChests.Contains(locId);
-
-                //int baseSprite = 0;
-                //if (progression)
-                //{
-                //    baseSprite = 33;
-                //}
-
-                //__instance.GetComponent<tk2dSprite>().SetSprite(baseSprite);
+                __instance.gameObject.AddComponent<ChestGraphicsMatchContent>();
             }
         }
 
@@ -42,35 +32,29 @@ namespace Archipelago.MonsterSanctuary.Client.Patchers
         {
             private static void Prefix(Chest __instance)
             {
-                //if (!ApState.IsConnected)
-                //    return;
+                if (!ApState.IsConnected)
+                    return;
 
-                //string locName = $"{GameController.Instance.CurrentSceneName}_{__instance.ID}";
-                //if (!GameData.ItemChecks.ContainsKey(locName))
-                //    return;
+                var animator = __instance.GetComponent<tk2dSpriteAnimator>();
+                var comp = __instance.gameObject.GetComponent<ChestGraphicsMatchContent>();
+                if (comp == null)
+                    return;
 
-                //var locId = GameData.ItemChecks[locName];
-                //var progression = _progressionItemChests.Contains(locId);
+                int spriteId = (int)comp.Color;
+                var closed = animator.GetClipByName("closed");
+                var opening = animator.GetClipByName("opening");
+                var open = animator.GetClipByName("open");
 
-                //int baseSprite = 0;
-                //if (progression)
-                //{
-                //    baseSprite = 33;
-                //}
+                // Closed
+                closed.frames[0].spriteId = spriteId;
 
-                //var animator = __instance.GetComponent<tk2dSpriteAnimator>();
-                //var closed = animator.GetClipByName("closed");
-                //var opening = animator.GetClipByName("opening");
-                //var open = animator.GetClipByName("open");
+                // Opening
+                opening.frames[0].spriteId = spriteId;
+                opening.frames[1].spriteId = spriteId + 1;
+                opening.frames[2].spriteId = spriteId + 2;
 
-                //// Closed
-                //closed.frames[0].spriteId = baseSprite;
-                //// Opening
-                //opening.frames[0].spriteId = baseSprite;
-                //opening.frames[1].spriteId = baseSprite + 1;
-                //opening.frames[2].spriteId = baseSprite + 2;
-                //// Open
-                //open.frames[0].spriteId = baseSprite + 2;
+                // Open
+                open.frames[0].spriteId = spriteId + 2;
             }
         }
     }

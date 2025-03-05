@@ -87,6 +87,7 @@ namespace Archipelago.MonsterSanctuary.Client.Options
 
         public static bool AddSmokeBombs { get; set; }
         public static int StartingGold { get; set; }
+        public static bool IncludeChaosRelics { get; set; }
 
         public static void LoadSlotData(Dictionary<string, object> slotData)
         {
@@ -146,8 +147,8 @@ namespace Archipelago.MonsterSanctuary.Client.Options
             MonsterShiftRule = GetEnumData(options, "monster_shift_rule", ShiftFlag.Normal);
             Patcher.Logger.LogInfo("Monster Shift Rule: " + Enum.GetName(typeof(ShiftFlag), MonsterShiftRule));
 
-            //IncludeChaosRelics = GetBoolData(options, "include_chaos_relics", false);
-            //Patcher.Logger.LogInfo("Include Chaos Relics: " + IncludeChaosRelics);
+            IncludeChaosRelics = GetBoolData(options, "include_chaos_relics", false);
+            Patcher.Logger.LogInfo("Include Chaos Relics: " + IncludeChaosRelics);
 
             AddSmokeBombs = GetBoolData(options, "add_smoke_bombs", false);
             Patcher.Logger.LogInfo("Add Smoke Bombs: " + AddSmokeBombs);
@@ -222,6 +223,9 @@ namespace Archipelago.MonsterSanctuary.Client.Options
 
         private static bool GetBoolData(Dictionary<string, object> data, string key, bool defaultValue)
         {
+            if (data.ContainsKey(key) && data[key] is bool)
+                return (bool)data[key];
+
             var value = GetStringData(data, key);
             if (value == null)
                 return defaultValue;

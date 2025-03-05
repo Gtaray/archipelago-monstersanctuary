@@ -98,7 +98,7 @@ namespace Archipelago.MonsterSanctuary.Client
                 if (!ApState.IsConnected)
                     return;
 
-                //___relicMode = SlotData.IncludeChaosRelics;
+                ___relicMode = SlotData.IncludeChaosRelics;
             }
         }
 
