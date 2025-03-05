@@ -1,10 +1,14 @@
-﻿using Archipelago.MonsterSanctuary.Client.Persistence;
+﻿using Archipelago.MonsterSanctuary.Client.Behaviors;
+using Archipelago.MonsterSanctuary.Client.Persistence;
 using Archipelago.MultiClient.Net.Models;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics.Eventing.Reader;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Security.Permissions;
 using System.Text;
 using System.Threading.Tasks;
@@ -182,5 +186,48 @@ namespace Archipelago.MonsterSanctuary.Client.AP
             ResyncReceivedItems();
             ResyncSentItems();
         }
+
+        public static List<string> ItemIcons = new();
+        public static NewItemList NewItems = new();
+        //public static Dictionary<ExploreAbilityLockType, List<ExploreActionUnlockItem>> ExploreActionUnlockItems = new();
+
+        public static IEnumerable<NewItem> GetNewItems() => NewItems.Items;
+
+
+        public static void Load()
+        {
+            var assembly = Assembly.GetExecutingAssembly();
+            using (Stream stream = assembly.GetManifestResourceStream("Archipelago.MonsterSanctuary.Client.data.item_icons.json"))
+            using (StreamReader reader = new StreamReader(stream))
+            {
+                string json = reader.ReadToEnd();
+                ItemIcons = JsonConvert.DeserializeObject<List<string>>(json);
+            }
+
+            using (Stream stream = assembly.GetManifestResourceStream("Archipelago.MonsterSanctuary.Client.data.new_items.json"))
+            using (StreamReader reader = new StreamReader(stream))
+            {
+                string json = reader.ReadToEnd();
+                NewItems = JsonConvert.DeserializeObject<NewItemList>(json);
+                Patcher.Logger.LogInfo($"Loaded {NewItems.Items.Count()} new items");
+            }
+        }
+    }
+
+    public class NewItemList
+    {
+        public IEnumerable<NewItem> Items;
+    }
+
+    public class NewItem
+    {
+        public BaseItem Item { get; set; }
+
+        public string GameObjectName { get; set; }
+        public string Name { get; set; }
+        public string Description { get; set; } = "SOMEONE IS A DOOFUS AND FORGOT TO PUT IN A DESCRIPTION";
+        public string Icon { get; set; }
+        public string Type { get; set; }
+        public ItemClassification Classification { get; set; }
     }
 }

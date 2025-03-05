@@ -92,6 +92,7 @@ namespace Archipelago.MonsterSanctuary.Client
 
             Champions.Load();
             Monsters.Load();
+            Items.Load();
             World.LoadStaticData();
 
             // Plugin startup logic
