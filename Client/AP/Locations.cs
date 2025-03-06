@@ -27,6 +27,15 @@ namespace Archipelago.MonsterSanctuary.Client.AP
         public static Dictionary<string, int> NumberOfChecks = new();
 
         /// <summary>
+        /// Returns a list of the location IDs for all checks
+        /// </summary>
+        /// <returns></returns>
+        public static List<long> GetAllLocations()
+        {
+            return NameToId.Values.ToList();
+        }
+
+        /// <summary>
         /// Adds a location to the game data for easy access
         /// </summary>
         /// <param name="logicalName"></param>
@@ -117,6 +126,51 @@ namespace Archipelago.MonsterSanctuary.Client.AP
             return 0;
         }
 
+        #region Chest Graphics Match Contents
+        public static HashSet<string> ProgressionLocations { get; set; } = new();
+        public static HashSet<string> UsefulLocations { get; set; } = new();
+
+        /// <summary>
+        /// Adds a location to the list of locations where progression items are
+        /// </summary>
+        /// <param name="location"></param>
+        public static void AddProgressionLocation(string location)
+        {
+            if (ProgressionLocations.Contains(location))
+                return;
+            ProgressionLocations.Add(location);
+        }
+
+        /// <summary>
+        /// Returns true if a given location name has a progression item
+        /// </summary>
+        /// <returns></returns>
+        public static bool IsLocationProgression(string location)
+        {
+            return ProgressionLocations.Contains(location);
+        }
+
+        /// <summary>
+        /// Adds a location to the list of locations where useful items are
+        /// </summary>
+        /// <param name="location"></param>
+        public static void AddUsefulLocation(string location)
+        {
+            if (UsefulLocations.Contains(location))
+                return;
+            UsefulLocations.Add(location);
+        }
+
+        /// <summary>
+        /// Returns true if a given location name has a useful item
+        /// </summary>
+        /// <returns></returns>
+        public static bool IsLocationUseful(string location)
+        {
+            return UsefulLocations.Contains(location);
+        }
+        #endregion
+
         /// <summary>
         /// Empties out data that is supplied by Archipelago. Used primarily to refresh state when connecting to AP
         /// </summary>
@@ -125,6 +179,9 @@ namespace Archipelago.MonsterSanctuary.Client.AP
             NameToId.Clear();
             IdToName.Clear();
             NumberOfChecks.Clear();
+
+            ProgressionLocations.Clear();
+            UsefulLocations.Clear();
         }
     }
 }

@@ -32,10 +32,14 @@ namespace Archipelago.MonsterSanctuary.Client
         private static ConfigEntry<bool> ShowNotificationTrap;
         private static ConfigEntry<bool> ShowNotificationProgression;
         private static ConfigEntry<int> ExpMultiplier;
+        private static ConfigEntry<bool> EnableWarpingHome;
 
         private void Awake()
         {
             Logger = base.Logger;
+
+            ClientVersion = System.Diagnostics.FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).FileVersion;
+            Patcher.Logger.LogInfo("AP CLIENT V" + ClientVersion);
 
             // OPTIONS
             ShowNotificationFiller = Config.Bind("Archipelago", "Notification Filler", false, "Show pop-up notifications for filler items");
@@ -43,6 +47,7 @@ namespace Archipelago.MonsterSanctuary.Client
             ShowNotificationTrap = Config.Bind("Archipelago", "Notification Trap", true, "Show pop-up notifications for trap items");
             ShowNotificationProgression = Config.Bind("Archipelago", "Notification Progression", true, "Show pop-up notifications for progression items");
             ExpMultiplier = Config.Bind("Archipelago", "Exp Multiplier", 1, "Multiplier for experienced gained");
+            EnableWarpingHome = Config.Bind("Archipelago", "Warp to Home", true, "If enabled, Warp to Start menu item returns you to the Keeper's Stronhold instead once it is explored.");
 
             if (ExpMultiplier.Value < 0)
             {
@@ -81,6 +86,13 @@ namespace Archipelago.MonsterSanctuary.Client
 
                 ModList.TryAddOption(
                     "AP Client",
+                    "Warp to Stronghold",
+                    () => EnableWarpingHome.Value ? "Enabled" : "Disabled",
+                    onValueChangeFunc: _ => EnableWarpingHome.Value = !EnableWarpingHome.Value,
+                    setDefaultValueFunc: () => EnableWarpingHome.Value = true);
+
+                ModList.TryAddOption(
+                    "AP Client",
                     "Exp Multiplier",
                     () => $"{ExpMultiplier.Value}x Exp",
                     direction => ExpMultiplier.Value = (ExpMultiplier.Value + direction).Clamp(1, 10),
@@ -92,6 +104,7 @@ namespace Archipelago.MonsterSanctuary.Client
 
             Champions.Load();
             Monsters.Load();
+            Items.Load();
             World.LoadStaticData();
 
             // Plugin startup logic
@@ -99,8 +112,6 @@ namespace Archipelago.MonsterSanctuary.Client
             SceneManager.sceneLoaded += new UnityAction<Scene, LoadSceneMode>(this.OnSceneLoaded);
 
             ApData.InitializePersistenceFiles();
-
-            ClientVersion = System.Diagnostics.FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).FileVersion;
         }
 
         private void OnDestroy()

@@ -10,16 +10,33 @@ namespace Archipelago.MonsterSanctuary.Client
 {
     public partial class Patcher
     {
+        private static bool IsKeeperStrongholdCrystalAvailable()
+        {
+            if (PlayerController.Instance == null)
+                return false;
+            if (PlayerController.Instance.Minimap == null)
+                return false;
+
+            var minimapEntry = PlayerController.Instance.Minimap.GetMapEntry("KeeperStronghold_CenterStairwell");
+            if (minimapEntry != null && EnableWarpingHome.Value == true)
+                return minimapEntry.IsExplored(0, 1);
+
+            return false;
+        }
         /// <summary>
         /// Replaces the Talk menu option with "Return to Start" 
         /// </summary>
-        [HarmonyPatch(typeof(IngameBaseMenu), "Start")]
-        public static class IngameBaseMenu_Start
+        [HarmonyPatch(typeof(IngameBaseMenu), "Open")]
+        public static class IngameBaseMenu_Open
         {
             public static void Prefix(IngameBaseMenu __instance)
             {
+                string text = Patcher.IsKeeperStrongholdCrystalAvailable()
+                    ? "Warp to Home"
+                    : "Warp to Start";
+
                 // Creating a brand new menu item is probably not going to work, so lets change an existing one
-                __instance.MenuItemTalk.SetText("Return to Start");
+                __instance.MenuItemTalk.SetText(text);
             }
         }
 
@@ -34,11 +51,14 @@ namespace Archipelago.MonsterSanctuary.Client
                 if (item == __instance.MenuItemTalk)
                 {
                     __instance.Close();
+                    string sceneToTpTo = Patcher.IsKeeperStrongholdCrystalAvailable()
+                        ? "KeeperStronghold_CenterStairwell"
+                        : "MountainPath_North1";
 
                     var position = new Vector2(145, 76);
                     PlayerController.Instance.StartTeleport();
                     GameController.Instance.StartSceneChange(
-                        "MountainPath_North1",
+                        sceneToTpTo,
                         position,
                         GameController.SceneChangeType.Teleport,
                         1.8f,

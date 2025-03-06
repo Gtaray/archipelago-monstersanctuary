@@ -15,6 +15,8 @@
     <RootNamespace>Archipelago.MonsterSanctuary.Client</RootNamespace>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <DebugType>Full</DebugType>
+    <AssemblyVersion>1.2.1.0</AssemblyVersion>
+    <FileVersion>1.2.1.0</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -24,9 +26,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="data\item_icons.json" />
     <None Remove="data\map_pins.json" />
     <None Remove="data\minimal_locked_doors.json" />
     <None Remove="data\monster_names.json" />
+    <None Remove="data\new_items.json" />
     <None Remove="data\npcs.json" />
     <None Remove="data\original_champions.json" />
     <None Remove="data\progression_flags.json" />
@@ -34,9 +38,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="data\item_icons.json" />
     <EmbeddedResource Include="data\map_pins.json" />
     <EmbeddedResource Include="data\minimal_locked_doors.json" />
     <EmbeddedResource Include="data\monster_names.json" />
+    <EmbeddedResource Include="data\new_items.json" />
   </ItemGroup>
 
   <ItemGroup>

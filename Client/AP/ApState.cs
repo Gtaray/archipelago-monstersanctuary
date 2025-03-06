@@ -23,7 +23,6 @@ namespace Archipelago.MonsterSanctuary.Client.AP
             Connected
         }
 
-        public static string ModVersion = "1.2.1";
         public static int[] AP_VERSION = new int[] { 0, 5, 1 };
         public static ConnectionState State = ConnectionState.Disconnected;
         public static bool IsConnected => State == ConnectionState.Connected;
@@ -80,11 +79,7 @@ namespace Archipelago.MonsterSanctuary.Client.AP
 
                 World.LoadMapPins();
 
-                // Commenting this out for now to see if I even need it
-                // I'd ilke to avoid having to rebuild data if possible. The files should be reliable
-                //ApData.RebuildCheckCounter();
-
-                //Items.ResyncAllItems();
+                ScoutAllLocations();
             }
             else if (loginResult is LoginFailure loginFailure)
             {
@@ -95,6 +90,44 @@ namespace Archipelago.MonsterSanctuary.Client.AP
             }
 
             return loginResult.Successful;
+        }
+
+        private static void ScoutAllLocations()
+        {
+            // Scout shops and progression item checks
+            var allScouts = Locations.GetAllLocations();
+            ScoutLocations(allScouts.ToArray(), false, HandleGlobalScoutCallback);
+        }
+
+        /// <summary>
+        /// Callback method for the global scout that happens when the client connects
+        /// Currently only saves information relevant to chest-graphics-matches-contents
+        /// </summary>
+        /// <param name="packet"></param>
+        private static void HandleGlobalScoutCallback(ScoutedItemInfo packet)
+        {
+            var flag = (ItemClassification)(int)packet.Flags;
+            string locationName = Locations.GetLocationName(packet.LocationId);
+
+            if (flag == ItemClassification.Progression)
+            {
+                Locations.AddProgressionLocation(locationName);
+            }
+            else if (flag == ItemClassification.Useful)
+            {
+                Locations.AddUsefulLocation(locationName);
+            }
+            else if (flag == ItemClassification.Trap)
+            {
+                // For traps, we randomly assign either it as a progression item, a useful item, or neither.
+                // The downside to this is that trapped chests will change graphics between play sessions,
+                // but I think I'm okay with that limitation, since it means I don't need to save that data in the ap data file.
+                var r = new Random().Next(0, 3);
+                if (r == 1)
+                    Locations.AddProgressionLocation(locationName);
+                else if (r == 2)
+                    Locations.AddUsefulLocation(locationName);
+            }
         }
 
         static void Session_PacketReceived(ArchipelagoPacketBase packet)
@@ -234,6 +267,32 @@ namespace Archipelago.MonsterSanctuary.Client.AP
                 // Notifying when they receive an item is done elsewhere
                 if (scout.Player !=  Session.Players.ActivePlayer)
                     Notifications.QueueItemTransferNotification(scout, ItemTransferType.Sent);
+            }
+        }
+
+        public static void ScoutLocations(long location, bool scoutAsHint = false, System.Action<ScoutedItemInfo> callback = null)
+        {
+            ScoutLocations(new long[] { location }, scoutAsHint, callback);
+        }
+
+        public static void ScoutLocations(string[] locationNames, bool scoutAsHint = false, System.Action<ScoutedItemInfo> callback = null)
+        {
+            var locations = locationNames.Select(l => Session.Locations.GetLocationIdFromName("Monster Sanctuary", l));
+            ScoutLocations(locations.ToArray(), scoutAsHint, callback);
+        }
+
+        public static void ScoutLocations(long[] locations, bool scoutAsHint = false, System.Action<ScoutedItemInfo> callback = null)
+        {
+            var task = Task.Run(() => ProcessScoutRequest(locations, scoutAsHint, callback));
+        }
+
+        private static async Task ProcessScoutRequest(long[] locations, bool asHint, System.Action<ScoutedItemInfo> callback)
+        {
+            var packets = await Session.Locations.ScoutLocationsAsync(asHint, locations);
+            foreach (KeyValuePair<long, ScoutedItemInfo> kvp in packets)
+            {
+                if (callback != null)
+                    callback(kvp.Value);
             }
         }
 

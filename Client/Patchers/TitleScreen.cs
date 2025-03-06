@@ -98,7 +98,7 @@ namespace Archipelago.MonsterSanctuary.Client
                 if (!ApState.IsConnected)
                     return;
 
-                //___relicMode = SlotData.IncludeChaosRelics;
+                ___relicMode = SlotData.IncludeChaosRelics;
             }
         }
 
@@ -398,7 +398,7 @@ namespace Archipelago.MonsterSanctuary.Client
         {
             private static void Postfix(UIController __instance)
             {
-                __instance.VersionString.text = "AP Client v" + ApState.ModVersion;
+                __instance.VersionString.text = "AP Client v" + Patcher.ClientVersion;
             }
         }
         #endregion
@@ -443,7 +443,7 @@ namespace Archipelago.MonsterSanctuary.Client
 #if DEBUG
                 host_name_debug,
 #else
-                String.Empty,
+                "archipelago.gg:",
 #endif
                 (string url) =>
                 {
@@ -508,7 +508,7 @@ namespace Archipelago.MonsterSanctuary.Client
             Patcher.Logger.LogInfo("ConnectToArchipelagoAndContinue()");
             if (ApState.Connect(host_name, slot_name, password))
             {
-                if (SlotData.Version != ApState.ModVersion)
+                if (SlotData.Version != Patcher.ClientVersion)
                 {
                     ShowVersionMismatchErrorAndDisconnect(__instance, failedConnectionAction);
                     return;
@@ -537,7 +537,7 @@ namespace Archipelago.MonsterSanctuary.Client
         {
             Timer.StartTimer(__instance.gameObject, 0.25f, () => PopupController.Instance.ShowMessage(
                 "Version Mismatch",
-                $"Detected a version mismatch between the client ({ApState.ModVersion}) and AP world ({SlotData.Version}). Disconnecting.",
+                $"Detected a version mismatch between the client ({Patcher.ClientVersion}) and AP world ({SlotData.Version}). Disconnecting.",
                 () =>
                 {
                     ApState.InitiateDisconnect();
