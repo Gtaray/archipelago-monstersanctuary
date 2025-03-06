@@ -32,6 +32,7 @@ namespace Archipelago.MonsterSanctuary.Client
         private static ConfigEntry<bool> ShowNotificationTrap;
         private static ConfigEntry<bool> ShowNotificationProgression;
         private static ConfigEntry<int> ExpMultiplier;
+        private static ConfigEntry<bool> EnableWarpingHome;
 
         private void Awake()
         {
@@ -46,6 +47,7 @@ namespace Archipelago.MonsterSanctuary.Client
             ShowNotificationTrap = Config.Bind("Archipelago", "Notification Trap", true, "Show pop-up notifications for trap items");
             ShowNotificationProgression = Config.Bind("Archipelago", "Notification Progression", true, "Show pop-up notifications for progression items");
             ExpMultiplier = Config.Bind("Archipelago", "Exp Multiplier", 1, "Multiplier for experienced gained");
+            EnableWarpingHome = Config.Bind("Archipelago", "Warp to Home", true, "If enabled, Warp to Start menu item returns you to the Keeper's Stronhold instead once it is explored.");
 
             if (ExpMultiplier.Value < 0)
             {
@@ -81,6 +83,13 @@ namespace Archipelago.MonsterSanctuary.Client
                    () => ShowNotificationProgression.Value ? "Yes" : "No",
                    onValueChangeFunc: _ => ShowNotificationProgression.Value = !ShowNotificationProgression.Value,
                    setDefaultValueFunc: () => ShowNotificationProgression.Value = true);
+
+                ModList.TryAddOption(
+                    "AP Client",
+                    "Warp to Stronghold",
+                    () => EnableWarpingHome.Value ? "Enabled" : "Disabled",
+                    onValueChangeFunc: _ => EnableWarpingHome.Value = !EnableWarpingHome.Value,
+                    setDefaultValueFunc: () => EnableWarpingHome.Value = true);
 
                 ModList.TryAddOption(
                     "AP Client",

@@ -443,7 +443,7 @@ namespace Archipelago.MonsterSanctuary.Client
 #if DEBUG
                 host_name_debug,
 #else
-                String.Empty,
+                "archipelago.gg:",
 #endif
                 (string url) =>
                 {
