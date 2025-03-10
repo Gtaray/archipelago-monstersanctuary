@@ -59,48 +59,47 @@ namespace Archipelago.MonsterSanctuary.Client
                         _eggShifts.TryRemove(nextItem.LocationID, out eggShift);
                     }
 
-                    ReceiveItem(nextItem.ItemName, eggShift);
+                    if (ReceiveItem(nextItem.ItemName, eggShift))
+                    {
+                        // We want to do this immediately after adding the item to the player inventory
+                        ApData.SetNextExpectedItemIndex(nextItem.ItemIndex + 1);
 
-                    // We want to do this immediately after adding the item to the player inventory
-                    ApData.SetNextExpectedItemIndex(nextItem.ItemIndex + 1);
-
-                    // We only queue notifications for received/acquired items after the player actually receives it.
-                    // Notifications for Sent items are handled when the location is checked
-                    // We do this here because the Notification queue should be fire and forget
-                    // The queue does not do any filtering or conditional checks for what should be shown. If it's on the queue, it gets shown.
-                    Notifications.QueueItemTransferNotification(
-                        nextItem.ItemName,
-                        nextItem.PlayerID,
-                        nextItem.LocationID,
-                        nextItem.ItemClassification,
-                        nextItem.PlayerID == ApState.Session.Players.ActivePlayer
-                            ? ItemTransferType.Acquired
-                            : ItemTransferType.Received);
-                        
+                        // We only queue notifications for received/acquired items after the player actually receives it.
+                        // Notifications for Sent items are handled when the location is checked
+                        // We do this here because the Notification queue should be fire and forget
+                        // The queue does not do any filtering or conditional checks for what should be shown. If it's on the queue, it gets shown.
+                        Notifications.QueueItemTransferNotification(
+                            nextItem.ItemName,
+                            nextItem.PlayerID,
+                            nextItem.LocationID,
+                            nextItem.ItemClassification,
+                            nextItem.PlayerID == ApState.Session.Players.ActivePlayer
+                                ? ItemTransferType.Acquired
+                                : ItemTransferType.Received);
+                    }                        
                 }
             }
 
             #region Item Handling
             private static bool CanGiveItem()
             {
-                // We can give the player items all the time, since giving the item is distinct from notifying the player that the item was given
-                return true;
+                // Make sure we're not giving the player items on the title screen
+                return GameStateManager.Instance.IsExploring();
             }
 
-            public static void ReceiveItem(string itemName, EShift eggShift)
+            public static bool ReceiveItem(string itemName, EShift eggShift)
             {
                 if (itemName == null)
                 {
                     Logger.LogError("Null item was received");
-                    return;
+                    return false;
                 }
 
-                Patcher.Logger.LogInfo("Received item: " + itemName);
                 var gold = GetGoldQuantity(itemName);
                 if (gold > 0)
                 {
                     GiveGoldToPlayer(gold);
-                    return;
+                    return true;
                 }
 
                 var quantity = GetQuantityOfItem(ref itemName);
@@ -110,10 +109,12 @@ namespace Archipelago.MonsterSanctuary.Client
                 {
                     // This shouldn't happen. Might need a smarter way to solve this.
                     Logger.LogError($"No item reference was found matching the name '{itemName}'.");
-                    return;
+                    return false;
                 }
 
                 AddItemToPlayerInventory(ref newItem, quantity, eggShift);
+
+                return true;
             }
 
             static void GiveGoldToPlayer(int amount)
@@ -191,7 +192,6 @@ namespace Archipelago.MonsterSanctuary.Client
 
                 string msg = "";
                 string itemName = notification.ItemName;
-                Patcher.Logger.LogInfo("Notification for item: " + itemName);
                 bool selfFound = notification.Action == ItemTransferType.Acquired;
                 int gold = 0;
 

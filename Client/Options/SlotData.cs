@@ -61,6 +61,7 @@ namespace Archipelago.MonsterSanctuary.Client.Options
         // END UNUSED
 
         public static string Version { get; set; }
+        public static string Seed { get; set; }
 
         public static CompletionEvent Goal { get; set; } = CompletionEvent.MadLord;
         public static bool DeathLink { get; set; } = false;
@@ -81,9 +82,14 @@ namespace Archipelago.MonsterSanctuary.Client.Options
         public static OpenWorldSetting OpenAbandonedTower { get; set; } = OpenWorldSetting.Closed;
 
         public static bool AlwaysGetEgg { get; set; } = false;
-        public static ShiftFlag MonsterShiftRule { get; set; } = ShiftFlag.Normal;
+        public static bool AlwaysGeCatalyst { get; set; } = false;
         public static string TanukiMonster { get; set; }
         public static string BexMonster { get; set; }
+
+        public static ShiftFlag MonsterShiftRule { get; set; } = ShiftFlag.Normal;
+        // TODO: Hvae this actually pull from slotdata
+        public static bool RandomizeMonsterSkillTress { get; set; } = false;
+        public static bool RandomizeMonsterUltimates { get; set; } = false;
 
         public static bool AddSmokeBombs { get; set; }
         public static int StartingGold { get; set; }
@@ -95,6 +101,10 @@ namespace Archipelago.MonsterSanctuary.Client.Options
 
             Version = GetStringData(slotData, "version");
             Patcher.Logger.LogInfo("AP World Version: " + Version);
+
+            Seed = GetStringData(slotData, "seed");
+            if (string.IsNullOrEmpty(Seed))
+                Patcher.Logger.LogError("Multiworld seed was not found in the slot data.");
 
             Goal = GetEnumData(options, "goal", CompletionEvent.MadLord);
             Patcher.Logger.LogInfo("Goal: " + Enum.GetName(typeof(CompletionEvent), Goal));
@@ -143,6 +153,9 @@ namespace Archipelago.MonsterSanctuary.Client.Options
 
             AlwaysGetEgg = GetBoolData(options, "monsters_always_drop_egg", false);
             Patcher.Logger.LogInfo("Always Drop Egg: " + AlwaysGetEgg);
+
+            AlwaysGeCatalyst = GetBoolData(options, "monsters_always_drop_catalyst", false);
+            Patcher.Logger.LogInfo("Always Drop Egg: " + AlwaysGeCatalyst);
 
             MonsterShiftRule = GetEnumData(options, "monster_shift_rule", ShiftFlag.Normal);
             Patcher.Logger.LogInfo("Monster Shift Rule: " + Enum.GetName(typeof(ShiftFlag), MonsterShiftRule));
@@ -211,6 +224,14 @@ namespace Archipelago.MonsterSanctuary.Client.Options
             if (data.ContainsKey(key))
                 return data[key].ToString();
             return null;
+        }
+
+        private static long GetLongData(Dictionary<string, object> data, string key, long defaultValue)
+        {
+            var str = GetStringData(data, key);
+            if (str == null)
+                return defaultValue;
+            return long.Parse(str);
         }
 
         private static int GetIntData(Dictionary<string, object> data, string key, int defaultValue)

@@ -80,26 +80,65 @@ namespace Archipelago.MonsterSanctuary.Client
             [UsedImplicitly]
             private static void Prefix(CombatController __instance, List<InventoryItem> ___rareRewards)
             {
-                if (__instance.CurrentEncounter.EncounterType == EEncounterType.InfinityArena
-                    || GameModeManager.Instance.BraveryMode
-                    || __instance.CurrentEncounter.IsChampionChallenge
-                    || !SlotData.AlwaysGetEgg)
+                if (__instance.CurrentEncounter.EncounterType == EEncounterType.InfinityArena || __instance.CurrentEncounter.IsChampionChallenge)
                 {
                     return;
                 }
 
-                var items = new List<InventoryItem>();
                 foreach (Monster enemy in __instance.Enemies)
                 {
-                    // Get the rare egg reward for this enemy
-                    var egg = enemy.RewardsRare
-                        .Select(i => i.GetComponent<BaseItem>())
-                        .FirstOrDefault(i => i is Egg);
-
-                    if (egg != null)
+                    if (enemy.RewardsCommon == null || enemy.RewardsCommon.Count == 0)
                     {
-                        Patcher.Logger.LogInfo($"Adding Egg: {egg.Name} ({(int)enemy.Shift})");
-                        __instance.AddRewardItem(items, egg, 1, (int)enemy.Shift);
+                        enemy.RewardsCommon.Add(GetItemByName("Potion").gameObject);
+                    }
+                    if (enemy.RewardsRare == null || enemy.RewardsRare.Count == 0)
+                    {
+                        enemy.RewardsRare.Add(GetItemByName<Egg>($"{enemy.OriginalMonsterName} Egg").gameObject);
+                    }
+                }
+
+                var items = new List<InventoryItem>();
+
+                if (SlotData.AlwaysGeCatalyst)
+                {
+                    foreach (Monster enemy in __instance.Enemies)
+                    {
+                        Catalyst c = null;
+                        if (enemy.OriginalMonsterName == "Ninki Nanka")
+                        {
+                            c = GetItemByName<Catalyst>("Magical Clay") as Catalyst;
+                        }
+                        else if (enemy.OriginalMonsterName == "Megataur")
+                        {
+                            c = GetItemByName<Catalyst>("Shard of Winter") as Catalyst;
+                        }
+                        else
+                        {
+                            c = enemy.RewardsRare
+                                .Select(i => i.GetComponent<Catalyst>())
+                                .FirstOrDefault(i => i is Catalyst);
+                        }
+
+                        if (c != null)
+                        {
+                            __instance.AddRewardItem(items, c, 1);
+                        }
+                    }
+                }
+
+                if (!GameModeManager.Instance.BraveryMode && SlotData.AlwaysGetEgg)
+                {
+                    foreach (Monster enemy in __instance.Enemies)
+                    {
+                        // Get the rare egg reward for this enemy
+                        var egg = enemy.RewardsRare
+                            .Select(i => i.GetComponent<BaseItem>())
+                            .FirstOrDefault(i => i is Egg);
+
+                        if (egg != null)
+                        {
+                            __instance.AddRewardItem(items, egg, 1, (int)enemy.Shift);
+                        }
                     }
                 }
 
@@ -108,7 +147,7 @@ namespace Archipelago.MonsterSanctuary.Client
         }
 
         /// <summary>
-        /// When giving a reward, this ensures that only one egg of a given monster is ever added
+        /// When giving a reward, this ensures that only one egg or catalyst of a given monster is ever added
         /// </summary>
         [HarmonyPatch(typeof(CombatController), "AddRewardItem")]
         private class CombatController_AddRewardItem
@@ -116,10 +155,13 @@ namespace Archipelago.MonsterSanctuary.Client
             [UsedImplicitly]
             private static bool Prefix(List<InventoryItem> items, BaseItem item, int quantity, int variation)
             {
-                if (item is not Egg)
-                    return true;
+                if (item is Catalyst)
+                    return !items.Any(i => i.Item == item);
 
-                return !items.Any(i => i.Item == item);
+                else if (item is Egg)
+                    return !items.Any(i => i.Item == item);
+
+                return false;
             }
         }
 

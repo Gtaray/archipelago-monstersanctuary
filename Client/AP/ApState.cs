@@ -11,6 +11,7 @@ using Archipelago.MultiClient.Net.Models;
 using Archipelago.MultiClient.Net.BounceFeatures.DeathLink;
 using Archipelago.MonsterSanctuary.Client.Persistence;
 using Archipelago.MonsterSanctuary.Client.Options;
+using System.Security.Cryptography;
 
 namespace Archipelago.MonsterSanctuary.Client.AP
 {
@@ -106,6 +107,9 @@ namespace Archipelago.MonsterSanctuary.Client.AP
         /// <param name="packet"></param>
         private static void HandleGlobalScoutCallback(ScoutedItemInfo packet)
         {
+            // Instantiate a new random object based on the seed so that trapped chests will always be marked the same.
+            var rng = new Random(SlotData.Seed.GetHashCode());
+
             var flag = (ItemClassification)(int)packet.Flags;
             string locationName = Locations.GetLocationName(packet.LocationId);
 
@@ -119,10 +123,7 @@ namespace Archipelago.MonsterSanctuary.Client.AP
             }
             else if (flag == ItemClassification.Trap)
             {
-                // For traps, we randomly assign either it as a progression item, a useful item, or neither.
-                // The downside to this is that trapped chests will change graphics between play sessions,
-                // but I think I'm okay with that limitation, since it means I don't need to save that data in the ap data file.
-                var r = new Random().Next(0, 3);
+                int r = rng.Next(0, 3);
                 if (r == 1)
                     Locations.AddProgressionLocation(locationName);
                 else if (r == 2)

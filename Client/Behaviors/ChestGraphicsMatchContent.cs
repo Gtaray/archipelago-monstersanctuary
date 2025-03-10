@@ -49,8 +49,6 @@ namespace Archipelago.MonsterSanctuary.Client.Behaviors
 
             int spriteId = (int)_color;            
 
-            Patcher.Logger.LogInfo($"Chest location {_locationName} set to sprite ID {spriteId}");
-
             // Set the base sprite of the chest
             if (_chest.CanInteract())
                 _sprite.SetSprite(spriteId); // Closed sprite

@@ -175,10 +175,17 @@ namespace Archipelago.MonsterSanctuary.Client
                 {
                     return !SlotData.SkipPlot;
                 }
+
                 if (GameController.Instance.CurrentSceneName == "KeeperStronghold_KeepersTower"
                     && __instance.ID == 578)
                 {
                     return !SlotData.SkipPlot;
+                }
+
+                // Skip the touch trigger when getting close to the underworld door if it's already open.
+                if (GameController.Instance.CurrentSceneName == "BlueCave_South5")
+                {
+                    return !ProgressManager.Instance.GetBool("UnderworldDoorIsOpen");
                 }
 
                 return true;
