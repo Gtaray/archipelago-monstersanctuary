@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Archipelago.MonsterSanctuary.Client
+namespace Archipelago.MonsterSanctuary.Client.Helpers
 {
     public class Colors
     {
@@ -20,18 +20,18 @@ namespace Archipelago.MonsterSanctuary.Client
         {
             if (classification == ItemClassification.Progression)
             {
-                return Colors.ProgressionItem;
+                return ProgressionItem;
             }
             else if (classification == ItemClassification.Useful)
             {
-                return Colors.UsefulItem;
+                return UsefulItem;
             }
             else if (classification == ItemClassification.Trap)
             {
-                return Colors.TrapItem;
+                return TrapItem;
             }
 
-            return Colors.FillerItem;
+            return FillerItem;
         }
     }
 }

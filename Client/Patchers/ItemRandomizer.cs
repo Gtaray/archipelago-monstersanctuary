@@ -1,4 +1,5 @@
 ﻿using Archipelago.MonsterSanctuary.Client.AP;
+using Archipelago.MonsterSanctuary.Client.Helpers;
 using Archipelago.MonsterSanctuary.Client.Options;
 using Archipelago.MonsterSanctuary.Client.Persistence;
 using HarmonyLib;
@@ -59,7 +60,7 @@ namespace Archipelago.MonsterSanctuary.Client
                         _eggShifts.TryRemove(nextItem.LocationID, out eggShift);
                     }
 
-                    if (ReceiveItem(nextItem.ItemName, eggShift))
+                    if (ReceiveItem(nextItem.ItemName, eggShift, out string itemName))
                     {
                         // We want to do this immediately after adding the item to the player inventory
                         ApData.SetNextExpectedItemIndex(nextItem.ItemIndex + 1);
@@ -69,7 +70,7 @@ namespace Archipelago.MonsterSanctuary.Client
                         // We do this here because the Notification queue should be fire and forget
                         // The queue does not do any filtering or conditional checks for what should be shown. If it's on the queue, it gets shown.
                         Notifications.QueueItemTransferNotification(
-                            nextItem.ItemName,
+                            itemName,
                             nextItem.PlayerID,
                             nextItem.LocationID,
                             nextItem.ItemClassification,
@@ -87,8 +88,9 @@ namespace Archipelago.MonsterSanctuary.Client
                 return GameStateManager.Instance.IsExploring();
             }
 
-            public static bool ReceiveItem(string itemName, EShift eggShift)
+            public static bool ReceiveItem(string itemName, EShift eggShift, out string finalItemName)
             {
+                finalItemName = itemName;
                 if (itemName == null)
                 {
                     Logger.LogError("Null item was received");
@@ -112,6 +114,19 @@ namespace Archipelago.MonsterSanctuary.Client
                     return false;
                 }
 
+                if (newItem is Equipment && SlotData.AutoScaleEquipment != EquipmentAutoScaler.Never)
+                {
+                    int level = GetScaledEquipmentLevel();
+                    if (level > 0)
+                    {
+                        string newItemName = $"{itemName}+{level}";
+                        Patcher.Logger.LogInfo("Auto-scaling equipment. New item name: " + newItem);
+                        newItem = GetItemByName(newItemName);
+                        finalItemName = newItemName;
+                    }
+                }
+
+
                 AddItemToPlayerInventory(ref newItem, quantity, eggShift);
 
                 return true;
@@ -129,6 +144,77 @@ namespace Archipelago.MonsterSanctuary.Client
                     item = Utils.CheckForCostumeReplacement(item);
                     PlayerController.Instance.Inventory.AddItem(item, quantity, (int)eggShift);
                 }
+            }
+
+            static int GetScaledEquipmentLevel()
+            {
+                switch (SlotData.AutoScaleEquipment)
+                {
+                    case EquipmentAutoScaler.Level:
+                        return ScaleByLevel();
+                    case EquipmentAutoScaler.Rank:
+                        return ScaleByRank();
+                    case EquipmentAutoScaler.Map:
+                        return ScaleByMap();
+                    default:
+                        return 0;
+                }
+            }
+
+            static int ScaleByRank()
+            {
+                switch (PlayerController.Instance.Rank.GetKeeperRank())
+                {
+                    case EKeeperRank.KeeperAspirant:
+                    case EKeeperRank.KeeperNovice:
+                        return 0;
+                    case EKeeperRank.KeeperSeeker:
+                        return 1;
+                    case EKeeperRank.KeeperLancer:
+                        return 2;
+                    case EKeeperRank.KeeperRanger:
+                        return 3;
+                    case EKeeperRank.KeeperKnight:
+                        return 4;
+                    case EKeeperRank.KeeperChampion:
+                    case EKeeperRank.KeeperDragoon:
+                    case EKeeperRank.KeeperMaster:
+                        return 5;
+                    default:
+                        return 0;
+                }
+            }
+
+            static int ScaleByLevel()
+            {
+                int highestLevel = PlayerController.Instance.Monsters.GetHighestLevel();
+                if (highestLevel >= 31)
+                    return 5;
+                else if (highestLevel >= 26)
+                    return 4;
+                else if (highestLevel >= 21)
+                    return 3;
+                else if (highestLevel >= 16)
+                    return 2;
+                else if (highestLevel >= 11)
+                    return 1;
+                return 0;
+            }
+
+            static int ScaleByMap()
+            {
+                float percentageComplete = (float)PlayerController.Instance.Minimap.CountAllExploredMaps() / (float)AchievementsManager.Instance.MapCount();
+                if (percentageComplete >= 75)
+                    return 5;
+                else if (percentageComplete >= 60)
+                    return 4;
+                else if (percentageComplete >= 45)
+                    return 3;
+                else if (percentageComplete >= 30)
+                    return 2;
+                else if (percentageComplete >= 15)
+                    return 1;
+                return 0;
             }
             #endregion
         }

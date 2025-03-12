@@ -41,6 +41,14 @@ namespace Archipelago.MonsterSanctuary.Client.Options
         Full = 3
     }
 
+    public enum EquipmentAutoScaler
+    {
+        Never = 0,
+        Level = 1,
+        Rank = 2,
+        Map = 3
+    }
+
     public class HintData
     {
         [JsonProperty("id")]
@@ -61,7 +69,6 @@ namespace Archipelago.MonsterSanctuary.Client.Options
         // END UNUSED
 
         public static string Version { get; set; }
-        public static string Seed { get; set; }
 
         public static CompletionEvent Goal { get; set; } = CompletionEvent.MadLord;
         public static bool DeathLink { get; set; } = false;
@@ -87,13 +94,15 @@ namespace Archipelago.MonsterSanctuary.Client.Options
         public static string BexMonster { get; set; }
 
         public static ShiftFlag MonsterShiftRule { get; set; } = ShiftFlag.Normal;
-        // TODO: Hvae this actually pull from slotdata
-        public static bool RandomizeMonsterSkillTress { get; set; } = false;
-        public static bool RandomizeMonsterUltimates { get; set; } = false;
+        // TODO: Have this actually pull from slotdata
+        public static bool RandomizeMonsterSkillTress { get; set; } = true;
+        public static bool RandomizeMonsterUltimates { get; set; } = true;
+        public static bool RandomizeMonsterShiftSkills { get; set; } = true;
 
         public static bool AddSmokeBombs { get; set; }
         public static int StartingGold { get; set; }
         public static bool IncludeChaosRelics { get; set; }
+        public static EquipmentAutoScaler AutoScaleEquipment { get; set; }
 
         public static void LoadSlotData(Dictionary<string, object> slotData)
         {
@@ -102,15 +111,14 @@ namespace Archipelago.MonsterSanctuary.Client.Options
             Version = GetStringData(slotData, "version");
             Patcher.Logger.LogInfo("AP World Version: " + Version);
 
-            Seed = GetStringData(slotData, "seed");
-            if (string.IsNullOrEmpty(Seed))
-                Patcher.Logger.LogError("Multiworld seed was not found in the slot data.");
-
             Goal = GetEnumData(options, "goal", CompletionEvent.MadLord);
             Patcher.Logger.LogInfo("Goal: " + Enum.GetName(typeof(CompletionEvent), Goal));
 
             SkipPlot = GetBoolData(options, "skip_plot", false);
             Patcher.Logger.LogInfo("Skip Plot: " + SkipPlot);
+
+            LockedDoors = GetEnumData(options, "remove_locked_doors", LockedDoorsFlag.All);
+            Patcher.Logger.LogInfo("Locked Doors: " + Enum.GetName(typeof(LockedDoorsFlag), LockedDoors));
 
             OpenBlueCaves = GetBoolData(options, "open_blue_caves", false);
             Patcher.Logger.LogInfo("Open Blue Caves: " + OpenBlueCaves);
@@ -148,9 +156,6 @@ namespace Archipelago.MonsterSanctuary.Client.Options
             OpenAbandonedTower = GetEnumData(options, "open_abandoned_tower", OpenWorldSetting.Closed);
             Patcher.Logger.LogInfo("Open Abandoned Tower: " + Enum.GetName(typeof(OpenWorldSetting), OpenAbandonedTower));
 
-            LockedDoors = GetEnumData(options, "remove_locked_doors", LockedDoorsFlag.All);
-            Patcher.Logger.LogInfo("Locked Doors: " + Enum.GetName(typeof(LockedDoorsFlag), LockedDoors));
-
             AlwaysGetEgg = GetBoolData(options, "monsters_always_drop_egg", false);
             Patcher.Logger.LogInfo("Always Drop Egg: " + AlwaysGetEgg);
 
@@ -159,6 +164,18 @@ namespace Archipelago.MonsterSanctuary.Client.Options
 
             MonsterShiftRule = GetEnumData(options, "monster_shift_rule", ShiftFlag.Normal);
             Patcher.Logger.LogInfo("Monster Shift Rule: " + Enum.GetName(typeof(ShiftFlag), MonsterShiftRule));
+
+            RandomizeMonsterSkillTress = GetBoolData(options, "randomize_monster_skill_trees", false);
+            Patcher.Logger.LogInfo("Randomize Skill Trees: " +  RandomizeMonsterSkillTress);
+
+            RandomizeMonsterUltimates = GetBoolData(options, "randomize_monster_ultimates", false);
+            Patcher.Logger.LogInfo("Randomize Ultimates: " + RandomizeMonsterUltimates);
+
+            RandomizeMonsterShiftSkills = GetBoolData(options, "randomize_monster_shift_skills", false);
+            Patcher.Logger.LogInfo("Randomize Shift Skills: " + RandomizeMonsterShiftSkills);
+
+            AutoScaleEquipment = GetEnumData(options, "automatically_scale_equipment", EquipmentAutoScaler.Never);
+            Patcher.Logger.LogInfo("Automatically Scale Equipment: " +  Enum.GetName(typeof(EquipmentAutoScaler), AutoScaleEquipment));
 
             IncludeChaosRelics = GetBoolData(options, "include_chaos_relics", false);
             Patcher.Logger.LogInfo("Include Chaos Relics: " + IncludeChaosRelics);

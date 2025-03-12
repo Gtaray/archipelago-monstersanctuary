@@ -31,6 +31,7 @@ namespace Archipelago.MonsterSanctuary.Client.AP
         public static ArchipelagoSession Session;
         public static bool Authenticated;
         public static bool Completed = false;
+        public static string Seed => State == ConnectionState.Connected ? Session.RoomState.Seed : null;
 
         private static DeathLinkService _deathLink;
 
@@ -108,7 +109,7 @@ namespace Archipelago.MonsterSanctuary.Client.AP
         private static void HandleGlobalScoutCallback(ScoutedItemInfo packet)
         {
             // Instantiate a new random object based on the seed so that trapped chests will always be marked the same.
-            var rng = new Random(SlotData.Seed.GetHashCode());
+            var rng = new Random(Seed.GetHashCode());
 
             var flag = (ItemClassification)(int)packet.Flags;
             string locationName = Locations.GetLocationName(packet.LocationId);
