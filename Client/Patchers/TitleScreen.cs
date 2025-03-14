@@ -225,8 +225,7 @@ namespace Archipelago.MonsterSanctuary.Client
                     PromptConfirmConnectionInformation<SaveGameMenu>(
                         __instance,
                         LoadGame, // If the player accepts and the connection is successful
-                        OnLoadCancelled, // If the player accepts and the connectoin fails
-                        (connected, notconnected, cancelled) => OnLoadCancelled(__instance)); // If the player cancels
+                        OnLoadCancelled); // If the player accepts and the connection fails
                     __instance.MenuList.SetLocked(true);
 
                     return false;
@@ -438,12 +437,14 @@ namespace Archipelago.MonsterSanctuary.Client
                 .GetValue() as MSInputField;
             inputfield.characterLimit = 20;
 
+            string url = string.IsNullOrEmpty(host_name) ? "archipelago.gg:" : host_name;
+
             Timer.StartTimer(__instance.gameObject, 0.25f, () => UIController.Instance.NameMenu.Open(
                 Utils.LOCA("Enter the host name"),
 #if DEBUG
                 host_name_debug,
 #else
-                "archipelago.gg:",
+                url,
 #endif
                 (string url) =>
                 {

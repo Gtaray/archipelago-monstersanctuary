@@ -82,21 +82,6 @@ namespace Archipelago.MonsterSanctuary.Client
             }
         }
 
-        [HarmonyPatch(typeof(SaveGameManager), "CreateBinaryFormatter")]
-        private static class SaveGameManager_CreateBinaryFormatter
-        {
-            private static void Postfix(ref BinaryFormatter __result)
-            {
-                ReferenceableSerializationSurrogate surrogate = new ReferenceableSerializationSurrogate();
-                surrogate.WorldData = GameController.Instance.WorldData;
-
-                var selector = (SurrogateSelector)__result.SurrogateSelector;
-                selector.AddSurrogate(typeof(ArchipelagoItem), new StreamingContext(StreamingContextStates.All), (ISerializationSurrogate)surrogate);
-
-                __result.SurrogateSelector = selector;
-            }
-        }
-
         [HarmonyPatch(typeof(InventoryManager), "GetListByItemType")]
         private static class InventoryManager_GetListByItemType
         {

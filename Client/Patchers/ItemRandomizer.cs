@@ -21,6 +21,14 @@ namespace Archipelago.MonsterSanctuary.Client
         // So we simply store the location ID and intended egg shift here, that way the item receiver an handle it appropriately
         private static readonly ConcurrentDictionary<long, EShift> _eggShifts = new();
 
+        private static readonly Dictionary<int, int> _infinityFlameChecks = new Dictionary<int, int>()
+        {
+            [42700036] = 42700002, // Wolf
+            [42700032] = 42700027, // Eagle
+            [42700030] = 42700013, // Toad
+            [42700034] = 42700020, // Lion
+        };
+
         #region Patches
         [HarmonyPatch(typeof(GameController), "Update")]
         private class GameController_Update_Items
@@ -426,9 +434,18 @@ namespace Archipelago.MonsterSanctuary.Client
         {
             // This needs to also handle NPCs that give the player eggs, and randomize which egg is given
             [UsedImplicitly]
-            private static bool Prefix(ref GrantItemsAction __instance, bool showMessage)
+            private static bool Prefix(ref GrantItemsAction __instance)
             {
-                string locName = $"{GameController.Instance.CurrentSceneName}_{__instance.ID}";
+                int id = __instance.ID;
+
+                // First thing we do is we have to manually check if this is one of the spectral familiars' Infinity Flame check.
+                // If it is, we manually adjust it
+                if (_infinityFlameChecks.ContainsKey(id))
+                {
+                    id = _infinityFlameChecks[id];
+                }
+
+                string locName = $"{GameController.Instance.CurrentSceneName}_{id}";
 
                 // Mark this location as opened the instant we interact with it, even if we're offline
                 ApData.MarkLocationAsChecked(locName);

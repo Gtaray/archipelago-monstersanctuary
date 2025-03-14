@@ -123,6 +123,20 @@ namespace Archipelago.MonsterSanctuary.Client
                     return;
                 }
 
+                // Vertraag talking in Eternity's End
+                if (name == "TriggerOnce42700080")
+                {
+                    __result = true;
+                    ProgressManager.Instance.SetBool("TriggerOnce42700080", __result);
+                }
+
+                // Open up eternity's end by default
+                if (name == "EndOfTimeDoorActivated")
+                {
+                    __result = true;
+                    ProgressManager.Instance.SetBool("EndOfTimeDoorActivated", __result);
+                }
+
                 var shouldSetFlag = World.ShouldSetProgressionFlag(name);
                 if (shouldSetFlag && __result == false)
                 {

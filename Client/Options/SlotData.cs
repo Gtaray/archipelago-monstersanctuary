@@ -72,6 +72,7 @@ namespace Archipelago.MonsterSanctuary.Client.Options
 
         public static CompletionEvent Goal { get; set; } = CompletionEvent.MadLord;
         public static bool DeathLink { get; set; } = false;
+        public static int ChampionsNeededToGetKeyOfPower { get; set; } = 0;
 
         public static bool SkipPlot { get; set; } = false;
         public static LockedDoorsFlag LockedDoors { get; set; } = 0;
@@ -94,10 +95,9 @@ namespace Archipelago.MonsterSanctuary.Client.Options
         public static string BexMonster { get; set; }
 
         public static ShiftFlag MonsterShiftRule { get; set; } = ShiftFlag.Normal;
-        // TODO: Have this actually pull from slotdata
-        public static bool RandomizeMonsterSkillTress { get; set; } = true;
-        public static bool RandomizeMonsterUltimates { get; set; } = true;
-        public static bool RandomizeMonsterShiftSkills { get; set; } = true;
+        public static bool RandomizeMonsterSkillTress { get; set; } = false;
+        public static bool RandomizeMonsterUltimates { get; set; } = false;
+        public static bool RandomizeMonsterShiftSkills { get; set; } = false;
 
         public static bool AddSmokeBombs { get; set; }
         public static int StartingGold { get; set; }
@@ -113,6 +113,9 @@ namespace Archipelago.MonsterSanctuary.Client.Options
 
             Goal = GetEnumData(options, "goal", CompletionEvent.MadLord);
             Patcher.Logger.LogInfo("Goal: " + Enum.GetName(typeof(CompletionEvent), Goal));
+
+            ChampionsNeededToGetKeyOfPower = GetIntData(options, "key_of_power_champion_unlock", 0);
+            Patcher.Logger.LogInfo("Champions Needed for Key of Power: " + ChampionsNeededToGetKeyOfPower);
 
             SkipPlot = GetBoolData(options, "skip_plot", false);
             Patcher.Logger.LogInfo("Skip Plot: " + SkipPlot);
@@ -200,6 +203,8 @@ namespace Archipelago.MonsterSanctuary.Client.Options
             {
                 Champions.AddChampionScene(kvp.Key, kvp.Value);
             }
+
+            Locations.KeyOfPowerUnlockLocation = GetLongData(slotData, "key_of_power_champion_unlock", 0);
 
             var itemLocations = GetDictionaryData<Dictionary<string, long>>(slotData, "locations");
 

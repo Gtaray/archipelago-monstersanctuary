@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Archipelago.MonsterSanctuary.Client.Options;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -25,6 +26,12 @@ namespace Archipelago.MonsterSanctuary.Client.AP
         /// The number of checks in each region, indexed by region name
         /// </summary>
         public static Dictionary<string, int> NumberOfChecks = new();
+
+        /// <summary>
+        /// Location ID that contains the Key of Power when defeating champions unlocks the key
+        /// If the value is 0, then this location should not be used
+        /// </summary>
+        public static long KeyOfPowerUnlockLocation = 0;
 
         /// <summary>
         /// Returns a list of the location IDs for all checks
@@ -124,6 +131,16 @@ namespace Archipelago.MonsterSanctuary.Client.AP
             if (NumberOfChecks.ContainsKey(regionName))
                 return NumberOfChecks[regionName];
             return 0;
+        }
+
+        /// <summary>
+        /// Returns true if defeating champions should give the player the Key of Power
+        /// Derives from having a the location ID and slot data for this setting.
+        /// </summary>
+        /// <returns></returns>
+        public static bool ChampionsUnlockKeyOfPower()
+        {
+            return KeyOfPowerUnlockLocation > 0 && SlotData.ChampionsNeededToGetKeyOfPower > 0;
         }
 
         #region Chest Graphics Match Contents

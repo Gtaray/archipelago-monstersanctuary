@@ -23,32 +23,6 @@ namespace Archipelago.MonsterSanctuary.Client
 
         private static System.Random _skillTreeRng;
 
-        [HarmonyPatch(typeof(PlayerController), "LoadGame")]
-        internal class PlayerController_LoadGame
-        {
-            private static void Prefix()
-            {
-                if (!ApState.IsConnected)
-                    return;
-
-                InitializeSkillTreeData();
-                RandomzeAllMonsterSkillData();
-            }
-        }
-
-        [HarmonyPatch(typeof(GameController), "InitPlayerStartSetup")]
-        internal class GameController_InitPlayerStartSetup
-        {
-            private static void Prefix()
-            {
-                if (!ApState.IsConnected)
-                    return;
-
-                InitializeSkillTreeData();
-                RandomzeAllMonsterSkillData();
-            }
-        }
-
         // Only want to do this once, the first time we load the game, and never again
         // This is because its a reference, and needs to remain unchanged to we can reference it for every load.
         public static void InitializeSkillTreeData()
@@ -92,6 +66,8 @@ namespace Archipelago.MonsterSanctuary.Client
             if (!ApState.IsConnected)
                 return;
 
+            InitializeSkillTreeData();
+
             var monsters = GameController.Instance.WorldData.Referenceables.Where(go => go != null && go.gameObject != null && go.gameObject.HasComponent<Monster>());
             foreach (var monster in monsters)
             {
@@ -120,7 +96,7 @@ namespace Archipelago.MonsterSanctuary.Client
             // Get rid of old skill tree components
             foreach (var tree in monster.GetComponents<SkillTree>())
             {
-                UnityEngine.Object.DestroyImmediate(tree);
+                DestroyImmediate(tree);
             }
 
             int numberOfTrees = _skillTreeRng.Next(1, 101) <= _threeSkillTreePercentageChance
@@ -134,7 +110,7 @@ namespace Archipelago.MonsterSanctuary.Client
 
             for (int i = 0; i < numberOfTrees; i++)
             {
-                var possibleTrees = _skillTrees.Where(tree => !HasBaseSkill(skillManager, tree)).ToList();
+                var possibleTrees = _skillTrees.Where(tree => !HasAnyBaseSkill(skillTreesAdded, tree)).ToList();
                 var actualTree = DuplicateComponentType(possibleTrees[_skillTreeRng.Next(possibleTrees.Count())]);
 
                 skillTreesAdded.Add(actualTree);
@@ -204,13 +180,13 @@ namespace Archipelago.MonsterSanctuary.Client
             skill_manager.LightSkill = lightpicks[_skillTreeRng.Next(lightpicks.Count())];
         }
 
-        private static bool HasBaseSkill(SkillManager skillManager, SkillTree tree)
+        private static bool HasAnyBaseSkill(List<SkillTree> skillTreesAdded, SkillTree tree)
         {
             // First check if our base skills collide with the tree's tier 1 skills
-            if (skillManager.BaseSkills.Intersect(tree.Tier1Skills).Any())
+            if (tree.Tier1Skills.Intersect(skillTreesAdded.SelectMany(tree => tree.Tier1Skills)).Any())
                 return true;
             // Second, if there are no tier 1 skills for this tree, see if our base skills collide with the tree's tier 2 skills
-            return !tree.Tier1Skills.Any() && skillManager.BaseSkills.Intersect(tree.Tier2Skills).Any();
+            return !tree.Tier1Skills.Any() && tree.Tier2Skills.Intersect(skillTreesAdded.SelectMany(tree => tree.Tier2Skills)).Any();
         }
 
         private static T CopyComponentToGameObject<T>(T original, GameObject destination) where T : Component
