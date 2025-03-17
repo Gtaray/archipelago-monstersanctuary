@@ -59,6 +59,18 @@ Many thanks for Cybe3R for getting us set up with a [PopTracker pack](https://gi
 	- Adds Bard to be included in the randomized monster pool
 	- 0: Do not include Bard in the pool
 	- 1: Include Bard in the pool
+ - `randomize_monster_skill_trees`
+ 	- When enabled, each monster specie will have three or four randomly selected skill trees rather than their normal skill trees
+  	- 0: Do not randomize skill trees
+   	- 1: Randomize monster skill trees
+ - `randomize_monster_ultimates`
+ 	- When enabled, each monster specie will have its three ultimate skills randomized
+  	- 0: Do not randomize ultimate skills
+   	- 1: Randomize monsters' ultimate skills
+ - `randomize_monster_shift_skills`
+ 	- When enabled, each monster specie will have its light and dark shift skills randomized
+  	- 0: Do not randomize shift skills
+   	- 1: Randomize monsters' shift skills
 
 - `cryomancer_check_restrictions`
 	- Sets how to handle the four Lady Stasis / Cryomancer checks in Snowy Peaks.
@@ -95,6 +107,11 @@ Many thanks for Cybe3R for getting us set up with a [PopTracker pack](https://gi
 	- 0: The location will contain its vanilla item (Bard Egg).
 	- 1: The location is randomized with everything else
 	- 2: The location will contain a junk item
+ - `spectral_familiar_egg_placement`
+ 	- Sets how to handle the four gift checks given by each of the spectral familiars in Eternity's End
+  	- 0: The four spectral familiar gift checks will contain their respective egg (Spectral Wolf will give the spectral wolf egg, etc)
+   	- 1: The four spectral familiar gift checks will be randomized with everything
+   	- 2: The four spectral familiar gift checks will contain junk items
 
 - `monsters_always_drop_egg`:
 	- If enabled, monsters will always give their egg as a battle reward. Evolved monsters will give their unevolved form's egg.
@@ -112,6 +129,15 @@ Many thanks for Cybe3R for getting us set up with a [PopTracker pack](https://gi
 	- Add the "Looter's Handbook" item to the item pool. When the player has this item in their inventory, chest sprites will update to match their contents: purple chests contain progression items, green chests contain useful items, and brown chests contain filler items. Traps can be in chests of any color.
 	- 0: No
 	- 1: Yes
+- `automatically_scale_equipment`:
+	- When enabled, all weapon and accessory items are automatically scaled to match the player's progress
+ 	- 0: Disabled. Weapon and accessory levels are randomized when the item pool is generated
+  	- 1: By level. Weapons and accessories are scaled with the highest monster level the player has
+  	- 2: By rank. Weapons and accessories are scaled with the number of champions the player has defeated
+  	- 3: By map progress. Weapons and accessories are scaled with the percentage of the map the player has uncovered
+- `key_of_power_champion_unlock`:
+	- Sets the number of champions that must be defeated in order for the player to receive the Key of Power. If set to 0, this is disabled, and the Key of power will be in the item pool. If set from 1 and 26, when that number of champions are defeated, the player will be given the Key of Power
+ 	- Range from 0 to 26
 - `add_smoke_bombs`:
 	- Start with 50 smoke bombs.
 	- 0: No
