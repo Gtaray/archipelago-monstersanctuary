@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Text.RegularExpressions;
 using Archipelago.MonsterSanctuary.Client.AP;
+using Archipelago.MonsterSanctuary.Client.Helpers;
 using Archipelago.MonsterSanctuary.Client.Options;
 using UnityEngine;
 

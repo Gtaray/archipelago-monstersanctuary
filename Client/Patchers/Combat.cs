@@ -51,7 +51,22 @@ namespace Archipelago.MonsterSanctuary.Client
                 }
 
                 ApData.AddChampionAsDefeated(GameController.Instance.CurrentSceneName);
-                ApState.CheckLocation(locationId.Value);
+                List<long> toCheck = new()
+                {
+                    locationId.Value
+                };
+
+                // If defeating champions should unlock the key of power, we check if enough champions have been defeated
+                // and if so, add the key of power location to the check
+                if (Locations.ChampionsUnlockKeyOfPower())
+                {
+                    if (ApData.GetNumberOfChampionsDefeated() >= SlotData.ChampionsNeededToGetKeyOfPower)
+                    {
+                        toCheck.Add(Locations.KeyOfPowerUnlockLocation);
+                    }
+                }
+
+                ApState.CheckLocations(toCheck.ToArray());
             }
         }
 

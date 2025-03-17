@@ -1,4 +1,5 @@
 ﻿using Archipelago.MonsterSanctuary.Client.AP;
+using Archipelago.MonsterSanctuary.Client.Helpers;
 using Archipelago.MultiClient.Net.Models;
 using HarmonyLib;
 using JetBrains.Annotations;
@@ -13,6 +14,46 @@ namespace Archipelago.MonsterSanctuary.Client
 {
     public partial class Patcher
     {
+        private static void AddMissingRewardsToMonsters()
+        {
+            var eggs = GameController.Instance.WorldData.Referenceables
+                .Where(go => go != null && go.gameObject != null && go.gameObject.HasComponent<Egg>())
+                .Select(go => go.GetComponent<Egg>());
+
+            foreach (var egg in eggs)
+            {
+                var monster = egg.Monster.GetComponent<Monster>();
+
+                // Don't add eggs for evolved monsters. Maybe one day this will be an option.
+                if (monster.IsEvolved)
+                    continue;
+
+                if (!monster.RewardsRare.Contains(egg.gameObject))
+                {
+                    monster.RewardsRare.Add(egg.gameObject);
+                }
+            }
+
+            var catalysts = GameController.Instance.WorldData.Referenceables
+                .Where(go => go != null && go.gameObject != null && go.gameObject.HasComponent<Catalyst>())
+                .Select(go => go.GetComponent<Catalyst>());
+
+            foreach (var catalyst in catalysts)
+            {
+                var monster = catalyst.EvolveMonster.GetComponent<Monster>();
+
+                // Don't add catalysts for unevolved monsters
+                if (!monster.IsEvolved)
+                    continue;
+
+                if (!monster.RewardsRare.Contains(catalyst.gameObject))
+                {
+                    monster.RewardsRare.Add(catalyst.gameObject);
+                }
+            }
+        }
+
+        #region Monsters and abilities to Data Storage
         [HarmonyPatch(typeof(MonsterManager), "AddMonsterByPrefab")]
         private class MonsterManager_AddMonsterByPrefab
         {
@@ -77,5 +118,6 @@ namespace Archipelago.MonsterSanctuary.Client
                 ApState.SetToDataStorage(monster.Name, (DataStorageElement)true);
             }
         }
+        #endregion
     }
 }

@@ -150,5 +150,31 @@ namespace Archipelago.MonsterSanctuary.Client
                 Patcher.UI = guiObject.AddComponent<ArchipelagoUI>();
             }
         }
+
+        [HarmonyPatch(typeof(PlayerController), "LoadGame")]
+        internal class PlayerController_LoadGame
+        {
+            private static void Prefix()
+            {
+                if (!ApState.IsConnected)
+                    return;
+
+                RandomzeAllMonsterSkillData();
+                AddMissingRewardsToMonsters();
+            }
+        }
+
+        [HarmonyPatch(typeof(GameController), "InitPlayerStartSetup")]
+        internal class GameController_InitPlayerStartSetup
+        {
+            private static void Prefix()
+            {
+                if (!ApState.IsConnected)
+                    return;
+
+                RandomzeAllMonsterSkillData();
+                AddMissingRewardsToMonsters();
+            }
+        }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Archipelago.MonsterSanctuary.Client.AP;
+using Archipelago.MonsterSanctuary.Client.Helpers;
 using Archipelago.MonsterSanctuary.Client.Options;
 using Archipelago.MonsterSanctuary.Client.Persistence;
 using HarmonyLib;
@@ -19,6 +20,14 @@ namespace Archipelago.MonsterSanctuary.Client
         // When receiving an egg as a gift during dialog, we need to make sure that the egg the player receives is shifted correctly
         // So we simply store the location ID and intended egg shift here, that way the item receiver an handle it appropriately
         private static readonly ConcurrentDictionary<long, EShift> _eggShifts = new();
+
+        private static readonly Dictionary<int, int> _infinityFlameChecks = new Dictionary<int, int>()
+        {
+            [42700036] = 42700002, // Wolf
+            [42700032] = 42700027, // Eagle
+            [42700030] = 42700013, // Toad
+            [42700034] = 42700020, // Lion
+        };
 
         #region Patches
         [HarmonyPatch(typeof(GameController), "Update")]
@@ -59,7 +68,7 @@ namespace Archipelago.MonsterSanctuary.Client
                         _eggShifts.TryRemove(nextItem.LocationID, out eggShift);
                     }
 
-                    if (ReceiveItem(nextItem.ItemName, eggShift))
+                    if (ReceiveItem(nextItem.ItemName, eggShift, out string itemName))
                     {
                         // We want to do this immediately after adding the item to the player inventory
                         ApData.SetNextExpectedItemIndex(nextItem.ItemIndex + 1);
@@ -69,7 +78,7 @@ namespace Archipelago.MonsterSanctuary.Client
                         // We do this here because the Notification queue should be fire and forget
                         // The queue does not do any filtering or conditional checks for what should be shown. If it's on the queue, it gets shown.
                         Notifications.QueueItemTransferNotification(
-                            nextItem.ItemName,
+                            itemName,
                             nextItem.PlayerID,
                             nextItem.LocationID,
                             nextItem.ItemClassification,
@@ -87,8 +96,9 @@ namespace Archipelago.MonsterSanctuary.Client
                 return GameStateManager.Instance.IsExploring();
             }
 
-            public static bool ReceiveItem(string itemName, EShift eggShift)
+            public static bool ReceiveItem(string itemName, EShift eggShift, out string finalItemName)
             {
+                finalItemName = itemName;
                 if (itemName == null)
                 {
                     Logger.LogError("Null item was received");
@@ -112,6 +122,19 @@ namespace Archipelago.MonsterSanctuary.Client
                     return false;
                 }
 
+                if (newItem is Equipment && SlotData.AutoScaleEquipment != EquipmentAutoScaler.Never)
+                {
+                    int level = GetScaledEquipmentLevel();
+                    if (level > 0)
+                    {
+                        string newItemName = $"{itemName}+{level}";
+                        Patcher.Logger.LogInfo("Auto-scaling equipment. New item name: " + newItem);
+                        newItem = GetItemByName(newItemName);
+                        finalItemName = newItemName;
+                    }
+                }
+
+
                 AddItemToPlayerInventory(ref newItem, quantity, eggShift);
 
                 return true;
@@ -129,6 +152,77 @@ namespace Archipelago.MonsterSanctuary.Client
                     item = Utils.CheckForCostumeReplacement(item);
                     PlayerController.Instance.Inventory.AddItem(item, quantity, (int)eggShift);
                 }
+            }
+
+            static int GetScaledEquipmentLevel()
+            {
+                switch (SlotData.AutoScaleEquipment)
+                {
+                    case EquipmentAutoScaler.Level:
+                        return ScaleByLevel();
+                    case EquipmentAutoScaler.Rank:
+                        return ScaleByRank();
+                    case EquipmentAutoScaler.Map:
+                        return ScaleByMap();
+                    default:
+                        return 0;
+                }
+            }
+
+            static int ScaleByRank()
+            {
+                switch (PlayerController.Instance.Rank.GetKeeperRank())
+                {
+                    case EKeeperRank.KeeperAspirant:
+                    case EKeeperRank.KeeperNovice:
+                        return 0;
+                    case EKeeperRank.KeeperSeeker:
+                        return 1;
+                    case EKeeperRank.KeeperLancer:
+                        return 2;
+                    case EKeeperRank.KeeperRanger:
+                        return 3;
+                    case EKeeperRank.KeeperKnight:
+                        return 4;
+                    case EKeeperRank.KeeperChampion:
+                    case EKeeperRank.KeeperDragoon:
+                    case EKeeperRank.KeeperMaster:
+                        return 5;
+                    default:
+                        return 0;
+                }
+            }
+
+            static int ScaleByLevel()
+            {
+                int highestLevel = PlayerController.Instance.Monsters.GetHighestLevel();
+                if (highestLevel >= 31)
+                    return 5;
+                else if (highestLevel >= 26)
+                    return 4;
+                else if (highestLevel >= 21)
+                    return 3;
+                else if (highestLevel >= 16)
+                    return 2;
+                else if (highestLevel >= 11)
+                    return 1;
+                return 0;
+            }
+
+            static int ScaleByMap()
+            {
+                float percentageComplete = (float)PlayerController.Instance.Minimap.CountAllExploredMaps() / (float)AchievementsManager.Instance.MapCount();
+                if (percentageComplete >= 75)
+                    return 5;
+                else if (percentageComplete >= 60)
+                    return 4;
+                else if (percentageComplete >= 45)
+                    return 3;
+                else if (percentageComplete >= 30)
+                    return 2;
+                else if (percentageComplete >= 15)
+                    return 1;
+                return 0;
             }
             #endregion
         }
@@ -340,9 +434,18 @@ namespace Archipelago.MonsterSanctuary.Client
         {
             // This needs to also handle NPCs that give the player eggs, and randomize which egg is given
             [UsedImplicitly]
-            private static bool Prefix(ref GrantItemsAction __instance, bool showMessage)
+            private static bool Prefix(ref GrantItemsAction __instance)
             {
-                string locName = $"{GameController.Instance.CurrentSceneName}_{__instance.ID}";
+                int id = __instance.ID;
+
+                // First thing we do is we have to manually check if this is one of the spectral familiars' Infinity Flame check.
+                // If it is, we manually adjust it
+                if (_infinityFlameChecks.ContainsKey(id))
+                {
+                    id = _infinityFlameChecks[id];
+                }
+
+                string locName = $"{GameController.Instance.CurrentSceneName}_{id}";
 
                 // Mark this location as opened the instant we interact with it, even if we're offline
                 ApData.MarkLocationAsChecked(locName);
