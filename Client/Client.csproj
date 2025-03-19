@@ -15,8 +15,8 @@
     <RootNamespace>Archipelago.MonsterSanctuary.Client</RootNamespace>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <DebugType>Full</DebugType>
-    <AssemblyVersion>1.2.2.0</AssemblyVersion>
-    <FileVersion>1.2.2.0</FileVersion>
+    <AssemblyVersion>1.3.0.0</AssemblyVersion>
+    <FileVersion>2.0.0.0</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -29,12 +29,18 @@
     <None Remove="data\item_icons.json" />
     <None Remove="data\map_pins.json" />
     <None Remove="data\minimal_locked_doors.json" />
+    <None Remove="data\monster_explore_ability_unlocks.json" />
     <None Remove="data\monster_names.json" />
     <None Remove="data\new_items.json" />
     <None Remove="data\npcs.json" />
     <None Remove="data\original_champions.json" />
     <None Remove="data\progression_flags.json" />
     <None Remove="data\script_nodes.json" />
+    <None Remove="graphics\ap_item.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="data\monster_explore_ability_unlocks.json" />
   </ItemGroup>
 
   <ItemGroup>
@@ -49,6 +55,7 @@
     <EmbeddedResource Include="data\npcs.json" />
     <EmbeddedResource Include="data\original_champions.json" />
     <EmbeddedResource Include="data\progression_flags.json" />
+    <EmbeddedResource Include="graphics\ap_item.png" />
   </ItemGroup>
 
   <ItemGroup>
@@ -56,6 +63,7 @@
     <PackageReference Include="BepInEx.Analyzers" Version="1.*" PrivateAssets="all" />
     <PackageReference Include="BepInEx.Core" Version="5.4.19" />
     <PackageReference Include="BepInEx.PluginInfoProps" Version="2.*" />
+    <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="UnityEngine.Modules" Version="2018.4.30" IncludeAssets="compile" />
   </ItemGroup>

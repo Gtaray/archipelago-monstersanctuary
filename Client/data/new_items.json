@@ -1,835 +1,1482 @@
-{
-  "Items": [
-    {
-      "gameObjectName": "LootersHandbook",
-      "name": "Looter's Handbook",
-      "description": "Chests' appearance matches the treasure they hold: purple chests have progression and items green chests have useful items. WARNING: Traps can be in chests of any color.",
-      "icon": "icon_tome",
-      "type": "unique",
-      "classification": 1
-    }
-  ],
-  "ExploreAbilityItems": {
-    "Ability": [
-      {
-        "name": "Ability - Blob Form",
-        "description": "Allows you to use the {Blob Form} ability",
-        "monsters": [ "Rainbow Blob", "King Blob" ]
-      },
-      {
-        "name": "Ability - Bubble Burst",
-        "description": "Allows you to use the {Bubble Burst} ability",
-        "monsters": [ "Blob", "Grummy", "G'rulu" ]
-      },
-      {
-        "name": "Ability - Charging Mount",
-        "description": "Allows you to use the {Charging Mount} ability",
-        "monsters": [ "Rampede", "Rathops" ]
-      },
-      {
-        "name": "Ability - Claws",
-        "description": "Allows you to use the {Claws} ability",
-        "monsters": [ "Spectral Wolf", "Spectral Lion", "Molebear" ]
-      },
-      {
-        "name": "Ability - Corrosive Jabs",
-        "description": "Allows you to use the {Corrosite Jabs} ability",
-        "monsters": [ "Troll" ]
-      },
-      {
-        "name": "Ability - Crush",
-        "description": "Allows you to use the {Crush} ability",
-        "monsters": [ "Salahammer", "Asura", "Goblin Pilot", "Darnation" ]
-      },
-      {
-        "name": "Ability - Dual Mobility",
-        "description": "Allows you to use the {Dual Mobility} ability",
-        "monsters": [ "Krakaturtle" ]
-      },
-      {
-        "name": "Ability - Fiery Shots",
-        "description": "Allows you to use the {Fiery Shots} ability",
-        "monsters": [ "Goblin Hood", "Polterofen", "Mimic" ]
-      },
-      {
-        "name": "Ability - Flying",
-        "description": "Allows you to use the {Flying} ability",
-        "monsters": [ "Spectral Eagle", "Vaero", "Frosty", "Mad Eye", "Raduga", "Draconov" ]
-      },
-      {
-        "name": "Ability - Freeze",
-        "description": "Allows you to use the {Freeze} ability",
-        "monsters": [ "Ice Blob", "Megataur" ]
-      },
-      {
-        "name": "Ability - Ghost Form",
-        "description": "Allows you to use the {Ghost Form} ability",
-        "monsters": [ "Kanko", "Sycophantom", "Stolby" ]
-      },
-      {
-        "name": "Ability - Grapple",
-        "description": "Allows you to use the {Grapple} ability",
-        "monsters": [ "Oculus", "Argiope", "Arachlich", "Worm" ]
-      },
-      {
-        "name": "Ability - Heavy Punch",
-        "description": "Allows you to use the {Heavy Punch} ability",
-        "monsters": [ "Monk" ]
-      },
-      {
-        "name": "Ability - Ignite",
-        "description": "Allows you to use the {Ignite} ability",
-        "monsters": [ "Magmapillar", "Tengu", "Specter", "Magmamoth", "Imori", "Lava Blob", "Skorch", "Plague Egg" ]
-      },
-      {
-        "name": "Ability - Improved Flying",
-        "description": "Allows you to use the {Improved Flying} ability",
-        "monsters": [ "Kongamato", "Silvaero", "Dracogran", "Ornithopter", "Dracozul", "Draconoir" ]
-      },
-      {
-        "name": "Ability - Improved Swimming",
-        "description": "Allows you to use the {Improved Swimming} ability",
-        "monsters": [ "Thornish", "Nautilid", "Elderjel", "Dracomer" ]
-      },
-      {
-        "name": "Ability - Jewel Blast",
-        "description": "Allows you to use the {Jewel Blast} ability",
-        "monsters": [ "Goblin King", "Crystal Snail" ]
-      },
-      {
-        "name": "Ability - Levitate",
-        "description": "Allows you to use the {Levitate} ability",
-        "monsters": [ "Vodinoy", "Diavola", "Vertraag", "Terradrile" ]
-      },
-      {
-        "name": "Ability - Light",
-        "description": "Allows you to use the {Light} ability",
-        "monsters": [ "Glowfly", "Glowdra", "Caraglow", "Manticorb" ]
-      },
-      {
-        "name": "Ability - Light Crush",
-        "description": "Allows you to use the {Light Crush} ability",
-        "monsters": [ "Goblin Miner" ]
-      },
-      {
-        "name": "Ability - Lightning Bolt",
-        "description": "Allows you to use the {Lightning Bolt} ability",
-        "monsters": [ "Crackle Knight", "Sizzle Knight", "Beetloid", "Goblin Warlock" ]
-      },
-      {
-        "name": "Ability - Lofty Mount",
-        "description": "Allows you to use the {Lofty Mount} ability",
-        "monsters": [ "Gryphonix" ]
-      },
-      {
-        "name": "Ability - Minnesang",
-        "description": "Allows you to use the {Minnesang} ability",
-        "monsters": [ "Bard" ]
-      },
-      {
-        "name": "Ability - Morph Ball",
-        "description": "Allows you to use the {Morph Ball} ability",
-        "monsters": [ "Changeling" ]
-      },
-      {
-        "name": "Ability - Mount",
-        "description": "Allows you to use the {Mount} ability",
-        "monsters": [ "Aurumtail", "Qilin", "Dodo", "Moccus" ]
-      },
-      {
-        "name": "Ability - Secret Vision",
-        "description": "Allows you to use the {Secret Vision} ability",
-        "monsters": [ "Sutsune", "Thanatos", "Aazerach", "Mad Lord", "Ascendant" ]
-      },
-      {
-        "name": "Ability - Shock Freeze",
-        "description": "Allows you to use the {Shock Freeze} ability",
-        "monsters": [ "Shockhopper" ]
-      },
-      {
-        "name": "Ability - Slash",
-        "description": "Allows you to use the {Slash} ability",
-        "monsters": [ "Catzerker", "Minitaur", "Blade Widow", "Ucan" ]
-      },
-      {
-        "name": "Ability - Slime Shot",
-        "description": "Allows you to use the {Slime Shot} ability",
-        "monsters": [ "Toxiquus", "Ninki", "Ninki Nanka" ]
-      },
-      {
-        "name": "Ability - Snowball Toss",
-        "description": "Allows you to use the {Snowball Toss} ability",
-        "monsters": [ "Mogwai" ]
-      },
-      {
-        "name": "Ability - Sonar",
-        "description": "Allows you to use the {Sonar} ability",
-        "monsters": [ "Nightwing" ]
-      },
-      {
-        "name": "Ability - Sonar Mount",
-        "description": "Allows you to use the {Sonar Mount} ability",
-        "monsters": [ "Akhlut" ]
-      },
-      {
-        "name": "Ability - Spore Shroud",
-        "description": "Allows you to use the {Spore Shroud} ability",
-        "monsters": [ "Fumagus", "Amberlgna" ]
-      },
-      {
-        "name": "Ability - Summon Big Rock",
-        "description": "Allows you to use the {Summon Big Rock} ability",
-        "monsters": [ "Brutus", "Mega Rock", "Promethean" ]
-      },
-      {
-        "name": "Ability - Summon Mushroom",
-        "description": "Allows you to use the {Summon Mushroom} ability",
-        "monsters": [ "Fungi", "Tanuki" ]
-      },
-      {
-        "name": "Ability - Summon Rock",
-        "description": "Allows you to use the {Summon Rock} ability",
-        "monsters": [ "Rocky", "Druid Oak", "Kame" ]
-      },
-      {
-        "name": "Ability - Swimming",
-        "description": "Allows you to use the {Swimming} ability",
-        "monsters": [ "Koi" ]
-      },
-      {
-        "name": "Ability - Tackle",
-        "description": "Allows you to use the {Tackle} ability",
-        "monsters": [ "Spectral Toad", "Yowie", "Steam Golem", "Vasuki", "Brawlish", "Targoat" ]
-      },
-      {
-        "name": "Ability - Tar Mount",
-        "description": "Allows you to use the {Tar Mount} ability",
-        "monsters": [ "Tar Blob" ]
-      },
-      {
-        "name": "Ability - Toxic Freeze",
-        "description": "Allows you to use the {Toxic Freeze} ability",
-        "monsters": [ "Spinner" ]
-      },
-      {
-        "name": "Ability - Toxic Slam",
-        "description": "Allows you to use the {Toxic Slam} ability",
-        "monsters": [ "Goblin Brute" ]
-      }
-    ],
-    "Type": [
-      {
-        "name": "Spectral Flame",
-        "description": "Allows you to use the explore ability for: Spectral Wolf, Spectral Toad, Spectral Eagle, Spectral Lion",
-        "monsters": [ "Spectral Wolf", "Spectral Toad", "Spectral Eagle", "Spectral Lion" ]
-      },
-      {
-        "name": "Slime Snack",
-        "description": "Allows you to use the explore ability for: Blob, Ice Blob, Lava Blob, Rainbow Blob, King Blob, Tar Blob",
-        "monsters": [ "Blob", "Ice Blob", "Lava Blob", "Rainbow Blob", "King Blob", "Tar Blob" ]
-      },
-      {
-        "name": "Insect Pheromones",
-        "description": "Allows you to use the explore ability for: Magmapillar, Magmamoth, Beetloid, Glowfly, Glowdra, Blade Widow, Argiope, Spinner, Darnation",
-        "monsters": [ "Magmapillar", "Magmamoth", "Beetloid", "Glowfly", "Glowdra", "Blade Widow", "Argiope", "Spinner", "Darnation" ]
-      },
-      {
-        "name": "Monster Treat",
-        "description": "Allows you to use the explore ability for: Yowie, Nightwing, Molebear, Caraglow, Aurumtail, Vasuki, Qilin, Targoat, Troll",
-        "monsters": [ "Yowie", "Nightwing", "Molebear", "Caraglow", "Aurumtail", "Vasuki", "Qilin", "Targoat", "Troll" ]
-      },
-      {
-        "name": "Repair Kit",
-        "description": "Allows you to use the explore ability for: Steam Golem, Crackle Knight, Sizzle Knight, Ornithopter, Oculus, Goblin Pilot, Promethean",
-        "monsters": [ "Steam Golem", "Crackle Knight", "Sizzle Knight", "Ornithopter", "Oculus", "Goblin Pilot", "Promethean" ]
-      },
-      {
-        "name": "Ancient Encyclopedia",
-        "description": "Allows you to use the explore ability for: Crystal Snail, Kongamato, Rampede, Rathops, Krakaturtle, Amberlgna, Terradrile",
-        "monsters": [ "Crystal Snail", "Kongamato", "Rampede", "Rathops", "Krakaturtle", "Amberlgna", "Terradrile" ]
-      },
-      {
-        "name": "Training Dummy",
-        "description": "Allows you to use the explore ability for: Catzerker, Monk, Minitaur, Megataur, Kame, Imori, Salahammer, Brutus, Worm, Vodinoy",
-        "monsters": [ "Catzerker", "Monk", "Minitaur", "Megataur", "Kame", "Imori", "Salahammer", "Brutus", "Worm", "Vodinoy" ]
-      },
-      {
-        "name": "Spellbook",
-        "description": "Allows you to use the explore ability for: Specter, Manticorb, Stolby, Arachlich, Vertraag, Ascendant, Fumagus",
-        "monsters": [ "Specter", "Manticorb", "Stolby", "Arachlich", "Vertraag", "Ascendant", "Fumagus" ]
-      },
-      {
-        "name": "Goblin Charm",
-        "description": "Allows you to use the explore ability for: Goblin Brute, Goblin Hood, Goblin Warlock, Goblin King, Goblin Miner",
-        "monsters": [ "Goblin Brute", "Goblin Hood", "Goblin Warlock", "Goblin King", "Goblin Miner" ]
-      },
-      {
-        "name": "Fishing Lure",
-        "description": "Allows you to use the explore ability for: Toxiquus, Akhlut, Koi, Ucan, Brawlish, Thornith, Nautilid",
-        "monsters": [ "Toxiquus", "Akhlut", "Koi", "Ucan", "Brawlish", "Thornish", "Nautilid" ]
-      },
-      {
-        "name": "Dragon Orb",
-        "description": "Allows you to use the explore ability for: Ninki, Ninki Nanka, Skorch, Draconov, Dracogran, Dracozul, Draconoir, Dracomer",
-        "monsters": [ "Ninki", "Ninki Nanka", "Skorch", "Draconov", "Dracogran", "Dracozul", "Draconoir", "Dracomer" ]
-      },
-      {
-        "name": "Power Suit",
-        "description": "Allows you to use the explore ability for: Changeling",
-        "monsters": [ "Changeling" ]
-      },
-      {
-        "name": "Spirit Charm",
-        "description": "Allows you to use the explore ability for: Tengu, Frosty, Sycophantom, Kanko, Polterofen, Mimic",
-        "monsters": [ "Tengu", "Frosty", "Sycophantom", "Kanko", "Polterofen", "Mimic" ]
-      },
-      {
-        "name": "Green Thumb",
-        "description": "Allows you to use the explore ability for: Rocky, Fungi, Druid Oak, Raduga, Mogwai, Tanuki, Mega Rock",
-        "monsters": [ "Rocky", "Fungi", "Druid Oak", "Raduga", "Mogwai", "Tanuki", "Mega Rock" ]
-      },
-      {
-        "name": "Bird Seed",
-        "description": "Allows you to use the explore ability for: Vaero, Silvaero, Dodo, Shockhopper, Plague Egg, Gryphonix, Bard",
-        "monsters": [ "Vaero", "Silvaero", "Dodo", "Shockhopper", "Plague Egg", "Gryphonix", "Bard" ]
-      },
-      {
-        "name": "Ahrimaaya",
-        "description": "Allows you to use the explore ability for: Grummy, G'rulu, Mad Eye, Mad Lord, Elderjel, Asura, Moccus, Sutsune, Thanatos, Aazerach, Diavola",
-        "monsters": [ "Grummy", "G'rulu", "Mad Eye", "Mad Lord", "Elderjel", "Asura", "Moccus", "Sutsune", "Thanatos", "Aazerach", "Diavola" ]
-      }
-    ],
-    "Species": [
-      {
-        "name": "Spectral Flame (Wolf)",
-        "description": "Allows you to use {Spectral Wolf's} explore ability",
-        "monsters": [ "Spectral Wolf" ]
-      },
-      {
-        "name": "Spectral Flame (Toad)",
-        "description": "Allows you to use {Spectral Toad's} explore ability",
-        "monsters": [ "Spectral Toad" ]
-      },
-      {
-        "name": "Spectral Flame (Eagle)",
-        "description": "Allows you to use {Spectral Eagle's} explore ability",
-        "monsters": [ "Spectral Eagle" ]
-      },
-      {
-        "name": "Spectral Flame (Lion)",
-        "description": "Allows you to use {Spectral Lion's} explore ability",
-        "monsters": [ "Spectral Lion" ]
-      },
-      {
-        "name": "Slime Snack",
-        "description": "Allows you to use {Blob's} explore ability",
-        "monsters": [ "Blob" ]
-      },
-      {
-        "name": "Magmamoth Pheromones",
-        "description": "Allows you to use {Magmapillar's} and {Magmamoth's} explore abilities",
-        "monsters": [ "Magmamoth", "Magmapillar" ]
-      },
-      {
-        "name": "Pet Rock",
-        "description": "Allows you to use {Rocky's'} explore ability",
-        "monsters": [ "Rocky" ]
-      },
-      {
-        "name": "Vaero Harness",
-        "description": "Allows you to use {Vaero's} explore ability",
-        "monsters": [ "Vaero" ]
-      },
-      {
-        "name": "Catzerker's Blade",
-        "description": "Allows you to use {Catzerker's} explore ability",
-        "monsters": [ "Catzerker" ]
-      },
-      {
-        "name": "Yowie Treat",
-        "description": "Allows you to use {Yowie's} explore ability",
-        "monsters": [ "Yowie" ]
-      },
-      {
-        "name": "Pneumatic Piston",
-        "description": "Allows you to use {Steam Golem's} explore ability",
-        "monsters": [ "Steam Golem" ]
-      },
-      {
-        "name": "Small Reliquary",
-        "description": "Allows you to use {Monk's} explore ability",
-        "monsters": [ "Monk" ]
-      },
-      {
-        "name": "Alien Shard",
-        "description": "Allows you to use {Grummy's} and {G'rulu's} explore abilities",
-        "monsters": [ "Grummy", "G'rulu" ]
-      },
-      {
-        "name": "Tengu Mask",
-        "description": "Allows you to use {Tengu's} explore ability",
-        "monsters": [ "Tengu" ]
-      },
-      {
-        "name": "Odd Mushroom",
-        "description": "Allows you to use {Fungi's} explore ability",
-        "monsters": [ "Fungi" ]
-      },
-      {
-        "name": "Frigid Wisp",
-        "description": "Allows you to use {Frosty's} explore ability",
-        "monsters": [ "Frosty" ]
-      },
-      {
-        "name": "Double-Headed Axe",
-        "description": "Allows you to use {Minitaur's} explore ability",
-        "monsters": [ "Minitaur" ]
-      },
-      {
-        "name": "Black Flame",
-        "description": "Allows you to use {Specter's} explore ability",
-        "monsters": [ "Specter" ]
-      },
-      {
-        "name": "Knightly Shield",
-        "description": "Allows you to use {Crackle Knight's} and {Sizzle Knight's} explore ability",
-        "monsters": [ "Crackle Knight", "Sizzle Knight" ]
-      },
-      {
-        "name": "Aqueous Humour",
-        "description": "Allows you to use {Mad Eye's} explore ability",
-        "monsters": [ "Mad Eye" ]
-      },
-      {
-        "name": "Sonar Detector",
-        "description": "Allows you to use {Nightwing's} explore ability",
-        "monsters": [ "Nightwing" ]
-      },
-      {
-        "name": "Toxic Sludge",
-        "description": "Allows you to use {Toxiquus's} explore ability",
-        "monsters": [ "Toxiquus" ]
-      },
-      {
-        "name": "Lightning Rod",
-        "description": "Allows you to use {Beetloid's} explore ability",
-        "monsters": [ "Beetloid" ]
-      },
-      {
-        "name": "Oaken Mask",
-        "description": "Allows you to use {Druid Oak's} explore ability",
-        "monsters": [ "Druid Oak" ]
-      },
-      {
-        "name": "Digging Claws",
-        "description": "Allows you to use {Molebear's} explore ability",
-        "monsters": [ "Molebear" ]
-      },
-      {
-        "name": "Glowfly Lantern",
-        "description": "Allows you to use {Glowfly's} and {Glowdra's} explore abilities",
-        "monsters": [ "Glowfly", "Glowdra" ]
-      },
-      {
-        "name": "Goblin Club",
-        "description": "Allows you to use {Goblin Brute's} explore ability",
-        "monsters": [ "Goblin Brute" ]
-      },
-      {
-        "name": "Goblin Bow",
-        "description": "Allows you to use {Goblin Hood's} explore ability",
-        "monsters": [ "Goblin Bow" ]
-      },
-      {
-        "name": "Goblin Staff",
-        "description": "Allows you to use {Goblin Warlock's} explore ability",
-        "monsters": [ "Goblin Warlock" ]
-      },
-      {
-        "name": "Goblin Crown",
-        "description": "Allows you to use {Goblin King's} explore ability",
-        "monsters": [ "Goblin King" ]
-      },
-      {
-        "name": "Prismatic Shard",
-        "description": "Allows you to use {Raduga's} explore ability",
-        "monsters": [ "Raduga" ]
-      },
-      {
-        "name": "Insulated Gloves",
-        "description": "Allows you to use {Ice Blob's} explore ability",
-        "monsters": [ "Ice Blob" ]
-      },
-      {
-        "name": "Caraglow Collar",
-        "description": "Allows you to use {Caraglow's} explore ability",
-        "monsters": [ "Caraglow" ]
-      },
-      {
-        "name": "Aurumtail Saddle",
-        "description": "Allows you to use {Aurumtail's} explore ability",
-        "monsters": [ "Aurumtail" ]
-      },
-      {
-        "name": "Giant Snowball",
-        "description": "Allows you to use {Megataur's} explore ability",
-        "monsters": [ "Megataur" ]
-      },
-      {
-        "name": "Mogwai Rulebook",
-        "description": "Allows you to use {Mogwai's} explore ability",
-        "monsters": [ "Mogwai" ]
-      },
-      {
-        "name": "Sign Language",
-        "description": "Allows you to use {Crystal Snail's} explore ability",
-        "monsters": [ "Crystal Snail" ]
-      },
-      {
-        "name": "Akhlut Saddle",
-        "description": "Allows you to use {Akhlut's} explore ability",
-        "monsters": [ "Akhlut" ]
-      },
-      {
-        "name": "Blade Widow Pheromones",
-        "description": "Allows you to use {Blade Widow's} explore ability",
-        "monsters": [ "Blade Widow" ]
-      },
-      {
-        "name": "River Clay",
-        "description": "Allows you to use {Ninki's} and {Ninki Nanka's} explore abilities",
-        "monsters": [ "Ninki", "Ninki Nanka" ]
-      },
-      {
-        "name": "Snake Stick",
-        "description": "Allows you to use {Vasuki's} explore ability",
-        "monsters": [ "Vasuki" ]
-      },
-      {
-        "name": "Kame Chi",
-        "description": "Allows you to use {Kame's} explore ability",
-        "monsters": [ "Kame" ]
-      },
-      {
-        "name": "Quick Wits",
-        "description": "Allows you to use {Sycophantom's} explore ability",
-        "monsters": [ "Sycophantom" ]
-      },
-      {
-        "name": "Flaming Spear",
-        "description": "Allows you to use {Imori's} explore ability",
-        "monsters": [ "Imori" ]
-      },
-      {
-        "name": "Qilin Saddle",
-        "description": "Allows you to use {Qilin's} explore ability",
-        "monsters": [ "Qilin" ]
-      },
-      {
-        "name": "Koi Lure",
-        "description": "Allows you to use {Koi's} explore ability",
-        "monsters": [ "Koi" ]
-      },
-      {
-        "name": "Magic Bell",
-        "description": "Allows you to use {Tanuki's} explore ability",
-        "monsters": [ "Tanuki" ]
-      },
-      {
-        "name": "Smoke Pipe",
-        "description": "Allows you to use {Kanko's} explore ability",
-        "monsters": [ "Kanko" ]
-      },
-      {
-        "name": "Dodo Saddle",
-        "description": "Allows you to use {Dodo's} explore ability",
-        "monsters": [ "Dodo" ]
-      },
-      {
-        "name": "Kongamato Harness",
-        "description": "Allows you to use {Kongamato's} explore ability",
-        "monsters": [ "Kongamato" ]
-      },
-      {
-        "name": "Ucan Lure",
-        "description": "Allows you to use {Ucan's} explore ability",
-        "monsters": [ "Ucan" ]
-      },
-      {
-        "name": "Brawlish Lure",
-        "description": "Allows you to use {Brawlish's} explore ability",
-        "monsters": [ "Brawlish" ]
-      },
-      {
-        "name": "Thornish Lure",
-        "description": "Allows you to use {Thornish's} explore ability",
-        "monsters": [ "Thornish" ]
-      },
-      {
-        "name": "Nautilid Lure",
-        "description": "Allows you to use {Nautilid's} explore ability",
-        "monsters": [ "Nautilid" ]
-      },
-      {
-        "name": "Silvaero Harness",
-        "description": "Allows you to use {Silvaero's} explore ability",
-        "monsters": [ "Silvaero" ]
-      },
-      {
-        "name": "Elderjel Lure",
-        "description": "Allows you to use {Elderjel's} explore ability",
-        "monsters": [ "Elderjel" ]
-      },
-      {
-        "name": "Mana Crystal",
-        "description": "Allows you to use {Manticorb's} explore ability",
-        "monsters": [ "Manticorb" ]
-      },
-      {
-        "name": "Mining Helmet",
-        "description": "Allows you to use {Goblin Miner's} explore ability",
-        "monsters": [ "Goblin Miner" ]
-      },
-      {
-        "name": "Sledgehammer",
-        "description": "Allows you to use {Salahammer's} explore ability",
-        "monsters": [ "Sledgehammer" ]
-      },
-      {
-        "name": "Heat-Proof Gloves",
-        "description": "Allows you to use {Lava Blob's} explore ability",
-        "monsters": [ "Lava Blob" ]
-      },
-      {
-        "name": "Draconov Harness",
-        "description": "Allows you to use {Draconov's} explore ability",
-        "monsters": [ "Draconov" ]
-      },
-      {
-        "name": "Dracogran Harness",
-        "description": "Allows you to use {Dracogran's} explore ability",
-        "monsters": [ "Dracogran" ]
-      },
-      {
-        "name": "Asura's Girdle",
-        "description": "Allows you to use {Asura's} explore ability",
-        "monsters": [ "Asura" ]
-      },
-      {
-        "name": "Candle Wax",
-        "description": "Allows you to use {Skorch's} explore ability",
-        "monsters": [ "Skorch" ]
-      },
-      {
-        "name": "Stolby's Spellbook",
-        "description": "Allows you to use {Stolby's} explore ability",
-        "monsters": [ "Stolby" ]
-      },
-      {
-        "name": "Ornithopter Harness",
-        "description": "Allows you to use {Ornithopter's} explore ability",
-        "monsters": [ "Ornithopter" ]
-      },
-      {
-        "name": "Lump of Coal",
-        "description": "Allows you to use {Polterofen's} explore ability",
-        "monsters": [ "Polterofen" ]
-      },
-      {
-        "name": "Mechanical Lens",
-        "description": "Allows you to use {Oculus's} explore ability",
-        "monsters": [ "Oculus" ]
-      },
-      {
-        "name": "Lockpicks",
-        "description": "Allows you to use {Mimic's} explore ability",
-        "monsters": [ "Mimic" ]
-      },
-      {
-        "name": "Pilot's License",
-        "description": "Allows you to use {Goblin Pilot's} explore ability",
-        "monsters": [ "Goblin Pilot" ]
-      },
-      {
-        "name": "Shiny Pebble",
-        "description": "Allows you to use {Shockhopper's} explore ability",
-        "monsters": [ "Shockhopper" ]
-      },
-      {
-        "name": "Targoat Horn",
-        "description": "Allows you to use {Targoat's} explore ability",
-        "monsters": [ "Targoat" ]
-      },
-      {
-        "name": "Dracozul Harness",
-        "description": "Allows you to use {Dracozul's} explore ability",
-        "monsters": [ "Dracozul" ]
-      },
-      {
-        "name": "Troll Toll",
-        "description": "Allows you to use {Troll's} explore ability",
-        "monsters": [ "Troll" ]
-      },
-      {
-        "name": "Brutus Treat",
-        "description": "Allows you to use {Brutus's} explore ability",
-        "monsters": [ "Brutus" ]
-      },
-      {
-        "name": "Pet Boulder",
-        "description": "Allows you to use {Mega Rock's} explore ability",
-        "monsters": [ "Mega Rock" ]
-      },
-      {
-        "name": "Argiope Pheromones",
-        "description": "Allows you to use {Argiope's} explore ability",
-        "monsters": [ "Argiope" ]
-      },
-      {
-        "name": "Phylactery",
-        "description": "Allows you to use {Arachlich's} explore ability",
-        "monsters": [ "Arachlich" ]
-      },
-      {
-        "name": "Moccus Saddle",
-        "description": "Allows you to use {Moccus's} explore ability",
-        "monsters": [ "Moccus" ]
-      },
-      {
-        "name": "Promethean Battery",
-        "description": "Allows you to use {Promethean's} explore ability",
-        "monsters": [ "Promethean" ]
-      },
-      {
-        "name": "Draconoir Harness",
-        "description": "Allows you to use {Draocnoir's} explore ability",
-        "monsters": [ "Draconoir" ]
-      },
-      {
-        "name": "Spare Outfit",
-        "description": "Allows you to use {Spinner's} explore ability",
-        "monsters": [ "Spinner" ]
-      },
-      {
-        "name": "Plague Mask",
-        "description": "Allows you to use {Plague Egg's} explore ability",
-        "monsters": [ "Plague Egg" ]
-      },
-      {
-        "name": "Sutsune's True Name",
-        "description": "Allows you to use {Sutsune's} explore ability",
-        "monsters": [ "Sutsune" ]
-      },
-      {
-        "name": "Darnation Pheromones",
-        "description": "Allows you to use {Darnation's} explore ability",
-        "monsters": [ "Darnation" ]
-      },
-      {
-        "name": "Thanatos' Scythe",
-        "description": "Allows you to use {Thanatos'} explore ability",
-        "monsters": [ "Thanatos" ]
-      },
-      {
-        "name": "Rainbow Slime Snack",
-        "description": "Allows you to use {Rainbow Blob's} explore ability",
-        "monsters": [ "Rainbow Blob" ]
-      },
-      {
-        "name": "Power Suit",
-        "description": "Allows you to use {Changeling's} explore ability",
-        "monsters": [ "Changeling" ]
-      },
-      {
-        "name": "Blob Crown",
-        "description": "Allows you to use {King Blob's} explore ability",
-        "monsters": [ "King Blob" ]
-      },
-      {
-        "name": "Grapnel Launcher",
-        "description": "Allows you to use {Worm's} explore ability",
-        "monsters": [ "Worm" ]
-      },
-      {
-        "name": "Ahrimaaya",
-        "description": "Allows you to use {Aazerach's'} explore ability",
-        "monsters": [ "Aazerach" ]
-      },
-      {
-        "name": "Vodinoy's Trident",
-        "description": "Allows you to use {Vodinoy's} explore ability",
-        "monsters": [ "Vodinoy" ]
-      },
-      {
-        "name": "Big Plant Pot",
-        "description": "Allows you to use {Diavola's} explore ability",
-        "monsters": [ "Diavola" ]
-      },
-      {
-        "name": "Gryphonix Saddle",
-        "description": "Allows you to use {Gryphonix's} explore ability",
-        "monsters": [ "Gryphonix" ]
-      },
-      {
-        "name": "Divine Hourglass",
-        "description": "Allows you to use {Vertraag's} explore ability",
-        "monsters": [ "Vertraag" ]
-      },
-      {
-        "name": "Mad Lord Contract",
-        "description": "Allows you to use {Mad Lord's} explore ability",
-        "monsters": [ "Mad Lord" ]
-      },
-      {
-        "name": "Nimbus Cloud",
-        "description": "Allows you to use {Ascendant's} explore ability",
-        "monsters": [ "Ascendant" ]
-      },
-      {
-        "name": "Strange Spores",
-        "description": "Allows you to use {Fumagus'} explore ability",
-        "monsters": [ "Fumagus" ]
-      },
-      {
-        "name": "Rampede Saddle",
-        "description": "Allows you to use {Rampede's} explore ability",
-        "monsters": [ "Rampede" ]
-      },
-      {
-        "name": "Rathops Saddle",
-        "description": "Allows you to use {Rathops's} explore ability",
-        "monsters": [ "Rathops" ]
-      },
-      {
-        "name": "Krakaturtle Harness",
-        "description": "Allows you to use {Krakaturtle's} explore ability",
-        "monsters": [ "Krakaturtle" ]
-      },
-      {
-        "name": "Tar Blob Saddle",
-        "description": "Allows you to use {Tar Blob's} explore ability",
-        "monsters": [ "Tar Blob" ]
-      },
-      {
-        "name": "Amberlgna Pheromones",
-        "description": "Allows you to use {Amberlgna's} explore ability",
-        "monsters": [ "Amberlgna" ]
-      },
-      {
-        "name": "Dracomer Harness",
-        "description": "Allows you to use {Dracomer's} explore ability",
-        "monsters": [ "Dracomer" ]
-      },
-      {
-        "name": "Terradrile's Lodestone",
-        "description": "Allows you to use {Terradrile's} explore ability",
-        "monsters": [ "Terradrile" ]
-      },
-      {
-        "name": "Bard's Lute",
-        "description": "Allows you to use {Bard's} explore ability",
-        "monsters": [ "Bard" ]
-      }
-    ]
+[
+  {
+    "gameObjectName": "LootersHandbook",
+    "name": "Looter's Handbook",
+    "description": "Chests' appearance matches the treasure they hold: purple chests have progression and items green chests have useful items. WARNING: Traps can be in chests of any color.",
+    "icon": "icon_tome",
+    "type": "unique",
+    "classification": 2
+  },
+  {
+    "gameObjectName": "AbilityBlobForm",
+    "name": "Ability - Blob Form",
+    "description": "Allows you to use the {Blob Form} ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "AbilityBubbleBurst",
+    "name": "Ability - Bubble Burst",
+    "description": "Allows you to use the {Bubble Burst} ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "AbilityChargingMount",
+    "name": "Ability - Charging Mount",
+    "description": "Allows you to use the {Charging Mount} ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "AbilityClaws",
+    "name": "Ability - Claws",
+    "description": "Allows you to use the {Claws} ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "AbilityCorrosiveJabs",
+    "name": "Ability - Corrosive Jabs",
+    "description": "Allows you to use the {Corrosite Jabs} ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "AbilityCrush",
+    "name": "Ability - Crush",
+    "description": "Allows you to use the {Crush} ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "AbilityDualMobility",
+    "name": "Ability - Dual Mobility",
+    "description": "Allows you to use the {Dual Mobility} ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "AbilityFieryShots",
+    "name": "Ability - Fiery Shots",
+    "description": "Allows you to use the {Fiery Shots} ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "AbilityFlying",
+    "name": "Ability - Flying",
+    "description": "Allows you to use the {Flying} ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "AbilityFreeze",
+    "name": "Ability - Freeze",
+    "description": "Allows you to use the {Freeze} ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "AbilityGhostForm",
+    "name": "Ability - Ghost Form",
+    "description": "Allows you to use the {Ghost Form} ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "AbilityGrapple",
+    "name": "Ability - Grapple",
+    "description": "Allows you to use the {Grapple} ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "AbilityHeavyPunch",
+    "name": "Ability - Heavy Punch",
+    "description": "Allows you to use the {Heavy Punch} ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "AbilityIgnite",
+    "name": "Ability - Ignite",
+    "description": "Allows you to use the {Ignite} ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "AbilityImprovedFlying",
+    "name": "Ability - Improved Flying",
+    "description": "Allows you to use the {Improved Flying} ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "AbilityImprovedSwimming",
+    "name": "Ability - Improved Swimming",
+    "description": "Allows you to use the {Improved Swimming} ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "AbilityJewelBlast",
+    "name": "Ability - Jewel Blast",
+    "description": "Allows you to use the {Jewel Blast} ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "AbilityLevitate",
+    "name": "Ability - Levitate",
+    "description": "Allows you to use the {Levitate} ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "AbilityLight",
+    "name": "Ability - Light",
+    "description": "Allows you to use the {Light} ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "AbilityLightCrush",
+    "name": "Ability - Light Crush",
+    "description": "Allows you to use the {Light Crush} ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "AbilityLightningBolt",
+    "name": "Ability - Lightning Bolt",
+    "description": "Allows you to use the {Lightning Bolt} ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "AbilityLoftyMount",
+    "name": "Ability - Lofty Mount",
+    "description": "Allows you to use the {Lofty Mount} ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "AbilityMinnesang",
+    "name": "Ability - Minnesang",
+    "description": "Allows you to use the {Minnesang} ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "AbilityMorphBall",
+    "name": "Ability - Morph Ball",
+    "description": "Allows you to use the {Morph Ball} ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "AbilityMount",
+    "name": "Ability - Mount",
+    "description": "Allows you to use the {Mount} ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "AbilitySecretionVision",
+    "name": "Ability - Secret Vision",
+    "description": "Allows you to use the {Secret Vision} ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "AbilityShockFreeze",
+    "name": "Ability - Shock Freeze",
+    "description": "Allows you to use the {Shock Freeze} ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "AbilitySlash",
+    "name": "Ability - Slash",
+    "description": "Allows you to use the {Slash} ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "AbilitySlimeShot",
+    "name": "Ability - Slime Shot",
+    "description": "Allows you to use the {Slime Shot} ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "AbilitySnowballToss",
+    "name": "Ability - Snowball Toss",
+    "description": "Allows you to use the {Snowball Toss} ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "AbilitySonar",
+    "name": "Ability - Sonar",
+    "description": "Allows you to use the {Sonar} ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "AbilitySonarMount",
+    "name": "Ability - Sonar Mount",
+    "description": "Allows you to use the {Sonar Mount} ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "AbilitySporeShroud",
+    "name": "Ability - Spore Shroud",
+    "description": "Allows you to use the {Spore Shroud} ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "AbilitySummonBigRock",
+    "name": "Ability - Summon Big Rock",
+    "description": "Allows you to use the {Summon Big Rock} ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "AbilitySummonMushroom",
+    "name": "Ability - Summon Mushroom",
+    "description": "Allows you to use the {Summon Mushroom} ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "AbilitySummonRock",
+    "name": "Ability - Summon Rock",
+    "description": "Allows you to use the {Summon Rock} ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "AbilitySwimming",
+    "name": "Ability - Swimming",
+    "description": "Allows you to use the {Swimming} ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "AbilityTackle",
+    "name": "Ability - Tackle",
+    "description": "Allows you to use the {Tackle} ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "AbilityTarMount",
+    "name": "Ability - Tar Mount",
+    "description": "Allows you to use the {Tar Mount} ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "AbilityToxicFreeze",
+    "name": "Ability - Toxic Freeze",
+    "description": "Allows you to use the {Toxic Freeze} ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "AbilityToxicSlam",
+    "name": "Ability - Toxic Slam",
+    "description": "Allows you to use the {Toxic Slam} ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+
+  {
+    "gameObjectName": "SpectralFlame",
+    "name": "Spectral Flame",
+    "description": "Allows you to use the explore ability for: Spectral Wolf, Spectral Toad, Spectral Eagle, Spectral Lion",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "SlimeSnack",
+    "name": "Slime Snack",
+    "description": "Allows you to use the explore ability for: Blob, Ice Blob, Lava Blob, Rainbow Blob, King Blob, Tar Blob",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "InsectPheromones",
+    "name": "Insect Pheromones",
+    "description": "Allows you to use the explore ability for: Magmapillar, Magmamoth, Beetloid, Glowfly, Glowdra, Blade Widow, Argiope, Spinner, Darnation",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "MonsterTreat",
+    "name": "Monster Treat",
+    "description": "Allows you to use the explore ability for: Yowie, Nightwing, Molebear, Caraglow, Aurumtail, Vasuki, Qilin, Targoat, Troll",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "RepairKit",
+    "name": "Repair Kit",
+    "description": "Allows you to use the explore ability for: Steam Golem, Crackle Knight, Sizzle Knight, Ornithopter, Oculus, Goblin Pilot, Promethean",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "AncientEncyclopedia",
+    "name": "Ancient Encyclopedia",
+    "description": "Allows you to use the explore ability for: Crystal Snail, Kongamato, Rampede, Rathops, Krakaturtle, Amberlgna, Terradrile",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "TrainingDummy",
+    "name": "Training Dummy",
+    "description": "Allows you to use the explore ability for: Catzerker, Monk, Minitaur, Megataur, Kame, Imori, Salahammer, Brutus, Worm, Vodinoy",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "Spellbook",
+    "name": "Spellbook",
+    "description": "Allows you to use the explore ability for: Specter, Manticorb, Stolby, Arachlich, Vertraag, Ascendant, Fumagus",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "GoblinCharm",
+    "name": "Goblin Charm",
+    "description": "Allows you to use the explore ability for: Goblin Brute, Goblin Hood, Goblin Warlock, Goblin King, Goblin Miner",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "FishingLure",
+    "name": "Fishing Lure",
+    "description": "Allows you to use the explore ability for: Toxiquus, Akhlut, Koi, Ucan, Brawlish, Thornith, Nautilid",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "DragonOrb",
+    "name": "Dragon Orb",
+    "description": "Allows you to use the explore ability for: Ninki, Ninki Nanka, Skorch, Draconov, Dracogran, Dracozul, Draconoir, Dracomer",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "PowerSuit",
+    "name": "Power Suit",
+    "description": "Allows you to use the explore ability for: Changeling",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "SpiritCharm",
+    "name": "Spirit Charm",
+    "description": "Allows you to use the explore ability for: Tengu, Frosty, Sycophantom, Kanko, Polterofen, Mimic",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "GreenThumb",
+    "name": "Green Thumb",
+    "description": "Allows you to use the explore ability for: Rocky, Fungi, Druid Oak, Raduga, Mogwai, Tanuki, Mega Rock",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "BirdSeed",
+    "name": "Bird Seed",
+    "description": "Allows you to use the explore ability for: Vaero, Silvaero, Dodo, Shockhopper, Plague Egg, Gryphonix, Bard",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  //{
+  //  "name": "Ahrimaaya",
+  //  "description": "Allows you to use the explore ability for: Grummy, G'rulu, Mad Eye, Mad Lord, Elderjel, Asura, Moccus, Sutsune, Thanatos, Aazerach, Diavola",
+  //  "icon": "icon_potion",
+  //  "type": "exploreitem",
+  //  "classification": 1
+  //},
+
+  {
+    "gameObjectName": "SpectralFlameWolf",
+    "name": "Spectral Flame (Wolf)",
+    "description": "Allows you to use {Spectral Wolf's} explore ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "SpectralFlameToad",
+    "name": "Spectral Flame (Toad)",
+    "description": "Allows you to use {Spectral Toad's} explore ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "SpectralFlameEagle",
+    "name": "Spectral Flame (Eagle)",
+    "description": "Allows you to use {Spectral Eagle's} explore ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "SpectralFlameLion",
+    "name": "Spectral Flame (Lion)",
+    "description": "Allows you to use {Spectral Lion's} explore ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "SlimeSnack",
+    "name": "Slime Snack",
+    "description": "Allows you to use {Blob's} explore ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "MagmamothPheromones",
+    "name": "Magmamoth Pheromones",
+    "description": "Allows you to use {Magmapillar's} and {Magmamoth's} explore abilities",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "PetRock",
+    "name": "Pet Rock",
+    "description": "Allows you to use {Rocky's'} explore ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "VaeroHarness",
+    "name": "Vaero Harness",
+    "description": "Allows you to use {Vaero's} explore ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "Catzerker's Blade'",
+    "name": "Catzerker's Blade",
+    "description": "Allows you to use {Catzerker's} explore ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "YowieTreat",
+    "name": "Yowie Treat",
+    "description": "Allows you to use {Yowie's} explore ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "PneumaticPiston",
+    "name": "Pneumatic Piston",
+    "description": "Allows you to use {Steam Golem's} explore ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "SmallReliquary",
+    "name": "Small Reliquary",
+    "description": "Allows you to use {Monk's} explore ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "AlienShard",
+    "name": "Alien Shard",
+    "description": "Allows you to use {Grummy's} and {G'rulu's} explore abilities",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "TenguMask",
+    "name": "Tengu Mask",
+    "description": "Allows you to use {Tengu's} explore ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "OddMushroom",
+    "name": "Odd Mushroom",
+    "description": "Allows you to use {Fungi's} explore ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "FrigidWisp",
+    "name": "Frigid Wisp",
+    "description": "Allows you to use {Frosty's} explore ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "DoubleHeadedAxe",
+    "name": "Double-Headed Axe",
+    "description": "Allows you to use {Minitaur's} explore ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "BlackFlame",
+    "name": "Black Flame",
+    "description": "Allows you to use {Specter's} explore ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "KnightlyShield",
+    "name": "Knightly Shield",
+    "description": "Allows you to use {Crackle Knight's} and {Sizzle Knight's} explore ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "AqueousHumor",
+    "name": "Aqueous Humor",
+    "description": "Allows you to use {Mad Eye's} explore ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "SonarDetector",
+    "name": "Sonar Detector",
+    "description": "Allows you to use {Nightwing's} explore ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "ToxicSludge",
+    "name": "Toxic Sludge",
+    "description": "Allows you to use {Toxiquus's} explore ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "LightningRod",
+    "name": "Lightning Rod",
+    "description": "Allows you to use {Beetloid's} explore ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "OakenMask",
+    "name": "Oaken Mask",
+    "description": "Allows you to use {Druid Oak's} explore ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "DiggingClaws",
+    "name": "Digging Claws",
+    "description": "Allows you to use {Molebear's} explore ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "GlowflyLantern",
+    "name": "Glowfly Lantern",
+    "description": "Allows you to use {Glowfly's} and {Glowdra's} explore abilities",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "GoblinClub",
+    "name": "Goblin Club",
+    "description": "Allows you to use {Goblin Brute's} explore ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "GoblinBow",
+    "name": "Goblin Bow",
+    "description": "Allows you to use {Goblin Hood's} explore ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "GoblinStaff",
+    "name": "Goblin Staff",
+    "description": "Allows you to use {Goblin Warlock's} explore ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "GoblinCrown",
+    "name": "Goblin Crown",
+    "description": "Allows you to use {Goblin King's} explore ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "PrismaticShard",
+    "name": "Prismatic Shard",
+    "description": "Allows you to use {Raduga's} explore ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "InsulatedGloves",
+    "name": "Insulated Gloves",
+    "description": "Allows you to use {Ice Blob's} explore ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "CaraglowCollar",
+    "name": "Caraglow Collar",
+    "description": "Allows you to use {Caraglow's} explore ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "AurumtailSaddle",
+    "name": "Aurumtail Saddle",
+    "description": "Allows you to use {Aurumtail's} explore ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "GiantSnowball",
+    "name": "Giant Snowball",
+    "description": "Allows you to use {Megataur's} explore ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "MogwaiRulebook",
+    "name": "Mogwai Rulebook",
+    "description": "Allows you to use {Mogwai's} explore ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "SignLanguage",
+    "name": "Sign Language",
+    "description": "Allows you to use {Crystal Snail's} explore ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "AkhlutSaddle",
+    "name": "Akhlut Saddle",
+    "description": "Allows you to use {Akhlut's} explore ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "BladeWidowPheromones",
+    "name": "Blade Widow Pheromones",
+    "description": "Allows you to use {Blade Widow's} explore ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "RiverClay",
+    "name": "River Clay",
+    "description": "Allows you to use {Ninki's} and {Ninki Nanka's} explore abilities",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "SnakeStick",
+    "name": "Snake Stick",
+    "description": "Allows you to use {Vasuki's} explore ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "KameChi",
+    "name": "Kame Chi",
+    "description": "Allows you to use {Kame's} explore ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "QuickWits",
+    "name": "Quick Wits",
+    "description": "Allows you to use {Sycophantom's} explore ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "FlamingSpear",
+    "name": "Flaming Spear",
+    "description": "Allows you to use {Imori's} explore ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "QilinSaddle",
+    "name": "Qilin Saddle",
+    "description": "Allows you to use {Qilin's} explore ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "Koi Lure",
+    "name": "Koi Lure",
+    "description": "Allows you to use {Koi's} explore ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "MagicBell",
+    "name": "Magic Bell",
+    "description": "Allows you to use {Tanuki's} explore ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "SmokePipe",
+    "name": "Smoke Pipe",
+    "description": "Allows you to use {Kanko's} explore ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "DodoSaddle",
+    "name": "Dodo Saddle",
+    "description": "Allows you to use {Dodo's} explore ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "KongamatoHarness",
+    "name": "Kongamato Harness",
+    "description": "Allows you to use {Kongamato's} explore ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "UcanLure",
+    "name": "Ucan Lure",
+    "description": "Allows you to use {Ucan's} explore ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "BrawlishLure",
+    "name": "Brawlish Lure",
+    "description": "Allows you to use {Brawlish's} explore ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "ThornishLure",
+    "name": "Thornish Lure",
+    "description": "Allows you to use {Thornish's} explore ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "NautilidLure",
+    "name": "Nautilid Lure",
+    "description": "Allows you to use {Nautilid's} explore ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "SilvaeroHarness",
+    "name": "Silvaero Harness",
+    "description": "Allows you to use {Silvaero's} explore ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "ElderjelLure",
+    "name": "Elderjel Lure",
+    "description": "Allows you to use {Elderjel's} explore ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "ManaCrystal",
+    "name": "Mana Crystal",
+    "description": "Allows you to use {Manticorb's} explore ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "MiningHelmet",
+    "name": "Mining Helmet",
+    "description": "Allows you to use {Goblin Miner's} explore ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "Sledgehammer",
+    "name": "Sledgehammer",
+    "description": "Allows you to use {Salahammer's} explore ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "Heat-Proof Gloves",
+    "name": "Heat-Proof Gloves",
+    "description": "Allows you to use {Lava Blob's} explore ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "DraconovHarness",
+    "name": "Draconov Harness",
+    "description": "Allows you to use {Draconov's} explore ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "DracogranHarness",
+    "name": "Dracogran Harness",
+    "description": "Allows you to use {Dracogran's} explore ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "AsurasGirdle",
+    "name": "Asura's Girdle",
+    "description": "Allows you to use {Asura's} explore ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "CandleWax",
+    "name": "Candle Wax",
+    "description": "Allows you to use {Skorch's} explore ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "StolbysSpellbook",
+    "name": "Stolby's Spellbook",
+    "description": "Allows you to use {Stolby's} explore ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "OrnithopterHarness",
+    "name": "Ornithopter Harness",
+    "description": "Allows you to use {Ornithopter's} explore ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "LumpOfCoal",
+    "name": "Lump of Coal",
+    "description": "Allows you to use {Polterofen's} explore ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "MechanicalLens",
+    "name": "Mechanical Lens",
+    "description": "Allows you to use {Oculus's} explore ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "Lockpicks",
+    "name": "Lockpicks",
+    "description": "Allows you to use {Mimic's} explore ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "PilotsLicense",
+    "name": "Pilot's License",
+    "description": "Allows you to use {Goblin Pilot's} explore ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "ShinyPebble",
+    "name": "Shiny Pebble",
+    "description": "Allows you to use {Shockhopper's} explore ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "TargoatHorn",
+    "name": "Targoat Horn",
+    "description": "Allows you to use {Targoat's} explore ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "DracozulHarness",
+    "name": "Dracozul Harness",
+    "description": "Allows you to use {Dracozul's} explore ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "TrollToll",
+    "name": "Troll Toll",
+    "description": "Allows you to use {Troll's} explore ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "BrutusTreat",
+    "name": "Brutus Treat",
+    "description": "Allows you to use {Brutus's} explore ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "PetBoulder",
+    "name": "Pet Boulder",
+    "description": "Allows you to use {Mega Rock's} explore ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "ArgiopePheromones",
+    "name": "Argiope Pheromones",
+    "description": "Allows you to use {Argiope's} explore ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "Phylactery",
+    "name": "Phylactery",
+    "description": "Allows you to use {Arachlich's} explore ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "MoccusSaddle",
+    "name": "Moccus Saddle",
+    "description": "Allows you to use {Moccus's} explore ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "PrometheanBattery",
+    "name": "Promethean Battery",
+    "description": "Allows you to use {Promethean's} explore ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "DraconoirHarness",
+    "name": "Draconoir Harness",
+    "description": "Allows you to use {Draocnoir's} explore ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "SpareOutfit",
+    "name": "Spare Outfit",
+    "description": "Allows you to use {Spinner's} explore ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "PlagueMask",
+    "name": "Plague Mask",
+    "description": "Allows you to use {Plague Egg's} explore ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "SutsunesTrueName",
+    "name": "Sutsune's True Name",
+    "description": "Allows you to use {Sutsune's} explore ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "DarnationPheromones",
+    "name": "Darnation Pheromones",
+    "description": "Allows you to use {Darnation's} explore ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "ThanatosScythe",
+    "name": "Thanatos' Scythe",
+    "description": "Allows you to use {Thanatos'} explore ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "RainbowSlimeSnack",
+    "name": "Rainbow Slime Snack",
+    "description": "Allows you to use {Rainbow Blob's} explore ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "PowerSuit",
+    "name": "Power Suit",
+    "description": "Allows you to use {Changeling's} explore ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "BlobCrown",
+    "name": "Blob Crown",
+    "description": "Allows you to use {King Blob's} explore ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "GrapnelLauncher",
+    "name": "Grapnel Launcher",
+    "description": "Allows you to use {Worm's} explore ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  //{
+  //  "gameObjectName": "Ahrimaaya",
+  //  "name": "Ahrimaaya",
+  //  "description": "Allows you to use {Aazerach's'} explore ability"
+  //},
+  {
+    "gameObjectName": "VodinoysTrident",
+    "name": "Vodinoy's Trident",
+    "description": "Allows you to use {Vodinoy's} explore ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "BigPlantPot",
+    "name": "Big Plant Pot",
+    "description": "Allows you to use {Diavola's} explore ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "GryphonixSaddle",
+    "name": "Gryphonix Saddle",
+    "description": "Allows you to use {Gryphonix's} explore ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "DivineHourglass",
+    "name": "Divine Hourglass",
+    "description": "Allows you to use {Vertraag's} explore ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "MadLordContract",
+    "name": "Mad Lord Contract",
+    "description": "Allows you to use {Mad Lord's} explore ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "NimbusCloud",
+    "name": "Nimbus Cloud",
+    "description": "Allows you to use {Ascendant's} explore ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "StrangeSpores",
+    "name": "Strange Spores",
+    "description": "Allows you to use {Fumagus'} explore ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "RampedeSaddle",
+    "name": "Rampede Saddle",
+    "description": "Allows you to use {Rampede's} explore ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "RathopsSaddle",
+    "name": "Rathops Saddle",
+    "description": "Allows you to use {Rathops's} explore ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "KrakaturtleHarness",
+    "name": "Krakaturtle Harness",
+    "description": "Allows you to use {Krakaturtle's} explore ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "TarBlobSaddle",
+    "name": "Tar Blob Saddle",
+    "description": "Allows you to use {Tar Blob's} explore ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "AmberlgnaPheromones",
+    "name": "Amberlgna Pheromones",
+    "description": "Allows you to use {Amberlgna's} explore ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "DracomerHarness",
+    "name": "Dracomer Harness",
+    "description": "Allows you to use {Dracomer's} explore ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "TarradrilesLodestone",
+    "name": "Terradrile's Lodestone",
+    "description": "Allows you to use {Terradrile's} explore ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObjectName": "BardsLute",
+    "name": "Bard's Lute",
+    "description": "Allows you to use {Bard's} explore ability",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+
+  {
+    "gameObject": "ProgressiveMobility",
+    "name": "Progressive Mobility",
+    "description": "Unlocks Flying -> Improved Flying -> Swimming -> Improved Swimming -> Dual Mobility",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObject": "ProgressiveTerrain",
+    "name": "Progressive Terrain",
+    "description": "Unlocks Grapple -> Blob Form / Morph Ball -> Secret Vision",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObject": "ProgressiveMount",
+    "name": "Progressive Mount",
+    "description": "Unlocks Mount -> Charging Mount / Tar Mount -> Lofty Mount",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObject": "ProgressiveWalls",
+    "name": "Progressive Walls",
+    "description": "Unlocks Claws / Slash / Heavy Punch / Tackle -> Crush / Light Crush -> Minnesang",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObject": "ProgressiveBoulders",
+    "name": "Progressive Boulders",
+    "description": "Unlocks Summon Rock / Summon Mushroom -> Summon Big Rock -> Levitate",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObject": "ProgressiveFireOrbs",
+    "name": "Progressive Fire Orbs",
+    "description": "Unlocks Ignite -> Fiery Shots",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObject": "ProgressiveWaterOrbs",
+    "name": "Progressive Water Orbs",
+    "description": "Unlocks Bubble Burst -> Corrosive Jabs",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObject": "ProgressiveLightningOrbs",
+    "name": "Progressive Lightning Orbs",
+    "description": "Unlocks Lightning Bolt -> Shock Freeze",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObject": "ProgressiveEarthOrbs",
+    "name": "Progressive Earth Orbs",
+    "description": "Unlocks Toxic Slam -> Slime Shot / Jewel Blast -> Toxic Freeze",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObject": "ProgressiveIceOrbs",
+    "name": "Progressive Ice Orbs",
+    "description": "Unlocks Freeze -> Snowball Toss",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObject": "ProgressiveLight",
+    "name": "Progressive Light",
+    "description": "Unlocks Light / Sonar -> Sonar Mount",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObject": "ProgressiveShroud",
+    "name": "Progressive Shroud",
+    "description": "Unlocks Ghost Form -> Spore Shroud",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+
+  {
+    "gameObject": "ComboFlight",
+    "name": "Combo Flight",
+    "description": "Unlocks Flying -> Improved Flying. Required to unlock Grapple, Lofty Mount, and Dual Mobility",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObject": "ComboSwimming",
+    "name": "Combo Swimming",
+    "description": "Unlocks Swimming -> Improved Swimming. Required to unlock Tar Mount and Dual Mobility",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObject": "ComboWalls",
+    "name": "Combo Walls",
+    "description": "Unlocks Claws / Slash -> Crush -> Minnesang. Required to unlock Tackle, Corrosive Jabs, Toxic Slam, Charging Mount, and Light Crush",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObject": "ComboBoulders",
+    "name": "Combo Boulders",
+    "description": "Unlocks Summon Rock / Summon Mushroom -> Summon Big Rock. Requried to unlock Tackle and Levitate",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObject": "ComboMount",
+    "name": "Combo Mount",
+    "description": "Unlocks Mount. Required to unlock Sonar Mount, Tar Mount, Charging Mount, and Lofty Mount",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObject": "ComboLight",
+    "name": "Combo Light",
+    "description": "Unlocks Light / Sonar. Required to unlock Sonar Mount and Light Crush",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObject": "ComboOrbs",
+    "name": "Combo Orbs",
+    "description": "Unlocks Ignite / Bubble Burst / Lightning Bolt / Freeze -> Fiery Shots / Jewel Blast / Slime Shot / Snowball Toss -> Shock Freeze / Toxic Freeze. Required for Corrosive Jabs and Toxic Slam",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObject": "ComboShorud",
+    "name": "Combo Shroud",
+    "description": "Unlocks Ghost Form -> Spore Shroud",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
+  },
+  {
+    "gameObject": "ComboMagic",
+    "name": "Combo Magic",
+    "description": "Unlocks Blob Form / Morph Ball -> Secret Vision. Requried to unlock Levitate",
+    "icon": "icon_potion",
+    "type": "exploreitem",
+    "classification": 1
   }
-}
+]

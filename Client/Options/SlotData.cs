@@ -49,6 +49,16 @@ namespace Archipelago.MonsterSanctuary.Client.Options
         Map = 3
     }
 
+    public enum LockedExploreAbilities
+    {
+        Off = 0,
+        Type = 1,
+        Ability = 2,
+        Specie = 3,
+        Progression = 4,
+        Combo = 5,
+    }
+
     public class HintData
     {
         [JsonProperty("id")]
@@ -94,6 +104,7 @@ namespace Archipelago.MonsterSanctuary.Client.Options
         public static string TanukiMonster { get; set; }
         public static string BexMonster { get; set; }
 
+        public static LockedExploreAbilities LockedExploreAbilities { get; set; }
         public static ShiftFlag MonsterShiftRule { get; set; } = ShiftFlag.Normal;
         public static bool RandomizeMonsterSkillTress { get; set; } = false;
         public static bool RandomizeMonsterUltimates { get; set; } = false;
@@ -176,6 +187,9 @@ namespace Archipelago.MonsterSanctuary.Client.Options
 
             RandomizeMonsterShiftSkills = GetBoolData(options, "randomize_monster_shift_skills", false);
             Patcher.Logger.LogInfo("Randomize Shift Skills: " + RandomizeMonsterShiftSkills);
+
+            LockedExploreAbilities = GetEnumData(options, "lock_explore_abilities", LockedExploreAbilities.Off);
+            Patcher.Logger.LogInfo("Locked Explore Abilities: " + Enum.GetName(typeof(LockedExploreAbilities), LockedExploreAbilities));
 
             AutoScaleEquipment = GetEnumData(options, "automatically_scale_equipment", EquipmentAutoScaler.Never);
             Patcher.Logger.LogInfo("Automatically Scale Equipment: " +  Enum.GetName(typeof(EquipmentAutoScaler), AutoScaleEquipment));

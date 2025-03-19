@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using Archipelago.MonsterSanctuary.Client.Options;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -170,6 +171,29 @@ namespace Archipelago.MonsterSanctuary.Client.AP
             MonstersCache.Clear();
         }
 
+        public static Dictionary<string, ExploreAbilityUnlockData> ExploreAbilityUnlockData { get; set; }
+
+        /// <summary>
+        /// Gets the items (and quantities) required to use a given monster's ability
+        /// </summary>
+        /// <param name="monsterName"></param>
+        /// <returns></returns>
+        public static List<ExploreAbilityUnlockItem> GetItemsRequiredToUseMonstersAbility(string monsterName)
+        {
+            if (!ExploreAbilityUnlockData.ContainsKey(monsterName))
+                return new();
+
+            return ExploreAbilityUnlockData[monsterName].GetRequiredItems();
+        }
+
+        public static string GetExploreItemDisplayTextForMonster(string monsterName)
+        {
+            if (!ExploreAbilityUnlockData.ContainsKey(monsterName))
+                return "";
+
+            return ExploreAbilityUnlockData[monsterName].ToDisplayText();
+        }
+
         /// <summary>
         /// Loads all relevant monster data from json files
         /// </summary>
@@ -195,6 +219,97 @@ namespace Archipelago.MonsterSanctuary.Client.AP
                 NPCs = JsonConvert.DeserializeObject<Dictionary<string, string>>(json);
                 Patcher.Logger.LogInfo($"Loaded {NPCs.Count()} npcs");
             }
+
+            // Load Explore item data
+            using (Stream stream = assembly.GetManifestResourceStream(
+                "Archipelago.MonsterSanctuary.Client.data.monster_explore_ability_unlocks.json"))
+            using (StreamReader reader = new StreamReader(stream))
+            {
+                string json = reader.ReadToEnd();
+                ExploreAbilityUnlockData = JsonConvert.DeserializeObject<Dictionary<string, ExploreAbilityUnlockData>>(json);
+            }
+        }
+    }
+
+    public class ExploreAbilityUnlockData
+    {
+        public string MonsterName { get; set; }
+        public List<ExploreAbilityUnlockItem> Species { get; set; } = new();
+        public List<ExploreAbilityUnlockItem> Ability { get; set; } = new();
+        public List<ExploreAbilityUnlockItem> Type { get; set; } = new();
+        public List<ExploreAbilityUnlockItem> Progression { get; set; } = new();
+        public List<ExploreAbilityUnlockItem> Combo { get; set; } = new();
+
+        public List<ExploreAbilityUnlockItem> GetRequiredItems()
+        {
+            if (!ApState.IsConnected)
+                return new();
+
+            switch (SlotData.LockedExploreAbilities)
+            {
+                case LockedExploreAbilities.Specie:
+                    return Species;
+                case LockedExploreAbilities.Ability:
+                    return Ability;
+                case LockedExploreAbilities.Type:
+                    return Type;
+                case LockedExploreAbilities.Progression:
+                    return Progression;
+                case LockedExploreAbilities.Combo:
+                    return Combo;
+                default:
+                    return new();
+            }
+        }
+
+        public string ToDisplayText()
+        {
+            if (!ApState.IsConnected)
+                return "";
+
+            IEnumerable<string> items;
+            switch (SlotData.LockedExploreAbilities)
+            {
+                case LockedExploreAbilities.Specie:
+                    items = Species.Select(i => i.ToDisplayText());
+                    break;
+                case LockedExploreAbilities.Ability:
+                    items = Ability.Select(i => i.ToDisplayText());
+                    break;
+                case LockedExploreAbilities.Type:
+                    items = Type.Select(i => i.ToDisplayText());
+                    break;
+                case LockedExploreAbilities.Progression:
+                    items = Progression.Select(i => i.ToDisplayText());
+                    break;
+                case LockedExploreAbilities.Combo:
+                    items = Combo.Select(i => i.ToDisplayText());
+                    break;
+                default:
+                    items = new List<string>();
+                    break;
+            }
+
+            if (items.Count() == 0)
+                return "";
+            else if (items.Count() == 1)
+                return items.First();
+            else
+                return string.Join(", ", items, 0, items.Count() - 1) + ", and " + items.LastOrDefault();
+        }
+    }
+
+    public class ExploreAbilityUnlockItem
+    {
+        public string ItemName { get; set; }
+        public int Count { get; set; } = 1;
+
+        public string ToDisplayText()
+        {
+            string formattedItemName = Patcher.FormatItem(ItemName, ItemClassification.Progression);
+            return Count == 1
+                ? formattedItemName
+                : $"{Count} {formattedItemName}";
         }
     }
 }
