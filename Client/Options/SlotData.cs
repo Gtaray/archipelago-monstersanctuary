@@ -85,6 +85,7 @@ namespace Archipelago.MonsterSanctuary.Client.Options
         public static int ChampionsNeededToGetKeyOfPower { get; set; } = 0;
 
         public static bool SkipPlot { get; set; } = false;
+        public static bool SkipBattles { get; set; } = false;
         public static LockedDoorsFlag LockedDoors { get; set; } = 0;
         public static bool OpenBlueCaves { get; set; } = false;
         public static OpenWorldSetting OpenStrongholdDungeon { get; set; } = OpenWorldSetting.Closed;
@@ -130,6 +131,9 @@ namespace Archipelago.MonsterSanctuary.Client.Options
 
             SkipPlot = GetBoolData(options, "skip_plot", false);
             Patcher.Logger.LogInfo("Skip Plot: " + SkipPlot);
+
+            SkipBattles = GetBoolData(options, "skip_keeper_battles", false);
+            Patcher.Logger.LogInfo("Skip Keeper Battles: " + SkipBattles);
 
             LockedDoors = GetEnumData(options, "remove_locked_doors", LockedDoorsFlag.All);
             Patcher.Logger.LogInfo("Locked Doors: " + Enum.GetName(typeof(LockedDoorsFlag), LockedDoors));

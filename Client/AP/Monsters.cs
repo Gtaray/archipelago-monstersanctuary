@@ -186,14 +186,6 @@ namespace Archipelago.MonsterSanctuary.Client.AP
             return ExploreAbilityUnlockData[monsterName].GetRequiredItems();
         }
 
-        public static string GetExploreItemDisplayTextForMonster(string monsterName)
-        {
-            if (!ExploreAbilityUnlockData.ContainsKey(monsterName))
-                return "";
-
-            return ExploreAbilityUnlockData[monsterName].ToDisplayText();
-        }
-
         /// <summary>
         /// Loads all relevant monster data from json files
         /// </summary>
@@ -261,55 +253,11 @@ namespace Archipelago.MonsterSanctuary.Client.AP
                     return new();
             }
         }
-
-        public string ToDisplayText()
-        {
-            if (!ApState.IsConnected)
-                return "";
-
-            IEnumerable<string> items;
-            switch (SlotData.LockedExploreAbilities)
-            {
-                case LockedExploreAbilities.Specie:
-                    items = Species.Select(i => i.ToDisplayText());
-                    break;
-                case LockedExploreAbilities.Ability:
-                    items = Ability.Select(i => i.ToDisplayText());
-                    break;
-                case LockedExploreAbilities.Type:
-                    items = Type.Select(i => i.ToDisplayText());
-                    break;
-                case LockedExploreAbilities.Progression:
-                    items = Progression.Select(i => i.ToDisplayText());
-                    break;
-                case LockedExploreAbilities.Combo:
-                    items = Combo.Select(i => i.ToDisplayText());
-                    break;
-                default:
-                    items = new List<string>();
-                    break;
-            }
-
-            if (items.Count() == 0)
-                return "";
-            else if (items.Count() == 1)
-                return items.First();
-            else
-                return string.Join(", ", items, 0, items.Count() - 1) + ", and " + items.LastOrDefault();
-        }
     }
 
     public class ExploreAbilityUnlockItem
     {
         public string ItemName { get; set; }
         public int Count { get; set; } = 1;
-
-        public string ToDisplayText()
-        {
-            string formattedItemName = Patcher.FormatItem(ItemName, ItemClassification.Progression);
-            return Count == 1
-                ? formattedItemName
-                : $"{Count} {formattedItemName}";
-        }
     }
 }

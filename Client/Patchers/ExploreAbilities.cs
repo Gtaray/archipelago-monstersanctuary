@@ -10,6 +10,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 
@@ -49,6 +50,14 @@ namespace Archipelago.MonsterSanctuary.Client
             return true;
         }
 
+        private static int GetExploreItemInventoryCount(string itemName)
+        {
+            var items = GetOwnedExploreAbilityItems();
+            if (!items.ContainsKey(itemName))
+                return 0;
+            return items[itemName];
+        }
+
         [HarmonyPatch(typeof(PlayerFollower), "CanUseAction")]
         private static class PlayerFollower_CanUseAction
         {
@@ -60,7 +69,10 @@ namespace Archipelago.MonsterSanctuary.Client
                 if (SlotData.LockedExploreAbilities == LockedExploreAbilities.Off)
                     return;
 
-                __result = IsMonsterAbilityAvailable(__instance.Monster.OriginalMonsterName);
+                // If the player would otherwise be able to use this action, we add one final check
+                // if they already couldn't use the action, don't suddenly let them.
+                if (__result)
+                    __result = IsMonsterAbilityAvailable(__instance.Monster.OriginalMonsterName);
             }
         }
 
@@ -144,7 +156,7 @@ namespace Archipelago.MonsterSanctuary.Client
                 if (!msv.IsDisabled)
                     return true;
 
-                var itemText = Monsters.GetExploreItemDisplayTextForMonster(msv.Monster.OriginalMonsterName);
+                var itemText = GetExploreItemDisplayTextForMonster(msv.Monster.OriginalMonsterName);
 
                 SFXController.Instance.PlaySFX(SFXController.Instance.SFXMenuCancel);
                 __instance.MenuList.SetLocked(true);
@@ -167,15 +179,36 @@ namespace Archipelago.MonsterSanctuary.Client
                 if (SlotData.LockedExploreAbilities == LockedExploreAbilities.Off)
                     return;
 
-                var itemText = Monsters.GetExploreItemDisplayTextForMonster(monster.OriginalMonsterName);
-                if (string.IsNullOrEmpty(itemText))
-                {
-                    Patcher.Logger.LogError($"could not find the item that unlocks {monster.OriginalMonsterName}'s explore ability");
-                    return;
-                }
+                string reqText = GetExploreItemDisplayTextForMonster(monster.OriginalMonsterName);
 
-                __instance.AbilityName.text += "\nRequires: " + itemText;
+                __instance.Description.text = $"- Requires: {reqText}\n{__instance.Description.text}";
             }
+        }
+
+        private static string GetExploreItemDisplayTextForMonster(string monsterName)
+        {
+            List<string> itemNames = new();
+            var items = Monsters.GetItemsRequiredToUseMonstersAbility(monsterName);
+            foreach (var item in items)
+            {
+                int has = GetExploreItemInventoryCount(item.ItemName);
+                int needed = item.Count;
+                ItemClassification color = has >= needed
+                    ? ItemClassification.Useful
+                    : ItemClassification.Trap;
+
+                itemNames.Add(FormatItem($"{has}/{needed} {item.ItemName}", color));
+            }
+
+            if (itemNames.Count() == 0)
+            {
+                Patcher.Logger.LogError($"could not find the item that unlocks {monsterName}'s explore ability");
+                return "";
+            }
+
+            if (itemNames.Count() == 1)
+                return itemNames.First();
+            return string.Join(", ", itemNames.ToArray(), 0, itemNames.Count() - 1) + ", and " + itemNames.LastOrDefault();
         }
         #endregion
     }

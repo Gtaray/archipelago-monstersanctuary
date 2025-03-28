@@ -14,6 +14,7 @@ namespace Archipelago.MonsterSanctuary.Client
     public partial class Patcher
     {
         private const int _threeSkillTreePercentageChance = 25;
+        private const int _maximumSkillWidth = 20;
 
         private static bool _skillDataInitialized = false;
         private static HashSet<SkillTree> _skillTrees = new();
@@ -108,13 +109,18 @@ namespace Archipelago.MonsterSanctuary.Client
             skillManager.BaseSkills.RemoveAll(s => s.HasComponent<BaseAction>());
             List<SkillTree> skillTreesAdded = new();
 
+            int skillWidth = 0;
             for (int i = 0; i < numberOfTrees; i++)
             {
-                var possibleTrees = _skillTrees.Where(tree => !HasAnyBaseSkill(skillTreesAdded, tree)).ToList();
+                var possibleTrees = _skillTrees
+                    .Where(tree => !HasAnyBaseSkill(skillTreesAdded, tree))
+                    .Where(t => GetSkillTreeWidth(t) + skillWidth <= _maximumSkillWidth)
+                    .ToList();
                 var actualTree = DuplicateComponentType(possibleTrees[_skillTreeRng.Next(possibleTrees.Count())]);
 
                 skillTreesAdded.Add(actualTree);
                 CopyComponentToGameObject(actualTree, monster);
+                skillWidth += GetSkillTreeWidth(actualTree);
             }
 
             // Randomly pick trees to start off with skill points in.
@@ -136,6 +142,19 @@ namespace Archipelago.MonsterSanctuary.Client
                     skillTreesAdded.Remove(tree);
                 }
             }
+        }
+
+        private static int GetSkillTreeWidth(SkillTree tree)
+        {
+            List<int> counts = new List<int>()
+            {
+                tree.Tier1Skills.Count(),
+                tree.Tier2Skills.Count(),
+                tree.Tier3Skills.Count(),
+                tree.Tier4Skills.Count(),
+                tree.Tier5Skills.Count()
+            };
+            return counts.Max();
         }
 
         public static void RandomizeUltimatesForMonster(GameObject monster)
