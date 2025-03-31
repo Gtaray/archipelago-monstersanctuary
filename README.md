@@ -28,9 +28,11 @@ NOTE: This mod is currently in its alpha stage. Features are likely to be broken
 - A .zip file will be created in the `output` folder containing information for your multiworld. In order to host your game, go to [https://archipelago.gg/uploads](https://archipelago.gg/uploads) and upload the .zip file, then click `Create New Room`.
 
 ## Connecting to a Room
-Once you start the game with the client mod, you'll see connection info in the top right. Enter the link to your room, the room's password, and your player name. Then click Connect.
+Once you start the game with the client mod, you can connect to an AP server by selecting either "New Game" or "Continue". If you are starting a new file, you will be prompted to enter the connection information for the AP server. This informatoin is then saved along with the game's file slot, and will allow you to quickly reconnect when continuing the save file.
 
-This connection info is saved and will re-populate when you run the game in the future.
+When you want to Continue a save file, if that save file has connection information associated with it, you will be prompted to connect to that AP server before loading the game.
+
+NOTE: The client mod prevents you from loading an AP save file while not connected to AP, and will not let you load a vanilla save file while connected to AP.
 
 ## PopTracker
 Many thanks for Cybe3R for getting us set up with a [PopTracker pack](https://github.com/Cyb3RGER/monster_sanctuary_ap_pack). Follow the instructions on that page to set up PopTracker.
