@@ -148,6 +148,7 @@ namespace Archipelago.MonsterSanctuary.Client.AP
     public class ProgressionFlagSkips
     {
         public List<string> Plotless = new();
+        public List<string> TediousPuzzles = new();
         public OpenWorldCollection BlueCaves = new();
         public OpenWorldCollection StrongholdDungeon = new();
         public OpenWorldCollection SnowyPeaks = new();

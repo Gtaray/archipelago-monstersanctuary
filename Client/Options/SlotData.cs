@@ -86,6 +86,7 @@ namespace Archipelago.MonsterSanctuary.Client.Options
 
         public static bool SkipPlot { get; set; } = false;
         public static bool SkipBattles { get; set; } = false;
+        //public static bool SolveTediousPuzzles { get; set; } = true;
         public static LockedDoorsFlag LockedDoors { get; set; } = 0;
         public static bool OpenBlueCaves { get; set; } = false;
         public static OpenWorldSetting OpenStrongholdDungeon { get; set; } = OpenWorldSetting.Closed;
