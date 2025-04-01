@@ -100,39 +100,15 @@ namespace Archipelago.MonsterSanctuary.Client
                     return;
                 }
 
-                foreach (Monster enemy in __instance.Enemies)
-                {
-                    if (enemy.RewardsCommon == null || enemy.RewardsCommon.Count == 0)
-                    {
-                        enemy.RewardsCommon.Add(GetItemByName("Potion").gameObject);
-                    }
-                    if (enemy.RewardsRare == null || enemy.RewardsRare.Count == 0)
-                    {
-                        enemy.RewardsRare.Add(GetItemByName<Egg>($"{enemy.OriginalMonsterName} Egg").gameObject);
-                    }
-                }
-
                 var items = new List<InventoryItem>();
 
                 if (SlotData.AlwaysGeCatalyst)
                 {
                     foreach (Monster enemy in __instance.Enemies)
                     {
-                        Catalyst c = null;
-                        if (enemy.OriginalMonsterName == "Ninki Nanka")
-                        {
-                            c = GetItemByName<Catalyst>("Magical Clay") as Catalyst;
-                        }
-                        else if (enemy.OriginalMonsterName == "Megataur")
-                        {
-                            c = GetItemByName<Catalyst>("Shard of Winter") as Catalyst;
-                        }
-                        else
-                        {
-                            c = enemy.RewardsRare
-                                .Select(i => i.GetComponent<Catalyst>())
-                                .FirstOrDefault(i => i is Catalyst);
-                        }
+                        Catalyst c = enemy.RewardsRare
+                            .Select(i => i.GetComponent<Catalyst>())
+                            .FirstOrDefault(i => i is Catalyst);
 
                         if (c != null)
                         {
@@ -176,7 +152,7 @@ namespace Archipelago.MonsterSanctuary.Client
                 else if (item is Egg)
                     return !items.Any(i => i.Item == item);
 
-                return false;
+                return true;
             }
         }
 

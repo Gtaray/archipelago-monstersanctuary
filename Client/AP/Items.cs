@@ -1,10 +1,12 @@
 ﻿using Archipelago.MonsterSanctuary.Client.Behaviors;
+using Archipelago.MonsterSanctuary.Client.Options;
 using Archipelago.MonsterSanctuary.Client.Persistence;
 using Archipelago.MultiClient.Net.Models;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.Eventing.Reader;
 using System.IO;
 using System.Linq;
@@ -193,10 +195,9 @@ namespace Archipelago.MonsterSanctuary.Client.AP
 
         #region New Items
         public static List<string> ItemIcons = new();
-        public static NewItemList NewItems = new();
-        //public static Dictionary<ExploreAbilityLockType, List<ExploreActionUnlockItem>> ExploreActionUnlockItems = new();
+        public static List<NewItem> NewItems = new();
 
-        public static IEnumerable<NewItem> GetNewItems() => NewItems.Items;
+        public static IEnumerable<NewItem> GetNewItems() => NewItems;
 
 
         public static void Load()
@@ -213,16 +214,11 @@ namespace Archipelago.MonsterSanctuary.Client.AP
             using (StreamReader reader = new StreamReader(stream))
             {
                 string json = reader.ReadToEnd();
-                NewItems = JsonConvert.DeserializeObject<NewItemList>(json);
-                Patcher.Logger.LogInfo($"Loaded {NewItems.Items.Count()} new items");
+                NewItems = JsonConvert.DeserializeObject<List<NewItem>>(json);
+                Patcher.Logger.LogInfo($"Loaded {NewItems.Count()} new items");
             }
         }
         #endregion
-    }
-
-    public class NewItemList
-    {
-        public IEnumerable<NewItem> Items;
     }
 
     public class NewItem

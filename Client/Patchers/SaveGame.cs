@@ -26,33 +26,12 @@ namespace Archipelago.MonsterSanctuary.Client
                 surrogate.WorldData = GameController.Instance.WorldData;
 
                 var selector = (SurrogateSelector)__result.SurrogateSelector;
-                selector.AddSurrogate(typeof(ApDataFile), new StreamingContext(StreamingContextStates.All), apSurrogate);
+                // selector.AddSurrogate(typeof(ApDataFile), new StreamingContext(StreamingContextStates.All), apSurrogate);
                 selector.AddSurrogate(typeof(ArchipelagoItem), new StreamingContext(StreamingContextStates.All), surrogate);
+                selector.AddSurrogate(typeof(ExploreAbilityItem), new StreamingContext (StreamingContextStates.All), surrogate);
 
                 __result.SurrogateSelector = selector;
             }
         }
-
-        //private static class SaveGameManager_SaveGame
-        //{
-        //    static FieldInfo f_someField = AccessTools.Field(typeof(SomeType), nameof(SomeType.someField));
-        //    static MethodInfo m_MyExtraMethod = SymbolExtensions.GetMethodInfo(() => Tools.MyExtraMethod());
-
-        //    static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
-        //    {
-        //        var found = false;
-        //        foreach (var instruction in instructions)
-        //        {
-        //            if (instruction.StoresField(f_someField))
-        //            {
-        //                yield return new CodeInstruction(OpCodes.Call, m_MyExtraMethod);
-        //                found = true;
-        //            }
-        //            yield return instruction;
-        //        }
-        //        if (found is false)
-        //            ReportError("Cannot find <Stdfld someField> in OriginalType.OriginalMethod");
-        //    }
-        //}
     }
 }

@@ -92,6 +92,15 @@ namespace Archipelago.MonsterSanctuary.Client
         //    }
         //}
 
+        [HarmonyPatch(typeof(ProgressManager), "SetBool")]
+        private class ProgressManager_SetBool
+        {
+            private static void Prefix(string name, bool value)
+            {
+                Patcher.Logger.LogInfo($"ProgressManager.SetBool({name}): {value}");
+            }
+        }
+
         [HarmonyPatch(typeof(ProgressManager), "GetBool")]
         private class ProgressManager_GetBool
         {

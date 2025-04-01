@@ -61,6 +61,20 @@
     "MysticalWorkshopAlchemistEvent1",
     "MysticalWorkshopAlchemistEvent2"
   ],
+  "TediousPuzzles": [
+    // Sliding gate puzzle in stronghold dungeon
+    // Sliding gate in sun palace
+    "SPS4Gate1",
+    "SPS4Gate2",
+    "SPS4Gate3",
+    "SPS4Gate4",
+    "SPS4Gate5",
+    "SPS4Gate6",
+    // Door puzzle in ancient woods
+    "AWDoorRed"
+    // Block and switch puzzle in workshop
+    // Gate puzzle in workshop
+  ],
   "BlueCaves": {
     "Entrances": [],
     "Interior": [
@@ -100,6 +114,8 @@
   },
   "SunPalace": {
     "Entrances": [
+      "SPE1SlidingGate1",
+      "SPE1SlidingGate2",
       "SPSPE1"
     ],
     "Interior": [

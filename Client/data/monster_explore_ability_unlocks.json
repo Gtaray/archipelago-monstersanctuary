@@ -1,0 +1,3757 @@
+﻿{
+  "Spectral Wolf": {
+    "MonsterName": "Spectral Wolf",
+    "Species": [
+      {
+        "ItemName": "Spectral Flame (Wolf)",
+        "Count": 1
+      }
+    ],
+    "Ability": [
+      {
+        "ItemName": "Ability - Claws",
+        "Count": 1
+      }
+    ],
+    "Type": [
+      {
+        "ItemName": "Spectral Flame",
+        "Count": 1
+      }
+    ],
+    "Progression": [
+      {
+        "ItemName": "Progressive Walls",
+        "Count": 1
+      }
+    ],
+    "Combo": [
+      {
+        "ItemName": "Combo Walls",
+        "Count": 1
+      }
+    ]
+  },
+  "Spectral Toad": {
+    "MonsterName": "Spectral Toad",
+    "Species": [
+      {
+        "ItemName": "Spectral Flame (Toad)",
+        "Count": 1
+      }
+    ],
+    "Ability": [
+      {
+        "ItemName": "Ability - Tackle",
+        "Count": 1
+      }
+    ],
+    "Type": [
+      {
+        "ItemName": "Spectral Flame",
+        "Count": 1
+      }
+    ],
+    "Progression": [
+      {
+        "ItemName": "Progressive Walls",
+        "Count": 1
+      }
+    ],
+    "Combo": [
+      {
+        "ItemName": "Combo Walls",
+        "Count": 1
+      },
+      {
+        "ItemName": "Combo Boulders",
+        "Count": 1
+      }
+    ]
+  },
+  "Spectral Eagle": {
+    "MonsterName": "Spectral Eagle",
+    "Species": [
+      {
+        "ItemName": "Spectral Flame (Eagle)",
+        "Count": 1
+      }
+    ],
+    "Ability": [
+      {
+        "ItemName": "Ability - Flying",
+        "Count": 1
+      }
+    ],
+    "Type": [
+      {
+        "ItemName": "Spectral Flame",
+        "Count": 1
+      }
+    ],
+    "Progression": [
+      {
+        "ItemName": "Progressive Mobility",
+        "Count": 1
+      }
+    ],
+    "Combo": [
+      {
+        "ItemName": "Combo Flight",
+        "Count": 1
+      }
+    ]
+  },
+  "Spectral Lion": {
+    "MonsterName": "Spectral Lion",
+    "Species": [
+      {
+        "ItemName": "Spectral Flame (Lion)",
+        "Count": 1
+      }
+    ],
+    "Ability": [
+      {
+        "ItemName": "Ability - Claws",
+        "Count": 1
+      }
+    ],
+    "Type": [
+      {
+        "ItemName": "Spectral Flame",
+        "Count": 1
+      }
+    ],
+    "Progression": [
+      {
+        "ItemName": "Progressive Walls",
+        "Count": 1
+      }
+    ],
+    "Combo": [
+      {
+        "ItemName": "Combo Walls",
+        "Count": 1
+      }
+    ]
+  },
+  "Blob": {
+    "MonsterName": "Blob",
+    "Species": [
+      {
+        "ItemName": "Slime Snack",
+        "Count": 1
+      }
+    ],
+    "Ability": [
+      {
+        "ItemName": "Ability - Bubble Burst",
+        "Count": 1
+      }
+    ],
+    "Type": [
+      {
+        "ItemName": "Slime Snack",
+        "Count": 1
+      }
+    ],
+    "Progression": [
+      {
+        "ItemName": "Progressive Water Orbs",
+        "Count": 1
+      }
+    ],
+    "Combo": [
+      {
+        "ItemName": "Combo Orbs",
+        "Count": 1
+      }
+    ]
+  },
+  "Magmapillar": {
+    "MonsterName": "Magmapillar",
+    "Species": [
+      {
+        "ItemName": "Magmamoth Pheromones",
+        "Count": 1
+      }
+    ],
+    "Ability": [
+      {
+        "ItemName": "Ability - Ignite",
+        "Count": 1
+      }
+    ],
+    "Type": [
+      {
+        "ItemName": "Insect Pheromones",
+        "Count": 1
+      }
+    ],
+    "Progression": [
+      {
+        "ItemName": "Progressive Fire Orbs",
+        "Count": 1
+      }
+    ],
+    "Combo": [
+      {
+        "ItemName": "Combo Orbs",
+        "Count": 1
+      }
+    ]
+  },
+  "Rocky": {
+    "MonsterName": "Rocky",
+    "Species": [
+      {
+        "ItemName": "Pet Rock",
+        "Count": 1
+      }
+    ],
+    "Ability": [
+      {
+        "ItemName": "Ability - Summon Rock",
+        "Count": 1
+      }
+    ],
+    "Type": [
+      {
+        "ItemName": "Green Thumb",
+        "Count": 1
+      }
+    ],
+    "Progression": [
+      {
+        "ItemName": "Progressive Boulders",
+        "Count": 1
+      }
+    ],
+    "Combo": [
+      {
+        "ItemName": "Combo Boulders",
+        "Count": 1
+      }
+    ]
+  },
+  "Vaero": {
+    "MonsterName": "Vaero",
+    "Species": [
+      {
+        "ItemName": "Vaero Harness",
+        "Count": 1
+      }
+    ],
+    "Ability": [
+      {
+        "ItemName": "Ability - Flying",
+        "Count": 1
+      }
+    ],
+    "Type": [
+      {
+        "ItemName": "Bird Seed",
+        "Count": 1
+      }
+    ],
+    "Progression": [
+      {
+        "ItemName": "Progressive Mobility",
+        "Count": 1
+      }
+    ],
+    "Combo": [
+      {
+        "ItemName": "Combo Flight",
+        "Count": 1
+      }
+    ]
+  },
+  "Catzerker": {
+    "MonsterName": "Catzerker",
+    "Species": [
+      {
+        "ItemName": "Catzerker's Blade",
+        "Count": 1
+      }
+    ],
+    "Ability": [
+      {
+        "ItemName": "Ability - Slash",
+        "Count": 1
+      }
+    ],
+    "Type": [
+      {
+        "ItemName": "Training Dummy",
+        "Count": 1
+      }
+    ],
+    "Progression": [
+      {
+        "ItemName": "Progressive Walls",
+        "Count": 1
+      }
+    ],
+    "Combo": [
+      {
+        "ItemName": "Combo Walls",
+        "Count": 1
+      }
+    ]
+  },
+  "Yowie": {
+    "MonsterName": "Yowie",
+    "Species": [
+      {
+        "ItemName": "Yowie Treat",
+        "Count": 1
+      }
+    ],
+    "Ability": [
+      {
+        "ItemName": "Ability - Tackle",
+        "Count": 1
+      }
+    ],
+    "Type": [
+      {
+        "ItemName": "Monster Treat",
+        "Count": 1
+      }
+    ],
+    "Progression": [
+      {
+        "ItemName": "Progressive Walls",
+        "Count": 1
+      }
+    ],
+    "Combo": [
+      {
+        "ItemName": "Combo Walls",
+        "Count": 1
+      },
+      {
+        "ItemName": "Combo Boulders",
+        "Count": 1
+      }
+    ]
+  },
+  "Steam Golem": {
+    "MonsterName": "Steam Golem",
+    "Species": [
+      {
+        "ItemName": "Pneumatic Piston",
+        "Count": 1
+      }
+    ],
+    "Ability": [
+      {
+        "ItemName": "Ability - Tackle",
+        "Count": 1
+      }
+    ],
+    "Type": [
+      {
+        "ItemName": "Repair Kit",
+        "Count": 1
+      }
+    ],
+    "Progression": [
+      {
+        "ItemName": "Progressive Walls",
+        "Count": 1
+      }
+    ],
+    "Combo": [
+      {
+        "ItemName": "Combo Walls",
+        "Count": 1
+      },
+      {
+        "ItemName": "Combo Boulders",
+        "Count": 1
+      }
+    ]
+  },
+  "Monk": {
+    "MonsterName": "Monk",
+    "Species": [
+      {
+        "ItemName": "Small Reliquary",
+        "Count": 1
+      }
+    ],
+    "Ability": [
+      {
+        "ItemName": "Ability - Heavy Punch",
+        "Count": 1
+      }
+    ],
+    "Type": [
+      {
+        "ItemName": "Training Dummy",
+        "Count": 1
+      }
+    ],
+    "Progression": [
+      {
+        "ItemName": "Progressive Walls",
+        "Count": 1
+      }
+    ],
+    "Combo": [
+      {
+        "ItemName": "Combo Walls",
+        "Count": 1
+      }
+    ]
+  },
+  "Grummy": {
+    "MonsterName": "Grummy",
+    "Species": [
+      {
+        "ItemName": "Alien Shard",
+        "Count": 1
+      }
+    ],
+    "Ability": [
+      {
+        "ItemName": "Ability - Bubble Burst",
+        "Count": 1
+      }
+    ],
+    "Type": [
+      {
+        "ItemName": "Ahrimaaya",
+        "Count": 1
+      }
+    ],
+    "Progression": [
+      {
+        "ItemName": "Progressive Water Orbs",
+        "Count": 1
+      }
+    ],
+    "Combo": [
+      {
+        "ItemName": "Combo Orbs",
+        "Count": 1
+      }
+    ]
+  },
+  "Tengu": {
+    "MonsterName": "Tengu",
+    "Species": [
+      {
+        "ItemName": "Tengu Mask",
+        "Count": 1
+      }
+    ],
+    "Ability": [
+      {
+        "ItemName": "Ability - Ignite",
+        "Count": 1
+      }
+    ],
+    "Type": [
+      {
+        "ItemName": "Spirit Charm",
+        "Count": 1
+      }
+    ],
+    "Progression": [
+      {
+        "ItemName": "Progressive Fire Orbs",
+        "Count": 1
+      }
+    ],
+    "Combo": [
+      {
+        "ItemName": "Combo Orbs",
+        "Count": 1
+      }
+    ]
+  },
+  "Fungi": {
+    "MonsterName": "Fungi",
+    "Species": [
+      {
+        "ItemName": "Odd Mushroom",
+        "Count": 1
+      }
+    ],
+    "Ability": [
+      {
+        "ItemName": "Ability - Summon Mushroom",
+        "Count": 1
+      }
+    ],
+    "Type": [
+      {
+        "ItemName": "Green Thumb",
+        "Count": 1
+      }
+    ],
+    "Progression": [
+      {
+        "ItemName": "Progressive Boulders",
+        "Count": 1
+      }
+    ],
+    "Combo": [
+      {
+        "ItemName": "Combo Boulders",
+        "Count": 1
+      }
+    ]
+  },
+  "Frosty": {
+    "MonsterName": "Frosty",
+    "Species": [
+      {
+        "ItemName": "Frigid Wisp",
+        "Count": 1
+      }
+    ],
+    "Ability": [
+      {
+        "ItemName": "Ability - Flying",
+        "Count": 1
+      }
+    ],
+    "Type": [
+      {
+        "ItemName": "Spirit Charm",
+        "Count": 1
+      }
+    ],
+    "Progression": [
+      {
+        "ItemName": "Progressive Mobility",
+        "Count": 1
+      }
+    ],
+    "Combo": [
+      {
+        "ItemName": "Combo Flight",
+        "Count": 1
+      }
+    ]
+  },
+  "Minitaur": {
+    "MonsterName": "Minitaur",
+    "Species": [
+      {
+        "ItemName": "Double-Headed Axe",
+        "Count": 1
+      }
+    ],
+    "Ability": [
+      {
+        "ItemName": "Ability - Slash",
+        "Count": 1
+      }
+    ],
+    "Type": [
+      {
+        "ItemName": "Training Dummy",
+        "Count": 1
+      }
+    ],
+    "Progression": [
+      {
+        "ItemName": "Progressive Walls",
+        "Count": 1
+      }
+    ],
+    "Combo": [
+      {
+        "ItemName": "Combo Walls",
+        "Count": 1
+      }
+    ]
+  },
+  "Specter": {
+    "MonsterName": "Specter",
+    "Species": [
+      {
+        "ItemName": "Black Flame",
+        "Count": 1
+      }
+    ],
+    "Ability": [
+      {
+        "ItemName": "Ability - Ignite",
+        "Count": 1
+      }
+    ],
+    "Type": [
+      {
+        "ItemName": "Spellbook",
+        "Count": 1
+      }
+    ],
+    "Progression": [
+      {
+        "ItemName": "Progressive Fire Orbs",
+        "Count": 1
+      }
+    ],
+    "Combo": [
+      {
+        "ItemName": "Combo Orbs",
+        "Count": 1
+      }
+    ]
+  },
+  "Crackle Knight": {
+    "MonsterName": "Crackle Knight",
+    "Species": [
+      {
+        "ItemName": "Knightly Shield",
+        "Count": 1
+      }
+    ],
+    "Ability": [
+      {
+        "ItemName": "Ability - Lightning Bolt",
+        "Count": 1
+      }
+    ],
+    "Type": [
+      {
+        "ItemName": "Repair Kit",
+        "Count": 1
+      }
+    ],
+    "Progression": [
+      {
+        "ItemName": "Progressive Lightning Orbs",
+        "Count": 1
+      }
+    ],
+    "Combo": [
+      {
+        "ItemName": "Combo Orbs",
+        "Count": 1
+      }
+    ]
+  },
+  "G'rulu": {
+    "MonsterName": "G'rulu",
+    "Species": [
+      {
+        "ItemName": "Alien Shard",
+        "Count": 1
+      }
+    ],
+    "Ability": [
+      {
+        "ItemName": "Ability - Bubble Burst",
+        "Count": 1
+      }
+    ],
+    "Type": [
+      {
+        "ItemName": "Ahrimaaya",
+        "Count": 1
+      }
+    ],
+    "Progression": [
+      {
+        "ItemName": "Progressive Water Orbs",
+        "Count": 1
+      }
+    ],
+    "Combo": [
+      {
+        "ItemName": "Combo Orbs",
+        "Count": 1
+      }
+    ]
+  },
+  "Mad Eye": {
+    "MonsterName": "Mad Eye",
+    "Species": [
+      {
+        "ItemName": "Aqueous Humor",
+        "Count": 1
+      }
+    ],
+    "Ability": [
+      {
+        "ItemName": "Ability - Flying",
+        "Count": 1
+      }
+    ],
+    "Type": [
+      {
+        "ItemName": "Ahrimaaya",
+        "Count": 1
+      }
+    ],
+    "Progression": [
+      {
+        "ItemName": "Progressive Mobility",
+        "Count": 1
+      }
+    ],
+    "Combo": [
+      {
+        "ItemName": "Combo Flight",
+        "Count": 1
+      }
+    ]
+  },
+  "Nightwing": {
+    "MonsterName": "Nightwing",
+    "Species": [
+      {
+        "ItemName": "Sonar Detector",
+        "Count": 1
+      }
+    ],
+    "Ability": [
+      {
+        "ItemName": "Ability - Sonar",
+        "Count": 1
+      }
+    ],
+    "Type": [
+      {
+        "ItemName": "Monster Treat",
+        "Count": 1
+      }
+    ],
+    "Progression": [
+      {
+        "ItemName": "Progressive Light",
+        "Count": 1
+      }
+    ],
+    "Combo": [
+      {
+        "ItemName": "Combo Light",
+        "Count": 1
+      }
+    ]
+  },
+  "Toxiquus": {
+    "MonsterName": "Toxiquus",
+    "Species": [
+      {
+        "ItemName": "Toxic Sludge",
+        "Count": 1
+      }
+    ],
+    "Ability": [
+      {
+        "ItemName": "Ability - Slime Shot",
+        "Count": 1
+      }
+    ],
+    "Type": [
+      {
+        "ItemName": "Fishing Lure",
+        "Count": 1
+      }
+    ],
+    "Progression": [
+      {
+        "ItemName": "Progressive Earth Orbs",
+        "Count": 2
+      }
+    ],
+    "Combo": [
+      {
+        "ItemName": "Combo Orbs",
+        "Count": 2
+      }
+    ]
+  },
+  "Beetloid": {
+    "MonsterName": "Beetloid",
+    "Species": [
+      {
+        "ItemName": "Lightning Rod",
+        "Count": 1
+      }
+    ],
+    "Ability": [
+      {
+        "ItemName": "Ability - Lightning Bolt",
+        "Count": 1
+      }
+    ],
+    "Type": [
+      {
+        "ItemName": "Insect Pheromones",
+        "Count": 1
+      }
+    ],
+    "Progression": [
+      {
+        "ItemName": "Progressive Lightning Orbs",
+        "Count": 1
+      }
+    ],
+    "Combo": [
+      {
+        "ItemName": "Combo Orbs",
+        "Count": 1
+      }
+    ]
+  },
+  "Druid Oak": {
+    "MonsterName": "Druid Oak",
+    "Species": [
+      {
+        "ItemName": "Oaken Mask",
+        "Count": 1
+      }
+    ],
+    "Ability": [
+      {
+        "ItemName": "Ability - Summon Rock",
+        "Count": 1
+      }
+    ],
+    "Type": [
+      {
+        "ItemName": "Green Thumb",
+        "Count": 1
+      }
+    ],
+    "Progression": [
+      {
+        "ItemName": "Progressive Boulders",
+        "Count": 1
+      }
+    ],
+    "Combo": [
+      {
+        "ItemName": "Combo Boulders",
+        "Count": 1
+      }
+    ]
+  },
+  "Magmamoth": {
+    "MonsterName": "Magmamoth",
+    "Species": [
+      {
+        "ItemName": "Magmamoth Pheromones",
+        "Count": 1
+      }
+    ],
+    "Ability": [
+      {
+        "ItemName": "Ability - Ignite",
+        "Count": 1
+      }
+    ],
+    "Type": [
+      {
+        "ItemName": "Insect Pheromones",
+        "Count": 1
+      }
+    ],
+    "Progression": [
+      {
+        "ItemName": "Progressive Fire Orbs",
+        "Count": 1
+      }
+    ],
+    "Combo": [
+      {
+        "ItemName": "Combo Orbs",
+        "Count": 1
+      }
+    ]
+  },
+  "Molebear": {
+    "MonsterName": "Molebear",
+    "Species": [
+      {
+        "ItemName": "Digging Claws",
+        "Count": 1
+      }
+    ],
+    "Ability": [
+      {
+        "ItemName": "Ability - Claws",
+        "Count": 1
+      }
+    ],
+    "Type": [
+      {
+        "ItemName": "Monster Treat",
+        "Count": 1
+      }
+    ],
+    "Progression": [
+      {
+        "ItemName": "Progressive Walls",
+        "Count": 1
+      }
+    ],
+    "Combo": [
+      {
+        "ItemName": "Combo Walls",
+        "Count": 1
+      }
+    ]
+  },
+  "Glowfly": {
+    "MonsterName": "Glowfly",
+    "Species": [
+      {
+        "ItemName": "Glowfly Lantern",
+        "Count": 1
+      }
+    ],
+    "Ability": [
+      {
+        "ItemName": "Ability - Light",
+        "Count": 1
+      }
+    ],
+    "Type": [
+      {
+        "ItemName": "Insect Pheromones",
+        "Count": 1
+      }
+    ],
+    "Progression": [
+      {
+        "ItemName": "Progressive Light",
+        "Count": 1
+      }
+    ],
+    "Combo": [
+      {
+        "ItemName": "Combo Light",
+        "Count": 1
+      }
+    ]
+  },
+  "Goblin Brute": {
+    "MonsterName": "Goblin Brute",
+    "Species": [
+      {
+        "ItemName": "Goblin Club",
+        "Count": 1
+      }
+    ],
+    "Ability": [
+      {
+        "ItemName": "Ability - Toxic Slam",
+        "Count": 1
+      }
+    ],
+    "Type": [
+      {
+        "ItemName": "Goblin Charm",
+        "Count": 1
+      }
+    ],
+    "Progression": [
+      {
+        "ItemName": "Progressive Earth Orbs",
+        "Count": 1
+      }
+    ],
+    "Combo": [
+      {
+        "ItemName": "Combo Orbs",
+        "Count": 1
+      },
+      {
+        "ItemName": "Combo Walls",
+        "Count": 1
+      }
+    ]
+  },
+  "Goblin Hood": {
+    "MonsterName": "Goblin Hood",
+    "Species": [
+      {
+        "ItemName": "Goblin Bow",
+        "Count": 1
+      }
+    ],
+    "Ability": [
+      {
+        "ItemName": "Ability - Fiery Shots",
+        "Count": 1
+      }
+    ],
+    "Type": [
+      {
+        "ItemName": "Goblin Charm",
+        "Count": 1
+      }
+    ],
+    "Progression": [
+      {
+        "ItemName": "Progressive Fire Orbs",
+        "Count": 2
+      }
+    ],
+    "Combo": [
+      {
+        "ItemName": "Combo Orbs",
+        "Count": 2
+      }
+    ]
+  },
+  "Goblin Warlock": {
+    "MonsterName": "Goblin Warlock",
+    "Species": [
+      {
+        "ItemName": "Goblin Staff",
+        "Count": 1
+      }
+    ],
+    "Ability": [
+      {
+        "ItemName": "Ability - Lightning Bolt",
+        "Count": 1
+      }
+    ],
+    "Type": [
+      {
+        "ItemName": "Goblin Charm",
+        "Count": 1
+      }
+    ],
+    "Progression": [
+      {
+        "ItemName": "Progressive Lightning Orbs",
+        "Count": 1
+      }
+    ],
+    "Combo": [
+      {
+        "ItemName": "Combo Orbs",
+        "Count": 1
+      }
+    ]
+  },
+  "Goblin King": {
+    "MonsterName": "Goblin King",
+    "Species": [
+      {
+        "ItemName": "Goblin Crown",
+        "Count": 1
+      }
+    ],
+    "Ability": [
+      {
+        "ItemName": "Ability - Jewel Blast",
+        "Count": 1
+      }
+    ],
+    "Type": [
+      {
+        "ItemName": "Goblin Charm",
+        "Count": 1
+      }
+    ],
+    "Progression": [
+      {
+        "ItemName": "Progressive Earth Orbs",
+        "Count": 2
+      }
+    ],
+    "Combo": [
+      {
+        "ItemName": "Combo Orbs",
+        "Count": 2
+      }
+    ]
+  },
+  "Raduga": {
+    "MonsterName": "Raduga",
+    "Species": [
+      {
+        "ItemName": "Prismatic Shard",
+        "Count": 1
+      }
+    ],
+    "Ability": [
+      {
+        "ItemName": "Ability - Flying",
+        "Count": 1
+      }
+    ],
+    "Type": [
+      {
+        "ItemName": "Green Thumb",
+        "Count": 1
+      }
+    ],
+    "Progression": [
+      {
+        "ItemName": "Progressive Mobility",
+        "Count": 1
+      }
+    ],
+    "Combo": [
+      {
+        "ItemName": "Combo Flight",
+        "Count": 1
+      }
+    ]
+  },
+  "Ice Blob": {
+    "MonsterName": "Ice Blob",
+    "Species": [
+      {
+        "ItemName": "Insulated Gloves",
+        "Count": 1
+      }
+    ],
+    "Ability": [
+      {
+        "ItemName": "Ability - Freeze",
+        "Count": 1
+      }
+    ],
+    "Type": [
+      {
+        "ItemName": "Slime Snack",
+        "Count": 1
+      }
+    ],
+    "Progression": [
+      {
+        "ItemName": "Progressive Ice Orbs",
+        "Count": 1
+      }
+    ],
+    "Combo": [
+      {
+        "ItemName": "Combo Orbs",
+        "Count": 1
+      }
+    ]
+  },
+  "Caraglow": {
+    "MonsterName": "Caraglow",
+    "Species": [
+      {
+        "ItemName": "Caraglow Collar",
+        "Count": 1
+      }
+    ],
+    "Ability": [
+      {
+        "ItemName": "Ability - Light",
+        "Count": 1
+      }
+    ],
+    "Type": [
+      {
+        "ItemName": "Monster Treat",
+        "Count": 1
+      }
+    ],
+    "Progression": [
+      {
+        "ItemName": "Progressive Light",
+        "Count": 1
+      }
+    ],
+    "Combo": [
+      {
+        "ItemName": "Combo Light",
+        "Count": 1
+      }
+    ]
+  },
+  "Aurumtail": {
+    "MonsterName": "Aurumtail",
+    "Species": [
+      {
+        "ItemName": "Aurumtail Saddle",
+        "Count": 1
+      }
+    ],
+    "Ability": [
+      {
+        "ItemName": "Ability - Mount",
+        "Count": 1
+      }
+    ],
+    "Type": [
+      {
+        "ItemName": "Monster Treat",
+        "Count": 1
+      }
+    ],
+    "Progression": [
+      {
+        "ItemName": "Progressive Mount",
+        "Count": 1
+      }
+    ],
+    "Combo": [
+      {
+        "ItemName": "Combo Mount",
+        "Count": 1
+      }
+    ]
+  },
+  "Megataur": {
+    "MonsterName": "Megataur",
+    "Species": [
+      {
+        "ItemName": "Giant Snowball",
+        "Count": 1
+      }
+    ],
+    "Ability": [
+      {
+        "ItemName": "Ability - Freeze",
+        "Count": 1
+      }
+    ],
+    "Type": [
+      {
+        "ItemName": "Training Dummy",
+        "Count": 1
+      }
+    ],
+    "Progression": [
+      {
+        "ItemName": "Progressive Ice Orbs",
+        "Count": 1
+      }
+    ],
+    "Combo": [
+      {
+        "ItemName": "Combo Orbs",
+        "Count": 1
+      }
+    ]
+  },
+  "Mogwai": {
+    "MonsterName": "Mogwai",
+    "Species": [
+      {
+        "ItemName": "Mogwai Rulebook",
+        "Count": 1
+      }
+    ],
+    "Ability": [
+      {
+        "ItemName": "Ability - Snowball Toss",
+        "Count": 1
+      }
+    ],
+    "Type": [
+      {
+        "ItemName": "Green Thumb",
+        "Count": 1
+      }
+    ],
+    "Progression": [
+      {
+        "ItemName": "Progressive Ice Orbs",
+        "Count": 2
+      }
+    ],
+    "Combo": [
+      {
+        "ItemName": "Combo Orbs",
+        "Count": 2
+      }
+    ]
+  },
+  "Crystal Snail": {
+    "MonsterName": "Crystal Snail",
+    "Species": [
+      {
+        "ItemName": "Sign Language",
+        "Count": 1
+      }
+    ],
+    "Ability": [
+      {
+        "ItemName": "Ability - Jewel Blast",
+        "Count": 1
+      }
+    ],
+    "Type": [
+      {
+        "ItemName": "Ancient Encyclopedia",
+        "Count": 1
+      }
+    ],
+    "Progression": [
+      {
+        "ItemName": "Progressive Earth Orbs",
+        "Count": 2
+      }
+    ],
+    "Combo": [
+      {
+        "ItemName": "Combo Orbs",
+        "Count": 2
+      }
+    ]
+  },
+  "Akhlut": {
+    "MonsterName": "Akhlut",
+    "Species": [
+      {
+        "ItemName": "Akhlut Saddle",
+        "Count": 1
+      }
+    ],
+    "Ability": [
+      {
+        "ItemName": "Ability - Sonar Mount",
+        "Count": 1
+      }
+    ],
+    "Type": [
+      {
+        "ItemName": "Fishing Lure",
+        "Count": 1
+      }
+    ],
+    "Progression": [
+      {
+        "ItemName": "Progressive Light",
+        "Count": 2
+      }
+    ],
+    "Combo": [
+      {
+        "ItemName": "Combo Mount",
+        "Count": 1
+      },
+      {
+        "ItemName": "Combo Light",
+        "Count": 1
+      }
+    ]
+  },
+  "Blade Widow": {
+    "MonsterName": "Blade Widow",
+    "Species": [
+      {
+        "ItemName": "Blade Widow Pheromones",
+        "Count": 1
+      }
+    ],
+    "Ability": [
+      {
+        "ItemName": "Ability - Slash",
+        "Count": 1
+      }
+    ],
+    "Type": [
+      {
+        "ItemName": "Insect Pheromones",
+        "Count": 1
+      }
+    ],
+    "Progression": [
+      {
+        "ItemName": "Progressive Walls",
+        "Count": 1
+      }
+    ],
+    "Combo": [
+      {
+        "ItemName": "Combo Walls",
+        "Count": 1
+      }
+    ]
+  },
+  "Ninki": {
+    "MonsterName": "Ninki",
+    "Species": [
+      {
+        "ItemName": "River Clay",
+        "Count": 1
+      }
+    ],
+    "Ability": [
+      {
+        "ItemName": "Ability - Slime Shot",
+        "Count": 1
+      }
+    ],
+    "Type": [
+      {
+        "ItemName": "Dragon Orb",
+        "Count": 1
+      }
+    ],
+    "Progression": [
+      {
+        "ItemName": "Progressive Earth Orbs",
+        "Count": 2
+      }
+    ],
+    "Combo": [
+      {
+        "ItemName": "Combo Orbs",
+        "Count": 2
+      }
+    ]
+  },
+  "Ninki Nanka": {
+    "MonsterName": "Ninki Nanka",
+    "Species": [
+      {
+        "ItemName": "River Clay",
+        "Count": 1
+      }
+    ],
+    "Ability": [
+      {
+        "ItemName": "Ability - Slime Shot",
+        "Count": 1
+      }
+    ],
+    "Type": [
+      {
+        "ItemName": "Dragon Orb",
+        "Count": 1
+      }
+    ],
+    "Progression": [
+      {
+        "ItemName": "Progressive Earth Orbs",
+        "Count": 2
+      }
+    ],
+    "Combo": [
+      {
+        "ItemName": "Combo Orbs",
+        "Count": 2
+      }
+    ]
+  },
+  "Vasuki": {
+    "MonsterName": "Vasuki",
+    "Species": [
+      {
+        "ItemName": "Snake Stick",
+        "Count": 1
+      }
+    ],
+    "Ability": [
+      {
+        "ItemName": "Ability - Tackle",
+        "Count": 1
+      }
+    ],
+    "Type": [
+      {
+        "ItemName": "Monster Treat",
+        "Count": 1
+      }
+    ],
+    "Progression": [
+      {
+        "ItemName": "Progressive Walls",
+        "Count": 1
+      }
+    ],
+    "Combo": [
+      {
+        "ItemName": "Combo Walls",
+        "Count": 1
+      },
+      {
+        "ItemName": "Combo Boulders",
+        "Count": 1
+      }
+    ]
+  },
+  "Kame": {
+    "MonsterName": "Kame",
+    "Species": [
+      {
+        "ItemName": "Kame Chi",
+        "Count": 1
+      }
+    ],
+    "Ability": [
+      {
+        "ItemName": "Ability - Summon Rock",
+        "Count": 1
+      }
+    ],
+    "Type": [
+      {
+        "ItemName": "Training Dummy",
+        "Count": 1
+      }
+    ],
+    "Progression": [
+      {
+        "ItemName": "Progressive Boulders",
+        "Count": 1
+      }
+    ],
+    "Combo": [
+      {
+        "ItemName": "Combo Boulders",
+        "Count": 1
+      }
+    ]
+  },
+  "Sycophantom": {
+    "MonsterName": "Sycophantom",
+    "Species": [
+      {
+        "ItemName": "Quick Wits",
+        "Count": 1
+      }
+    ],
+    "Ability": [
+      {
+        "ItemName": "Ability - Ghost Form",
+        "Count": 1
+      }
+    ],
+    "Type": [
+      {
+        "ItemName": "Spirit Charm",
+        "Count": 1
+      }
+    ],
+    "Progression": [
+      {
+        "ItemName": "Progressive Shroud",
+        "Count": 1
+      }
+    ],
+    "Combo": [
+      {
+        "ItemName": "Combo Shroud",
+        "Count": 1
+      }
+    ]
+  },
+  "Imori": {
+    "MonsterName": "Imori",
+    "Species": [
+      {
+        "ItemName": "Flaming Spear",
+        "Count": 1
+      }
+    ],
+    "Ability": [
+      {
+        "ItemName": "Ability - Ignite",
+        "Count": 1
+      }
+    ],
+    "Type": [
+      {
+        "ItemName": "Training Dummy",
+        "Count": 1
+      }
+    ],
+    "Progression": [
+      {
+        "ItemName": "Progressive Fire Orbs",
+        "Count": 1
+      }
+    ],
+    "Combo": [
+      {
+        "ItemName": "Combo Orbs",
+        "Count": 1
+      }
+    ]
+  },
+  "Qilin": {
+    "MonsterName": "Qilin",
+    "Species": [
+      {
+        "ItemName": "Qilin Saddle",
+        "Count": 1
+      }
+    ],
+    "Ability": [
+      {
+        "ItemName": "Ability - Mount",
+        "Count": 1
+      }
+    ],
+    "Type": [
+      {
+        "ItemName": "Monster Treat",
+        "Count": 1
+      }
+    ],
+    "Progression": [
+      {
+        "ItemName": "Progressive Mount",
+        "Count": 1
+      }
+    ],
+    "Combo": [
+      {
+        "ItemName": "Combo Mount",
+        "Count": 1
+      }
+    ]
+  },
+  "Sizzle Knight": {
+    "MonsterName": "Sizzle Knight",
+    "Species": [
+      {
+        "ItemName": "Knightly Shield",
+        "Count": 1
+      }
+    ],
+    "Ability": [
+      {
+        "ItemName": "Ability - Lightning Bolt",
+        "Count": 1
+      }
+    ],
+    "Type": [
+      {
+        "ItemName": "Repair Kit",
+        "Count": 1
+      }
+    ],
+    "Progression": [
+      {
+        "ItemName": "Progressive Lightning Orbs",
+        "Count": 1
+      }
+    ],
+    "Combo": [
+      {
+        "ItemName": "Combo Orbs",
+        "Count": 1
+      }
+    ]
+  },
+  "Koi": {
+    "MonsterName": "Koi",
+    "Species": [
+      {
+        "ItemName": "Koi Lure",
+        "Count": 1
+      }
+    ],
+    "Ability": [
+      {
+        "ItemName": "Ability - Swimming",
+        "Count": 1
+      }
+    ],
+    "Type": [
+      {
+        "ItemName": "Fishing Lure",
+        "Count": 1
+      }
+    ],
+    "Progression": [
+      {
+        "ItemName": "Progressive Mobility",
+        "Count": 3
+      }
+    ],
+    "Combo": [
+      {
+        "ItemName": "Combo Swimming",
+        "Count": 1
+      }
+    ]
+  },
+  "Tanuki": {
+    "MonsterName": "Tanuki",
+    "Species": [
+      {
+        "ItemName": "Magic Bell",
+        "Count": 1
+      }
+    ],
+    "Ability": [
+      {
+        "ItemName": "Ability - Summon Mushroom",
+        "Count": 1
+      }
+    ],
+    "Type": [
+      {
+        "ItemName": "Green Thumb",
+        "Count": 1
+      }
+    ],
+    "Progression": [
+      {
+        "ItemName": "Progressive Boulders",
+        "Count": 1
+      }
+    ],
+    "Combo": [
+      {
+        "ItemName": "Combo Boulders",
+        "Count": 1
+      }
+    ]
+  },
+  "Kanko": {
+    "MonsterName": "Kanko",
+    "Species": [
+      {
+        "ItemName": "Smoke Pipe",
+        "Count": 1
+      }
+    ],
+    "Ability": [
+      {
+        "ItemName": "Ability - Ghost Form",
+        "Count": 1
+      }
+    ],
+    "Type": [
+      {
+        "ItemName": "Spirit Charm",
+        "Count": 1
+      }
+    ],
+    "Progression": [
+      {
+        "ItemName": "Progressive Shroud",
+        "Count": 1
+      }
+    ],
+    "Combo": [
+      {
+        "ItemName": "Combo Shroud",
+        "Count": 1
+      }
+    ]
+  },
+  "Dodo": {
+    "MonsterName": "Dodo",
+    "Species": [
+      {
+        "ItemName": "Dodo Saddle",
+        "Count": 1
+      }
+    ],
+    "Ability": [
+      {
+        "ItemName": "Ability - Mount",
+        "Count": 1
+      }
+    ],
+    "Type": [
+      {
+        "ItemName": "Bird Seed",
+        "Count": 1
+      }
+    ],
+    "Progression": [
+      {
+        "ItemName": "Progressive Mount",
+        "Count": 1
+      }
+    ],
+    "Combo": [
+      {
+        "ItemName": "Combo Mount",
+        "Count": 1
+      }
+    ]
+  },
+  "Kongamato": {
+    "MonsterName": "Kongamato",
+    "Species": [
+      {
+        "ItemName": "Kongamato Harness",
+        "Count": 1
+      }
+    ],
+    "Ability": [
+      {
+        "ItemName": "Ability - Improved Flying",
+        "Count": 1
+      }
+    ],
+    "Type": [
+      {
+        "ItemName": "Ancient Encyclopedia",
+        "Count": 1
+      }
+    ],
+    "Progression": [
+      {
+        "ItemName": "Progressive Mobility",
+        "Count": 2
+      }
+    ],
+    "Combo": [
+      {
+        "ItemName": "Combo Flight",
+        "Count": 2
+      }
+    ]
+  },
+  "Ucan": {
+    "MonsterName": "Ucan",
+    "Species": [
+      {
+        "ItemName": "Ucan Lure",
+        "Count": 1
+      }
+    ],
+    "Ability": [
+      {
+        "ItemName": "Ability - Slash",
+        "Count": 1
+      }
+    ],
+    "Type": [
+      {
+        "ItemName": "Fishing Lure",
+        "Count": 1
+      }
+    ],
+    "Progression": [
+      {
+        "ItemName": "Progressive Walls",
+        "Count": 1
+      }
+    ],
+    "Combo": [
+      {
+        "ItemName": "Combo Walls",
+        "Count": 1
+      }
+    ]
+  },
+  "Brawlish": {
+    "MonsterName": "Brawlish",
+    "Species": [
+      {
+        "ItemName": "Brawlish Lure",
+        "Count": 1
+      }
+    ],
+    "Ability": [
+      {
+        "ItemName": "Ability - Tackle",
+        "Count": 1
+      }
+    ],
+    "Type": [
+      {
+        "ItemName": "Fishing Lure",
+        "Count": 1
+      }
+    ],
+    "Progression": [
+      {
+        "ItemName": "Progressive Walls",
+        "Count": 1
+      }
+    ],
+    "Combo": [
+      {
+        "ItemName": "Combo Walls",
+        "Count": 1
+      },
+      {
+        "ItemName": "Combo Boulders",
+        "Count": 1
+      }
+    ]
+  },
+  "Thornish": {
+    "MonsterName": "Thornish",
+    "Species": [
+      {
+        "ItemName": "Thornish Lure",
+        "Count": 1
+      }
+    ],
+    "Ability": [
+      {
+        "ItemName": "Ability - Improved Swimming",
+        "Count": 1
+      }
+    ],
+    "Type": [
+      {
+        "ItemName": "Fishing Lure",
+        "Count": 1
+      }
+    ],
+    "Progression": [
+      {
+        "ItemName": "Progressive Mobility",
+        "Count": 4
+      }
+    ],
+    "Combo": [
+      {
+        "ItemName": "Combo Swimming",
+        "Count": 2
+      }
+    ]
+  },
+  "Nautilid": {
+    "MonsterName": "Nautilid",
+    "Species": [
+      {
+        "ItemName": "Nautilid Lure",
+        "Count": 1
+      }
+    ],
+    "Ability": [
+      {
+        "ItemName": "Ability - Improved Swimming",
+        "Count": 1
+      }
+    ],
+    "Type": [
+      {
+        "ItemName": "Fishing Lure",
+        "Count": 1
+      }
+    ],
+    "Progression": [
+      {
+        "ItemName": "Progressive Mobility",
+        "Count": 4
+      }
+    ],
+    "Combo": [
+      {
+        "ItemName": "Combo Swimming",
+        "Count": 2
+      }
+    ]
+  },
+  "Silvaero": {
+    "MonsterName": "Silvaero",
+    "Species": [
+      {
+        "ItemName": "Silvaero Harness",
+        "Count": 1
+      }
+    ],
+    "Ability": [
+      {
+        "ItemName": "Ability - Improved Flying",
+        "Count": 1
+      }
+    ],
+    "Type": [
+      {
+        "ItemName": "Bird Seed",
+        "Count": 1
+      }
+    ],
+    "Progression": [
+      {
+        "ItemName": "Progressive Mobility",
+        "Count": 2
+      }
+    ],
+    "Combo": [
+      {
+        "ItemName": "Combo Flight",
+        "Count": 2
+      }
+    ]
+  },
+  "Elderjel": {
+    "MonsterName": "Elderjel",
+    "Species": [
+      {
+        "ItemName": "Elderjel Lure",
+        "Count": 1
+      }
+    ],
+    "Ability": [
+      {
+        "ItemName": "Ability - Improved Swimming",
+        "Count": 1
+      }
+    ],
+    "Type": [
+      {
+        "ItemName": "Ahrimaaya",
+        "Count": 1
+      }
+    ],
+    "Progression": [
+      {
+        "ItemName": "Progressive Mobility",
+        "Count": 4
+      }
+    ],
+    "Combo": [
+      {
+        "ItemName": "Combo Swimming",
+        "Count": 2
+      }
+    ]
+  },
+  "Manticorb": {
+    "MonsterName": "Manticorb",
+    "Species": [
+      {
+        "ItemName": "Mana Crystal",
+        "Count": 1
+      }
+    ],
+    "Ability": [
+      {
+        "ItemName": "Ability - Light",
+        "Count": 1
+      }
+    ],
+    "Type": [
+      {
+        "ItemName": "Spellbook",
+        "Count": 1
+      }
+    ],
+    "Progression": [
+      {
+        "ItemName": "Progressive Light",
+        "Count": 1
+      }
+    ],
+    "Combo": [
+      {
+        "ItemName": "Combo Light",
+        "Count": 1
+      }
+    ]
+  },
+  "Goblin Miner": {
+    "MonsterName": "Goblin Miner",
+    "Species": [
+      {
+        "ItemName": "Mining Helmet",
+        "Count": 1
+      }
+    ],
+    "Ability": [
+      {
+        "ItemName": "Ability - Light Crush",
+        "Count": 1
+      }
+    ],
+    "Type": [
+      {
+        "ItemName": "Goblin Charm",
+        "Count": 1
+      }
+    ],
+    "Progression": [
+      {
+        "ItemName": "Progressive Walls",
+        "Count": 2
+      }
+    ],
+    "Combo": [
+      {
+        "ItemName": "Combo Walls",
+        "Count": 2
+      },
+      {
+        "ItemName": "Combo Light",
+        "Count": 1
+      }
+    ]
+  },
+  "Salahammer": {
+    "MonsterName": "Salahammer",
+    "Species": [
+      {
+        "ItemName": "Sledgehammer",
+        "Count": 1
+      }
+    ],
+    "Ability": [
+      {
+        "ItemName": "Ability - Crush",
+        "Count": 1
+      }
+    ],
+    "Type": [
+      {
+        "ItemName": "Training Dummy",
+        "Count": 1
+      }
+    ],
+    "Progression": [
+      {
+        "ItemName": "Progressive Walls",
+        "Count": 2
+      }
+    ],
+    "Combo": [
+      {
+        "ItemName": "Combo Walls",
+        "Count": 2
+      }
+    ]
+  },
+  "Lava Blob": {
+    "MonsterName": "Lava Blob",
+    "Species": [
+      {
+        "ItemName": "Heat-Proof Gloves",
+        "Count": 1
+      }
+    ],
+    "Ability": [
+      {
+        "ItemName": "Ability - Ignite",
+        "Count": 1
+      }
+    ],
+    "Type": [
+      {
+        "ItemName": "Slime Snack",
+        "Count": 1
+      }
+    ],
+    "Progression": [
+      {
+        "ItemName": "Progressive Fire Orbs",
+        "Count": 1
+      }
+    ],
+    "Combo": [
+      {
+        "ItemName": "Combo Orbs",
+        "Count": 1
+      }
+    ]
+  },
+  "Glowdra": {
+    "MonsterName": "Glowdra",
+    "Species": [
+      {
+        "ItemName": "Glowfly Lantern",
+        "Count": 1
+      }
+    ],
+    "Ability": [
+      {
+        "ItemName": "Ability - Light",
+        "Count": 1
+      }
+    ],
+    "Type": [
+      {
+        "ItemName": "Insect Pheromones",
+        "Count": 1
+      }
+    ],
+    "Progression": [
+      {
+        "ItemName": "Progressive Light",
+        "Count": 1
+      }
+    ],
+    "Combo": [
+      {
+        "ItemName": "Combo Light",
+        "Count": 1
+      }
+    ]
+  },
+  "Draconov": {
+    "MonsterName": "Draconov",
+    "Species": [
+      {
+        "ItemName": "Draconov Harness",
+        "Count": 1
+      }
+    ],
+    "Ability": [
+      {
+        "ItemName": "Ability - Flying",
+        "Count": 1
+      }
+    ],
+    "Type": [
+      {
+        "ItemName": "Dragon Orb",
+        "Count": 1
+      }
+    ],
+    "Progression": [
+      {
+        "ItemName": "Progressive Mobility",
+        "Count": 1
+      }
+    ],
+    "Combo": [
+      {
+        "ItemName": "Combo Flight",
+        "Count": 1
+      }
+    ]
+  },
+  "Dracogran": {
+    "MonsterName": "Dracogran",
+    "Species": [
+      {
+        "ItemName": "Dracogran Harness",
+        "Count": 1
+      }
+    ],
+    "Ability": [
+      {
+        "ItemName": "Ability - Improved Flying",
+        "Count": 1
+      }
+    ],
+    "Type": [
+      {
+        "ItemName": "Dragon Orb",
+        "Count": 1
+      }
+    ],
+    "Progression": [
+      {
+        "ItemName": "Progressive Mobility",
+        "Count": 2
+      }
+    ],
+    "Combo": [
+      {
+        "ItemName": "Combo Flight",
+        "Count": 2
+      }
+    ]
+  },
+  "Asura": {
+    "MonsterName": "Asura",
+    "Species": [
+      {
+        "ItemName": "Asura's Girdle",
+        "Count": 1
+      }
+    ],
+    "Ability": [
+      {
+        "ItemName": "Ability - Crush",
+        "Count": 1
+      }
+    ],
+    "Type": [
+      {
+        "ItemName": "Ahrimaaya",
+        "Count": 1
+      }
+    ],
+    "Progression": [
+      {
+        "ItemName": "Progressive Walls",
+        "Count": 2
+      }
+    ],
+    "Combo": [
+      {
+        "ItemName": "Combo Walls",
+        "Count": 2
+      }
+    ]
+  },
+  "Skorch": {
+    "MonsterName": "Skorch",
+    "Species": [
+      {
+        "ItemName": "Candle Wax",
+        "Count": 1
+      }
+    ],
+    "Ability": [
+      {
+        "ItemName": "Ability - Ignite",
+        "Count": 1
+      }
+    ],
+    "Type": [
+      {
+        "ItemName": "Dragon Orb",
+        "Count": 1
+      }
+    ],
+    "Progression": [
+      {
+        "ItemName": "Progressive Fire Orbs",
+        "Count": 1
+      }
+    ],
+    "Combo": [
+      {
+        "ItemName": "Combo Orbs",
+        "Count": 1
+      }
+    ]
+  },
+  "Stolby": {
+    "MonsterName": "Stolby",
+    "Species": [
+      {
+        "ItemName": "Stolby's Spellbook",
+        "Count": 1
+      }
+    ],
+    "Ability": [
+      {
+        "ItemName": "Ability - Ghost Form",
+        "Count": 1
+      }
+    ],
+    "Type": [
+      {
+        "ItemName": "Spellbook",
+        "Count": 1
+      }
+    ],
+    "Progression": [
+      {
+        "ItemName": "Progressive Shroud",
+        "Count": 1
+      }
+    ],
+    "Combo": [
+      {
+        "ItemName": "Combo Shroud",
+        "Count": 1
+      }
+    ]
+  },
+  "Ornithopter": {
+    "MonsterName": "Ornithopter",
+    "Species": [
+      {
+        "ItemName": "Ornithopter Harness",
+        "Count": 1
+      }
+    ],
+    "Ability": [
+      {
+        "ItemName": "Ability - Improved Flying",
+        "Count": 1
+      }
+    ],
+    "Type": [
+      {
+        "ItemName": "Repair Kit",
+        "Count": 1
+      }
+    ],
+    "Progression": [
+      {
+        "ItemName": "Progressive Mobility",
+        "Count": 2
+      }
+    ],
+    "Combo": [
+      {
+        "ItemName": "Combo Flight",
+        "Count": 2
+      }
+    ]
+  },
+  "Polterofen": {
+    "MonsterName": "Polterofen",
+    "Species": [
+      {
+        "ItemName": "Lump of Coal",
+        "Count": 1
+      }
+    ],
+    "Ability": [
+      {
+        "ItemName": "Ability - Fiery Shots",
+        "Count": 1
+      }
+    ],
+    "Type": [
+      {
+        "ItemName": "Spirit Charm",
+        "Count": 1
+      }
+    ],
+    "Progression": [
+      {
+        "ItemName": "Progressive Fire Orbs",
+        "Count": 2
+      }
+    ],
+    "Combo": [
+      {
+        "ItemName": "Combo Orbs",
+        "Count": 2
+      }
+    ]
+  },
+  "Oculus": {
+    "MonsterName": "Oculus",
+    "Species": [
+      {
+        "ItemName": "Mechanical Lens",
+        "Count": 1
+      }
+    ],
+    "Ability": [
+      {
+        "ItemName": "Ability - Grapple",
+        "Count": 1
+      }
+    ],
+    "Type": [
+      {
+        "ItemName": "Repair Kit",
+        "Count": 1
+      }
+    ],
+    "Progression": [
+      {
+        "ItemName": "Progressive Terrain",
+        "Count": 1
+      }
+    ],
+    "Combo": [
+      {
+        "ItemName": "Combo Flight",
+        "Count": 1
+      },
+      {
+        "ItemName": "Combo Mount",
+        "Count": 1
+      }
+    ]
+  },
+  "Mimic": {
+    "MonsterName": "Mimic",
+    "Species": [
+      {
+        "ItemName": "Lockpicks",
+        "Count": 1
+      }
+    ],
+    "Ability": [
+      {
+        "ItemName": "Ability - Fiery Shots",
+        "Count": 1
+      }
+    ],
+    "Type": [
+      {
+        "ItemName": "Spirit Charm",
+        "Count": 1
+      }
+    ],
+    "Progression": [
+      {
+        "ItemName": "Progressive Fire Orbs",
+        "Count": 2
+      }
+    ],
+    "Combo": [
+      {
+        "ItemName": "Combo Orbs",
+        "Count": 2
+      }
+    ]
+  },
+  "Goblin Pilot": {
+    "MonsterName": "Goblin Pilot",
+    "Species": [
+      {
+        "ItemName": "Pilot's License",
+        "Count": 1
+      }
+    ],
+    "Ability": [
+      {
+        "ItemName": "Ability - Crush",
+        "Count": 1
+      }
+    ],
+    "Type": [
+      {
+        "ItemName": "Goblin Charm",
+        "Count": 1
+      }
+    ],
+    "Progression": [
+      {
+        "ItemName": "Progressive Walls",
+        "Count": 2
+      }
+    ],
+    "Combo": [
+      {
+        "ItemName": "Combo Walls",
+        "Count": 2
+      }
+    ]
+  },
+  "Shockhopper": {
+    "MonsterName": "Shockhopper",
+    "Species": [
+      {
+        "ItemName": "Shiny Pebble",
+        "Count": 1
+      }
+    ],
+    "Ability": [
+      {
+        "ItemName": "Ability - Shock Freeze",
+        "Count": 1
+      }
+    ],
+    "Type": [
+      {
+        "ItemName": "Bird Seed",
+        "Count": 1
+      }
+    ],
+    "Progression": [
+      {
+        "ItemName": "Progressive Lightning Orbs",
+        "Count": 2
+      }
+    ],
+    "Combo": [
+      {
+        "ItemName": "Combo Orbs",
+        "Count": 3
+      }
+    ]
+  },
+  "Targoat": {
+    "MonsterName": "Targoat",
+    "Species": [
+      {
+        "ItemName": "Targoat Horn",
+        "Count": 1
+      }
+    ],
+    "Ability": [
+      {
+        "ItemName": "Ability - Tackle",
+        "Count": 1
+      }
+    ],
+    "Type": [
+      {
+        "ItemName": "Monster Treat",
+        "Count": 1
+      }
+    ],
+    "Progression": [
+      {
+        "ItemName": "Progressive Walls",
+        "Count": 1
+      }
+    ],
+    "Combo": [
+      {
+        "ItemName": "Combo Walls",
+        "Count": 1
+      },
+      {
+        "ItemName": "Combo Boulders",
+        "Count": 1
+      }
+    ]
+  },
+  "Dracozul": {
+    "MonsterName": "Dracozul",
+    "Species": [
+      {
+        "ItemName": "Dracozul Harness",
+        "Count": 1
+      }
+    ],
+    "Ability": [
+      {
+        "ItemName": "Ability - Improved Flying",
+        "Count": 1
+      }
+    ],
+    "Type": [
+      {
+        "ItemName": "Dragon Orb",
+        "Count": 1
+      }
+    ],
+    "Progression": [
+      {
+        "ItemName": "Progressive Mobility",
+        "Count": 2
+      }
+    ],
+    "Combo": [
+      {
+        "ItemName": "Combo Flight",
+        "Count": 2
+      }
+    ]
+  },
+  "Troll": {
+    "MonsterName": "Troll",
+    "Species": [
+      {
+        "ItemName": "Troll Toll",
+        "Count": 1
+      }
+    ],
+    "Ability": [
+      {
+        "ItemName": "Ability - Corrosive Jabs",
+        "Count": 1
+      }
+    ],
+    "Type": [
+      {
+        "ItemName": "Monster Treat",
+        "Count": 1
+      }
+    ],
+    "Progression": [
+      {
+        "ItemName": "Progressive Water Orbs",
+        "Count": 2
+      }
+    ],
+    "Combo": [
+      {
+        "ItemName": "Combo Orbs",
+        "Count": 1
+      },
+      {
+        "ItemName": "Combo Walls",
+        "Count": 1
+      }
+    ]
+  },
+  "Brutus": {
+    "MonsterName": "Brutus",
+    "Species": [
+      {
+        "ItemName": "Brutus Treat",
+        "Count": 1
+      }
+    ],
+    "Ability": [
+      {
+        "ItemName": "Ability - Summon Big Rock",
+        "Count": 1
+      }
+    ],
+    "Type": [
+      {
+        "ItemName": "Training Dummy",
+        "Count": 1
+      }
+    ],
+    "Progression": [
+      {
+        "ItemName": "Progressive Boulders",
+        "Count": 2
+      }
+    ],
+    "Combo": [
+      {
+        "ItemName": "Combo Boulders",
+        "Count": 2
+      }
+    ]
+  },
+  "Mega Rock": {
+    "MonsterName": "Mega Rock",
+    "Species": [
+      {
+        "ItemName": "Pet Boulder",
+        "Count": 1
+      }
+    ],
+    "Ability": [
+      {
+        "ItemName": "Ability - Summon Big Rock",
+        "Count": 1
+      }
+    ],
+    "Type": [
+      {
+        "ItemName": "Green Thumb",
+        "Count": 1
+      }
+    ],
+    "Progression": [
+      {
+        "ItemName": "Progressive Boulders",
+        "Count": 2
+      }
+    ],
+    "Combo": [
+      {
+        "ItemName": "Combo Boulders",
+        "Count": 2
+      }
+    ]
+  },
+  "Argiope": {
+    "MonsterName": "Argiope",
+    "Species": [
+      {
+        "ItemName": "Argiope Pheromones",
+        "Count": 1
+      }
+    ],
+    "Ability": [
+      {
+        "ItemName": "Ability - Grapple",
+        "Count": 1
+      }
+    ],
+    "Type": [
+      {
+        "ItemName": "Insect Pheromones",
+        "Count": 1
+      }
+    ],
+    "Progression": [
+      {
+        "ItemName": "Progressive Terrain",
+        "Count": 1
+      }
+    ],
+    "Combo": [
+      {
+        "ItemName": "Combo Flight",
+        "Count": 1
+      },
+      {
+        "ItemName": "Combo Mount",
+        "Count": 1
+      }
+    ]
+  },
+  "Arachlich": {
+    "MonsterName": "Arachlich",
+    "Species": [
+      {
+        "ItemName": "Phylactery",
+        "Count": 1
+      }
+    ],
+    "Ability": [
+      {
+        "ItemName": "Ability - Grapple",
+        "Count": 1
+      }
+    ],
+    "Type": [
+      {
+        "ItemName": "Spellbook",
+        "Count": 1
+      }
+    ],
+    "Progression": [
+      {
+        "ItemName": "Progressive Terrain",
+        "Count": 1
+      }
+    ],
+    "Combo": [
+      {
+        "ItemName": "Combo Flight",
+        "Count": 1
+      },
+      {
+        "ItemName": "Combo Mount",
+        "Count": 1
+      }
+    ]
+  },
+  "Moccus": {
+    "MonsterName": "Moccus",
+    "Species": [
+      {
+        "ItemName": "Moccus Saddle",
+        "Count": 1
+      }
+    ],
+    "Ability": [
+      {
+        "ItemName": "Ability - Mount",
+        "Count": 1
+      }
+    ],
+    "Type": [
+      {
+        "ItemName": "Ahrimaaya",
+        "Count": 1
+      }
+    ],
+    "Progression": [
+      {
+        "ItemName": "Progressive Mount",
+        "Count": 1
+      }
+    ],
+    "Combo": [
+      {
+        "ItemName": "Combo Mount",
+        "Count": 1
+      }
+    ]
+  },
+  "Promethean": {
+    "MonsterName": "Promethean",
+    "Species": [
+      {
+        "ItemName": "Promethean Battery",
+        "Count": 1
+      }
+    ],
+    "Ability": [
+      {
+        "ItemName": "Ability - Summon Big Rock",
+        "Count": 1
+      }
+    ],
+    "Type": [
+      {
+        "ItemName": "Repair Kit",
+        "Count": 1
+      }
+    ],
+    "Progression": [
+      {
+        "ItemName": "Progressive Boulders",
+        "Count": 2
+      }
+    ],
+    "Combo": [
+      {
+        "ItemName": "Combo Boulders",
+        "Count": 2
+      }
+    ]
+  },
+  "Draconoir": {
+    "MonsterName": "Draconoir",
+    "Species": [
+      {
+        "ItemName": "Draconoir Harness",
+        "Count": 1
+      }
+    ],
+    "Ability": [
+      {
+        "ItemName": "Ability - Improved Flying",
+        "Count": 1
+      }
+    ],
+    "Type": [
+      {
+        "ItemName": "Dragon Orb",
+        "Count": 1
+      }
+    ],
+    "Progression": [
+      {
+        "ItemName": "Progressive Mobility",
+        "Count": 2
+      }
+    ],
+    "Combo": [
+      {
+        "ItemName": "Combo Flight",
+        "Count": 2
+      }
+    ]
+  },
+  "Spinner": {
+    "MonsterName": "Spinner",
+    "Species": [
+      {
+        "ItemName": "Spare Outfit",
+        "Count": 1
+      }
+    ],
+    "Ability": [
+      {
+        "ItemName": "Ability - Toxic Freeze",
+        "Count": 1
+      }
+    ],
+    "Type": [
+      {
+        "ItemName": "Insect Pheromones",
+        "Count": 1
+      }
+    ],
+    "Progression": [
+      {
+        "ItemName": "Progressive Earth Orbs",
+        "Count": 3
+      }
+    ],
+    "Combo": [
+      {
+        "ItemName": "Combo Orbs",
+        "Count": 3
+      }
+    ]
+  },
+  "Plague Egg": {
+    "MonsterName": "Plague Egg",
+    "Species": [
+      {
+        "ItemName": "Plague Mask",
+        "Count": 1
+      }
+    ],
+    "Ability": [
+      {
+        "ItemName": "Ability - Ignite",
+        "Count": 1
+      }
+    ],
+    "Type": [
+      {
+        "ItemName": "Bird Seed",
+        "Count": 1
+      }
+    ],
+    "Progression": [
+      {
+        "ItemName": "Progressive Fire Orbs",
+        "Count": 1
+      }
+    ],
+    "Combo": [
+      {
+        "ItemName": "Combo Orbs",
+        "Count": 1
+      }
+    ]
+  },
+  "Sutsune": {
+    "MonsterName": "Sutsune",
+    "Species": [
+      {
+        "ItemName": "Sutsune's True Name",
+        "Count": 1
+      }
+    ],
+    "Ability": [
+      {
+        "ItemName": "Ability - Secret Vision",
+        "Count": 1
+      }
+    ],
+    "Type": [
+      {
+        "ItemName": "Ahrimaaya",
+        "Count": 1
+      }
+    ],
+    "Progression": [
+      {
+        "ItemName": "Progressive Terrain",
+        "Count": 3
+      }
+    ],
+    "Combo": [
+      {
+        "ItemName": "Combo Magic",
+        "Count": 2
+      }
+    ]
+  },
+  "Darnation": {
+    "MonsterName": "Darnation",
+    "Species": [
+      {
+        "ItemName": "Darnation Pheromones",
+        "Count": 1
+      }
+    ],
+    "Ability": [
+      {
+        "ItemName": "Ability - Crush",
+        "Count": 1
+      }
+    ],
+    "Type": [
+      {
+        "ItemName": "Insect Pheromones",
+        "Count": 1
+      }
+    ],
+    "Progression": [
+      {
+        "ItemName": "Progressive Walls",
+        "Count": 2
+      }
+    ],
+    "Combo": [
+      {
+        "ItemName": "Combo Walls",
+        "Count": 2
+      }
+    ]
+  },
+  "Thanatos": {
+    "MonsterName": "Thanatos",
+    "Species": [
+      {
+        "ItemName": "Thanatos' Scythe",
+        "Count": 1
+      }
+    ],
+    "Ability": [
+      {
+        "ItemName": "Ability - Secret Vision",
+        "Count": 1
+      }
+    ],
+    "Type": [
+      {
+        "ItemName": "Ahrimaaya",
+        "Count": 1
+      }
+    ],
+    "Progression": [
+      {
+        "ItemName": "Progressive Terrain",
+        "Count": 3
+      }
+    ],
+    "Combo": [
+      {
+        "ItemName": "Combo Magic",
+        "Count": 2
+      }
+    ]
+  },
+  "Rainbow Blob": {
+    "MonsterName": "Rainbow Blob",
+    "Species": [
+      {
+        "ItemName": "Rainbow Slime Snack",
+        "Count": 1
+      }
+    ],
+    "Ability": [
+      {
+        "ItemName": "Ability - Blob Form",
+        "Count": 1
+      }
+    ],
+    "Type": [
+      {
+        "ItemName": "Slime Snack",
+        "Count": 1
+      }
+    ],
+    "Progression": [
+      {
+        "ItemName": "Progressive Terrain",
+        "Count": 2
+      }
+    ],
+    "Combo": [
+      {
+        "ItemName": "Combo Magic",
+        "Count": 1
+      }
+    ]
+  },
+  "Changeling": {
+    "MonsterName": "Changeling",
+    "Species": [
+      {
+        "ItemName": "Power Suit",
+        "Count": 1
+      }
+    ],
+    "Ability": [
+      {
+        "ItemName": "Ability - Morph Ball",
+        "Count": 1
+      }
+    ],
+    "Type": [
+      {
+        "ItemName": "Power Suit",
+        "Count": 1
+      }
+    ],
+    "Progression": [
+      {
+        "ItemName": "Progressive Terrain",
+        "Count": 2
+      }
+    ],
+    "Combo": [
+      {
+        "ItemName": "Combo Magic",
+        "Count": 1
+      }
+    ]
+  },
+  "King Blob": {
+    "MonsterName": "King Blob",
+    "Species": [
+      {
+        "ItemName": "Blob Crown",
+        "Count": 1
+      }
+    ],
+    "Ability": [
+      {
+        "ItemName": "Ability - Blob Form",
+        "Count": 1
+      }
+    ],
+    "Type": [
+      {
+        "ItemName": "Slime Snack",
+        "Count": 1
+      }
+    ],
+    "Progression": [
+      {
+        "ItemName": "Progressive Terrain",
+        "Count": 2
+      }
+    ],
+    "Combo": [
+      {
+        "ItemName": "Combo Magic",
+        "Count": 1
+      }
+    ]
+  },
+  "Worm": {
+    "MonsterName": "Worm",
+    "Species": [
+      {
+        "ItemName": "Grapnel Launcher",
+        "Count": 1
+      }
+    ],
+    "Ability": [
+      {
+        "ItemName": "Ability - Grapple",
+        "Count": 1
+      }
+    ],
+    "Type": [
+      {
+        "ItemName": "Training Dummy",
+        "Count": 1
+      }
+    ],
+    "Progression": [
+      {
+        "ItemName": "Progressive Terrain",
+        "Count": 1
+      }
+    ],
+    "Combo": [
+      {
+        "ItemName": "Combo Flight",
+        "Count": 1
+      },
+      {
+        "ItemName": "Combo Mount",
+        "Count": 1
+      }
+    ]
+  },
+  "Vodinoy": {
+    "MonsterName": "Vodinoy",
+    "Species": [
+      {
+        "ItemName": "Vodinoy's Trident",
+        "Count": 1
+      }
+    ],
+    "Ability": [
+      {
+        "ItemName": "Ability - Levitate",
+        "Count": 1
+      }
+    ],
+    "Type": [
+      {
+        "ItemName": "Training Dummy",
+        "Count": 1
+      }
+    ],
+    "Progression": [
+      {
+        "ItemName": "Progressive Boulders",
+        "Count": 3
+      }
+    ],
+    "Combo": [
+      {
+        "ItemName": "Combo Boulders",
+        "Count": 2
+      },
+      {
+        "ItemName": "Combo Magic",
+        "Count": 2
+      }
+    ]
+  },
+  "Aazerach": {
+    "MonsterName": "Aazerach",
+    "Species": [
+      {
+        "ItemName": "Ahrimaaya",
+        "Count": 1
+      }
+    ],
+    "Ability": [
+      {
+        "ItemName": "Ability - Secret Vision",
+        "Count": 1
+      }
+    ],
+    "Type": [
+      {
+        "ItemName": "Ahrimaaya",
+        "Count": 1
+      }
+    ],
+    "Progression": [
+      {
+        "ItemName": "Progressive Terrain",
+        "Count": 3
+      }
+    ],
+    "Combo": [
+      {
+        "ItemName": "Combo Magic",
+        "Count": 2
+      }
+    ]
+  },
+  "Diavola": {
+    "MonsterName": "Diavola",
+    "Species": [
+      {
+        "ItemName": "Big Plant Pot",
+        "Count": 1
+      }
+    ],
+    "Ability": [
+      {
+        "ItemName": "Ability - Levitate",
+        "Count": 1
+      }
+    ],
+    "Type": [
+      {
+        "ItemName": "Ahrimaaya",
+        "Count": 1
+      }
+    ],
+    "Progression": [
+      {
+        "ItemName": "Progressive Boulders",
+        "Count": 3
+      }
+    ],
+    "Combo": [
+      {
+        "ItemName": "Combo Boulders",
+        "Count": 2
+      },
+      {
+        "ItemName": "Combo Magic",
+        "Count": 2
+      }
+    ]
+  },
+  "Gryphonix": {
+    "MonsterName": "Gryphonix",
+    "Species": [
+      {
+        "ItemName": "Gryphonix Saddle",
+        "Count": 1
+      }
+    ],
+    "Ability": [
+      {
+        "ItemName": "Ability - Lofty Mount",
+        "Count": 1
+      }
+    ],
+    "Type": [
+      {
+        "ItemName": "Bird Seed",
+        "Count": 1
+      }
+    ],
+    "Progression": [
+      {
+        "ItemName": "Progressive Mount",
+        "Count": 3
+      }
+    ],
+    "Combo": [
+      {
+        "ItemName": "Combo Mount",
+        "Count": 1
+      },
+      {
+        "ItemName": "Combo Flight",
+        "Count": 2
+      }
+    ]
+  },
+  "Vertraag": {
+    "MonsterName": "Vertraag",
+    "Species": [
+      {
+        "ItemName": "Divine Hourglass",
+        "Count": 1
+      }
+    ],
+    "Ability": [
+      {
+        "ItemName": "Ability - Levitate",
+        "Count": 1
+      }
+    ],
+    "Type": [
+      {
+        "ItemName": "Spellbook",
+        "Count": 1
+      }
+    ],
+    "Progression": [
+      {
+        "ItemName": "Progressive Boulders",
+        "Count": 3
+      }
+    ],
+    "Combo": [
+      {
+        "ItemName": "Combo Boulders",
+        "Count": 2
+      },
+      {
+        "ItemName": "Combo Magic",
+        "Count": 2
+      }
+    ]
+  },
+  "Mad Lord": {
+    "MonsterName": "Mad Lord",
+    "Species": [
+      {
+        "ItemName": "Mad Lord Contract",
+        "Count": 1
+      }
+    ],
+    "Ability": [
+      {
+        "ItemName": "Ability - Secret Vision",
+        "Count": 1
+      }
+    ],
+    "Type": [
+      {
+        "ItemName": "Ahrimaaya",
+        "Count": 1
+      }
+    ],
+    "Progression": [
+      {
+        "ItemName": "Progressive Terrain",
+        "Count": 3
+      }
+    ],
+    "Combo": [
+      {
+        "ItemName": "Combo Magic",
+        "Count": 2
+      }
+    ]
+  },
+  "Ascendant": {
+    "MonsterName": "Ascendant",
+    "Species": [
+      {
+        "ItemName": "Nimbus Cloud",
+        "Count": 1
+      }
+    ],
+    "Ability": [
+      {
+        "ItemName": "Ability - Secret Vision",
+        "Count": 1
+      }
+    ],
+    "Type": [
+      {
+        "ItemName": "Spellbook",
+        "Count": 1
+      }
+    ],
+    "Progression": [
+      {
+        "ItemName": "Progressive Terrain",
+        "Count": 3
+      }
+    ],
+    "Combo": [
+      {
+        "ItemName": "Combo Magic",
+        "Count": 2
+      }
+    ]
+  },
+  "Fumagus": {
+    "MonsterName": "Fumagus",
+    "Species": [
+      {
+        "ItemName": "Strange Spores",
+        "Count": 1
+      }
+    ],
+    "Ability": [
+      {
+        "ItemName": "Ability - Spore Shroud",
+        "Count": 1
+      }
+    ],
+    "Type": [
+      {
+        "ItemName": "Spellbook",
+        "Count": 1
+      }
+    ],
+    "Progression": [
+      {
+        "ItemName": "Progressive Shroud",
+        "Count": 2
+      }
+    ],
+    "Combo": [
+      {
+        "ItemName": "Combo Shroud",
+        "Count": 2
+      }
+    ]
+  },
+  "Rampede": {
+    "MonsterName": "Rampede",
+    "Species": [
+      {
+        "ItemName": "Rampede Saddle",
+        "Count": 1
+      }
+    ],
+    "Ability": [
+      {
+        "ItemName": "Ability - Charging Mount",
+        "Count": 1
+      }
+    ],
+    "Type": [
+      {
+        "ItemName": "Ancient Encyclopedia",
+        "Count": 1
+      }
+    ],
+    "Progression": [
+      {
+        "ItemName": "Progressive Mount",
+        "Count": 2
+      }
+    ],
+    "Combo": [
+      {
+        "ItemName": "Combo Mount",
+        "Count": 1
+      },
+      {
+        "ItemName": "Combo Walls",
+        "Count": 1
+      }
+    ]
+  },
+  "Rathops": {
+    "MonsterName": "Rathops",
+    "Species": [
+      {
+        "ItemName": "Rathops Saddle",
+        "Count": 1
+      }
+    ],
+    "Ability": [
+      {
+        "ItemName": "Ability - Charging Mount",
+        "Count": 1
+      }
+    ],
+    "Type": [
+      {
+        "ItemName": "Ancient Encyclopedia",
+        "Count": 1
+      }
+    ],
+    "Progression": [
+      {
+        "ItemName": "Progressive Mount",
+        "Count": 2
+      }
+    ],
+    "Combo": [
+      {
+        "ItemName": "Combo Mount",
+        "Count": 1
+      },
+      {
+        "ItemName": "Combo Walls",
+        "Count": 1
+      }
+    ]
+  },
+  "Krakaturtle": {
+    "MonsterName": "Krakaturtle",
+    "Species": [
+      {
+        "ItemName": "Krakaturtle Harness",
+        "Count": 1
+      }
+    ],
+    "Ability": [
+      {
+        "ItemName": "Ability - Dual Mobility",
+        "Count": 1
+      }
+    ],
+    "Type": [
+      {
+        "ItemName": "Ancient Encyclopedia",
+        "Count": 1
+      }
+    ],
+    "Progression": [
+      {
+        "ItemName": "Progressive Mobility",
+        "Count": 5
+      }
+    ],
+    "Combo": [
+      {
+        "ItemName": "Combo Flight",
+        "Count": 2
+      },
+      {
+        "ItemName": "Combo Swimming",
+        "Count": 2
+      }
+    ]
+  },
+  "Tar Blob": {
+    "MonsterName": "Tar Blob",
+    "Species": [
+      {
+        "ItemName": "Tar Blob Saddle",
+        "Count": 1
+      }
+    ],
+    "Ability": [
+      {
+        "ItemName": "Ability - Tar Mount",
+        "Count": 1
+      }
+    ],
+    "Type": [
+      {
+        "ItemName": "Slime Snack",
+        "Count": 1
+      }
+    ],
+    "Progression": [
+      {
+        "ItemName": "Progressive Mount",
+        "Count": 2
+      }
+    ],
+    "Combo": [
+      {
+        "ItemName": "Combo Mount",
+        "Count": 1
+      },
+      {
+        "ItemName": "Combo Swimming",
+        "Count": 1
+      }
+    ]
+  },
+  "Amberlgna": {
+    "MonsterName": "Amberlgna",
+    "Species": [
+      {
+        "ItemName": "Amberlgna Pheromones",
+        "Count": 1
+      }
+    ],
+    "Ability": [
+      {
+        "ItemName": "Ability - Spore Shroud",
+        "Count": 1
+      }
+    ],
+    "Type": [
+      {
+        "ItemName": "Ancient Encyclopedia",
+        "Count": 1
+      }
+    ],
+    "Progression": [
+      {
+        "ItemName": "Progressive Shroud",
+        "Count": 2
+      }
+    ],
+    "Combo": [
+      {
+        "ItemName": "Combo Shroud",
+        "Count": 2
+      }
+    ]
+  },
+  "Dracomer": {
+    "MonsterName": "Dracomer",
+    "Species": [
+      {
+        "ItemName": "Dracomer Harness",
+        "Count": 1
+      }
+    ],
+    "Ability": [
+      {
+        "ItemName": "Ability - Improved Swimming",
+        "Count": 1
+      }
+    ],
+    "Type": [
+      {
+        "ItemName": "Dragon Orb",
+        "Count": 1
+      }
+    ],
+    "Progression": [
+      {
+        "ItemName": "Progressive Mobility",
+        "Count": 4
+      }
+    ],
+    "Combo": [
+      {
+        "ItemName": "Combo Swimming",
+        "Count": 2
+      }
+    ]
+  },
+  "Terradrile": {
+    "MonsterName": "Terradrile",
+    "Species": [
+      {
+        "ItemName": "Terradrile's Lodestone",
+        "Count": 1
+      }
+    ],
+    "Ability": [
+      {
+        "ItemName": "Ability - Levitate",
+        "Count": 1
+      }
+    ],
+    "Type": [
+      {
+        "ItemName": "Ancient Encyclopedia",
+        "Count": 1
+      }
+    ],
+    "Progression": [
+      {
+        "ItemName": "Progressive Boulders",
+        "Count": 3
+      }
+    ],
+    "Combo": [
+      {
+        "ItemName": "Combo Boulders",
+        "Count": 2
+      },
+      {
+        "ItemName": "Combo Magic",
+        "Count": 2
+      }
+    ]
+  },
+  "Bard": {
+    "MonsterName": "Bard",
+    "Species": [
+      {
+        "ItemName": "Bard's Lute",
+        "Count": 1
+      }
+    ],
+    "Ability": [
+      {
+        "ItemName": "Ability - Minnesang",
+        "Count": 1
+      }
+    ],
+    "Type": [
+      {
+        "ItemName": "Bird Seed",
+        "Count": 1
+      }
+    ],
+    "Progression": [
+      {
+        "ItemName": "Progressive Walls",
+        "Count": 3
+      }
+    ],
+    "Combo": [
+      {
+        "ItemName": "Combo Walls",
+        "Count": 3
+      }
+    ]
+  }
+}

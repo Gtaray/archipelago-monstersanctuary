@@ -25,60 +25,41 @@ namespace Archipelago.MonsterSanctuary.Client
         [HarmonyPatch(typeof(WorldData), "BuildReferenceablesCache")]
         private static class WorldData_BuildReferenceablesCache
         {
+            private static T CreateNewApItem<T>(NewItem item, int id) where T : ArchipelagoItem
+            {
+                var go = new GameObject($"AP {item.GameObjectName}");
+                go.SetActive(false);
+
+                var itemComp = go.AddComponent<T>();
+                itemComp.ID = id;
+                itemComp.Name = item.Name;
+                itemComp.Description = item.Description;
+                itemComp.Icon = item.Icon;
+                itemComp.Type = item.Type;
+
+                item.Item = itemComp;
+
+                return itemComp;
+            }
+
             private static void Prefix(WorldData __instance)
             {
                 int idOffset = 0;
                 Patcher.Logger.LogInfo("Adding new items");
                 foreach (var item in Items.GetNewItems())
                 {
-                    var id = REFERENCEABLE_ID_START + idOffset;
+                    int id = REFERENCEABLE_ID_START + idOffset;
                     Patcher.Logger.LogInfo($"\tAdding new item: {item.Name} ({id})");
 
-                    var go = new GameObject(item.GameObjectName);
-                    go.SetActive(false);
+                    ArchipelagoItem component = null;
+                    if (item.Type == "exploreitem")
+                        component = CreateNewApItem<ExploreAbilityItem>(item, id);
+                    else
+                        component = CreateNewApItem<ArchipelagoItem>(item, id);
 
-                    var itemComp = go.AddComponent<ArchipelagoItem>();
-                    itemComp.ID = id;
-                    itemComp.Name = item.Name;
-                    itemComp.Description = item.Description;
-                    itemComp.Icon = item.Icon;
-
-                    // Add a reference to the component back to the data item, so we have quick access to it later if we need it.
-                    item.Item = (BaseItem)itemComp;
-
-                    __instance.Referenceables.Add(itemComp);
+                    __instance.Referenceables.Add(component);
                     idOffset += 1;
                 }
-
-                // Explore item stuff
-                //foreach(var kvp in GameData.ExploreActionUnlockItems)
-                //{
-                //    var key = kvp.Key;
-                //    foreach (var item in kvp.Value)
-                //    {
-                //        // Check for existing items first.
-                //        // We can't update the tooltip here, becuase we don't know which
-                //        // tooltip to use. Handle that in SlotData
-                //        var existingItem = GameData.GetItemByName(item.Name);
-                //        if (existingItem != null)
-                //        {
-                //            item.Item = existingItem;
-                //            continue;
-                //        }
-
-                //        var go = new GameObject(item.Name);
-                //        go.SetActive(false);
-
-                //        var itemComp = go.AddComponent<ExploreAbilityItem>();
-                //        itemComp.Name = item.Name;
-                //        itemComp.Tooltip = item.Tooltip;
-                //        itemComp.Monsters = item.Monsters;
-
-                //        GameController.Instance.WorldData.Referenceables.Add(itemComp);
-
-                //        item.Item = itemComp;
-                //    }
-                //}
             }
         }
 
@@ -94,6 +75,8 @@ namespace Archipelago.MonsterSanctuary.Client
                     switch (apItem.Type)
                     {
                         case "unique":
+                        case "exploreitem":
+                        case "trap":
                             __result = __instance.Uniques;
                             break;
                         default:

@@ -212,15 +212,16 @@ namespace Archipelago.MonsterSanctuary.Client
             static int ScaleByMap()
             {
                 float percentageComplete = (float)PlayerController.Instance.Minimap.CountAllExploredMaps() / (float)AchievementsManager.Instance.MapCount();
-                if (percentageComplete >= 75)
+                    Patcher.Logger.LogInfo("Scale by Map: " + percentageComplete);
+                if (percentageComplete >= .6)
                     return 5;
-                else if (percentageComplete >= 60)
+                else if (percentageComplete >= .4)
                     return 4;
-                else if (percentageComplete >= 45)
+                else if (percentageComplete >= .2)
                     return 3;
-                else if (percentageComplete >= 30)
+                else if (percentageComplete >= .1)
                     return 2;
-                else if (percentageComplete >= 15)
+                else if (percentageComplete >= .05)
                     return 1;
                 return 0;
             }
