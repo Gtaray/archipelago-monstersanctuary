@@ -231,5 +231,6 @@ namespace Archipelago.MonsterSanctuary.Client.AP
         public string Icon { get; set; }
         public string Type { get; set; }
         public ItemClassification Classification { get; set; }
+        public TrapTrigger TrapTrigger { get; set; }
     }
 }

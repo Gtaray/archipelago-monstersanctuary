@@ -88,145 +88,144 @@ namespace Archipelago.MonsterSanctuary.Client
                     }                        
                 }
             }
+        }
 
-            #region Item Handling
-            private static bool CanGiveItem()
+        #region Item Handling
+        private static bool CanGiveItem()
+        {
+            // Make sure we're not giving the player items on the title screen
+            return GameStateManager.Instance.IsExploring() || GameStateManager.Instance.IsCombat();
+        }
+
+        public static bool ReceiveItem(string itemName, EShift eggShift, out string finalItemName)
+        {
+            finalItemName = itemName;
+            if (itemName == null)
             {
-                // Make sure we're not giving the player items on the title screen
-                return GameStateManager.Instance.IsExploring();
+                Logger.LogError("Null item was received");
+                return false;
             }
 
-            public static bool ReceiveItem(string itemName, EShift eggShift, out string finalItemName)
+            var gold = GetGoldQuantity(itemName);
+            if (gold > 0)
             {
-                finalItemName = itemName;
-                if (itemName == null)
-                {
-                    Logger.LogError("Null item was received");
-                    return false;
-                }
-
-                var gold = GetGoldQuantity(itemName);
-                if (gold > 0)
-                {
-                    GiveGoldToPlayer(gold);
-                    return true;
-                }
-
-                var quantity = GetQuantityOfItem(ref itemName);
-                var newItem = GetItemByName(itemName);
-
-                if (newItem == null)
-                {
-                    // This shouldn't happen. Might need a smarter way to solve this.
-                    Logger.LogError($"No item reference was found matching the name '{itemName}'.");
-                    return false;
-                }
-
-                if (newItem is Equipment && SlotData.AutoScaleEquipment != EquipmentAutoScaler.Never)
-                {
-                    int level = GetScaledEquipmentLevel();
-                    if (level > 0)
-                    {
-                        string newItemName = $"{itemName}+{level}";
-                        Patcher.Logger.LogInfo("Auto-scaling equipment. New item name: " + newItem);
-                        newItem = GetItemByName(newItemName);
-                        finalItemName = newItemName;
-                    }
-                }
-
-
-                AddItemToPlayerInventory(ref newItem, quantity, eggShift);
-
+                GiveGoldToPlayer(gold);
                 return true;
             }
 
-            static void GiveGoldToPlayer(int amount)
+            var quantity = GetQuantityOfItem(ref itemName);
+            var newItem = GetItemByName(itemName);
+
+            if (newItem == null)
             {
-                PlayerController.Instance.Gold += amount;
+                // This shouldn't happen. Might need a smarter way to solve this.
+                Logger.LogError($"No item reference was found matching the name '{itemName}'.");
+                return false;
             }
 
-            static void AddItemToPlayerInventory(ref BaseItem item, int quantity = 1, EShift eggShift = EShift.Normal)
+            if (newItem is Equipment && SlotData.AutoScaleEquipment != EquipmentAutoScaler.Never)
             {
-                if (item != null)
+                int level = GetScaledEquipmentLevel();
+                if (level > 0)
                 {
-                    item = Utils.CheckForCostumeReplacement(item);
-                    PlayerController.Instance.Inventory.AddItem(item, quantity, (int)eggShift);
+                    string newItemName = $"{itemName}+{level}";
+                    Patcher.Logger.LogInfo("Auto-scaling equipment. New item name: " + newItem);
+                    newItem = GetItemByName(newItemName);
+                    finalItemName = newItemName;
                 }
             }
 
-            static int GetScaledEquipmentLevel()
-            {
-                switch (SlotData.AutoScaleEquipment)
-                {
-                    case EquipmentAutoScaler.Level:
-                        return ScaleByLevel();
-                    case EquipmentAutoScaler.Rank:
-                        return ScaleByRank();
-                    case EquipmentAutoScaler.Map:
-                        return ScaleByMap();
-                    default:
-                        return 0;
-                }
-            }
+            AddItemToPlayerInventory(ref newItem, quantity, eggShift);
 
-            static int ScaleByRank()
-            {
-                switch (PlayerController.Instance.Rank.GetKeeperRank())
-                {
-                    case EKeeperRank.KeeperAspirant:
-                    case EKeeperRank.KeeperNovice:
-                        return 0;
-                    case EKeeperRank.KeeperSeeker:
-                        return 1;
-                    case EKeeperRank.KeeperLancer:
-                        return 2;
-                    case EKeeperRank.KeeperRanger:
-                        return 3;
-                    case EKeeperRank.KeeperKnight:
-                        return 4;
-                    case EKeeperRank.KeeperChampion:
-                    case EKeeperRank.KeeperDragoon:
-                    case EKeeperRank.KeeperMaster:
-                        return 5;
-                    default:
-                        return 0;
-                }
-            }
-
-            static int ScaleByLevel()
-            {
-                int highestLevel = PlayerController.Instance.Monsters.GetHighestLevel();
-                if (highestLevel >= 31)
-                    return 5;
-                else if (highestLevel >= 26)
-                    return 4;
-                else if (highestLevel >= 21)
-                    return 3;
-                else if (highestLevel >= 16)
-                    return 2;
-                else if (highestLevel >= 11)
-                    return 1;
-                return 0;
-            }
-
-            static int ScaleByMap()
-            {
-                float percentageComplete = (float)PlayerController.Instance.Minimap.CountAllExploredMaps() / (float)AchievementsManager.Instance.MapCount();
-                    Patcher.Logger.LogInfo("Scale by Map: " + percentageComplete);
-                if (percentageComplete >= .6)
-                    return 5;
-                else if (percentageComplete >= .4)
-                    return 4;
-                else if (percentageComplete >= .2)
-                    return 3;
-                else if (percentageComplete >= .1)
-                    return 2;
-                else if (percentageComplete >= .05)
-                    return 1;
-                return 0;
-            }
-            #endregion
+            return true;
         }
+
+        public static void GiveGoldToPlayer(int amount)
+        {
+            PlayerController.Instance.Gold += amount;
+        }
+
+        public static void AddItemToPlayerInventory(ref BaseItem item, int quantity = 1, EShift eggShift = EShift.Normal)
+        {
+            if (item != null)
+            {
+                item = Utils.CheckForCostumeReplacement(item);
+                PlayerController.Instance.Inventory.AddItem(item, quantity, (int)eggShift);
+            }
+        }
+
+        static int GetScaledEquipmentLevel()
+        {
+            switch (SlotData.AutoScaleEquipment)
+            {
+                case EquipmentAutoScaler.Level:
+                    return ScaleByLevel();
+                case EquipmentAutoScaler.Rank:
+                    return ScaleByRank();
+                case EquipmentAutoScaler.Map:
+                    return ScaleByMap();
+                default:
+                    return 0;
+            }
+        }
+
+        static int ScaleByRank()
+        {
+            switch (PlayerController.Instance.Rank.GetKeeperRank())
+            {
+                case EKeeperRank.KeeperAspirant:
+                case EKeeperRank.KeeperNovice:
+                    return 0;
+                case EKeeperRank.KeeperSeeker:
+                    return 1;
+                case EKeeperRank.KeeperLancer:
+                    return 2;
+                case EKeeperRank.KeeperRanger:
+                    return 3;
+                case EKeeperRank.KeeperKnight:
+                    return 4;
+                case EKeeperRank.KeeperChampion:
+                case EKeeperRank.KeeperDragoon:
+                case EKeeperRank.KeeperMaster:
+                    return 5;
+                default:
+                    return 0;
+            }
+        }
+
+        static int ScaleByLevel()
+        {
+            int highestLevel = PlayerController.Instance.Monsters.GetHighestLevel();
+            if (highestLevel >= 31)
+                return 5;
+            else if (highestLevel >= 26)
+                return 4;
+            else if (highestLevel >= 21)
+                return 3;
+            else if (highestLevel >= 16)
+                return 2;
+            else if (highestLevel >= 11)
+                return 1;
+            return 0;
+        }
+
+        static int ScaleByMap()
+        {
+            float percentageComplete = (float)PlayerController.Instance.Minimap.CountAllExploredMaps() / (float)AchievementsManager.Instance.MapCount();
+            Patcher.Logger.LogInfo("Scale by Map: " + percentageComplete);
+            if (percentageComplete >= .6)
+                return 5;
+            else if (percentageComplete >= .4)
+                return 4;
+            else if (percentageComplete >= .2)
+                return 3;
+            else if (percentageComplete >= .1)
+                return 2;
+            else if (percentageComplete >= .05)
+                return 1;
+            return 0;
+        }
+        #endregion
 
         [HarmonyPatch(typeof(GameController), "Update")]
         private class GameController_Update_Notifications
@@ -261,7 +260,7 @@ namespace Archipelago.MonsterSanctuary.Client
 
             private static void NotifyPlayer(ItemTransferNotification notification)
             {
-                Patcher.UI.AddItemToHistory(notification);
+                //Patcher.UI.AddItemToHistory(notification);
 
                 bool showPopup = false;
                 switch (notification.Classification)
@@ -539,7 +538,7 @@ namespace Archipelago.MonsterSanctuary.Client
             return gold;
         }
 
-        static BaseItem GetItemByName(string name)
+        public static BaseItem GetItemByName(string name)
         {
             if (name.EndsWith(" Egg"))
                 return GetItemByName<Egg>(name);
@@ -547,7 +546,7 @@ namespace Archipelago.MonsterSanctuary.Client
             return GetItemByName<BaseItem>(name);
         }
 
-        static BaseItem GetItemByName<T>(string name) where T : BaseItem
+        public static BaseItem GetItemByName<T>(string name) where T : BaseItem
         {
             return GameController.Instance.WorldData.Referenceables
                 .Where(x => x?.gameObject.GetComponent<T>() != null)

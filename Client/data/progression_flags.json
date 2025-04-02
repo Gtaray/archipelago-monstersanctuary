@@ -63,6 +63,10 @@
   ],
   "TediousPuzzles": [
     // Sliding gate puzzle in stronghold dungeon
+    "SDEastGate1",
+    "SDEastGate2",
+    "SDEastGate3",
+    "SDEastGate4",
     // Sliding gate in sun palace
     "SPS4Gate1",
     "SPS4Gate2",
@@ -71,9 +75,31 @@
     "SPS4Gate5",
     "SPS4Gate6",
     // Door puzzle in ancient woods
-    "AWDoorRed"
+    "AWDoorRed",
+    "AWDoorBlue",
+    "AWDoorGreen",
+    "AWDoorYellow",
     // Block and switch puzzle in workshop
+    "MWS4Gate1",
+    "MWS4Gate2",
+    "MWS4Gate3",
+    "MWS4Gate4",
+    "MWS4Gate5",
+    "MWS4Gate6",
+    "MWS4Gate7",
+    "MWS4Gate8",
+    "MWS4Gate9",
+    "MWS4Gate10",
+    "MWS4Gate20",
+    "MWS4Gate21",
     // Gate puzzle in workshop
+    "MWE1Lever1",
+    "MWE1Lever2",
+    "MWE1Lever3",
+    "MWE1Lever4",
+    "MWE1Lever5",
+    "MWE1Lever6",
+    "MWE1Lever7"
   ],
   "BlueCaves": {
     "Entrances": [],

@@ -186,7 +186,7 @@ namespace Archipelago.MonsterSanctuary.Client
                         return ProgressManager.Instance.GetBool("TrevisanQuestAazerach");
                     }
                 }
-                if (GameController.Instance.CurrentSceneName == "MountainPath_North1" 
+                if (GameController.Instance.CurrentSceneName == "MountainPath_North1"
                     && __instance.ID == 18)
                 {
                     // Disable the touch trigger in the first room
@@ -244,7 +244,7 @@ namespace Archipelago.MonsterSanctuary.Client
                 if (!ApState.IsConnected)
                     return true;
 
-                
+
                 // Lowers sun palace water by the first stage
                 if (__instance.BoolSwitchName == "SunPalaceWaterSwitch1")
                 {
@@ -288,6 +288,23 @@ namespace Archipelago.MonsterSanctuary.Client
             private static void ShowPlayerWarningMessage()
             {
                 PopupController.Instance.ShowMessage("Warning", "This lever doesn't appear to work right now. Looks like you need to do something else first.");
+            }
+        }
+
+        [HarmonyPatch(typeof(BoolSwitchDoor), "Start")]
+        private class BoolSwitchDoor_Start
+        {
+            private static void Postfix(BoolSwitchDoor __instance)
+            {
+                //if (!ApState.IsConnected)
+                //    return;
+                if (!SlotData.SolveTediousPuzzles)
+                    return;
+
+                if (World.ShouldTediousDoorBeSkipped(__instance.BoolSwitchName))
+                {
+                    __instance.gameObject.SetActive(false);
+                }
             }
         }
     }

@@ -1,10 +1,13 @@
 ﻿using Archipelago.MonsterSanctuary.Client.AP;
+using Archipelago.MonsterSanctuary.Client.Behaviors;
 using Archipelago.MonsterSanctuary.Client.Options;
 using Archipelago.MonsterSanctuary.Client.Persistence;
 using HarmonyLib;
 using JetBrains.Annotations;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
 
 namespace Archipelago.MonsterSanctuary.Client
 {
@@ -196,5 +199,207 @@ namespace Archipelago.MonsterSanctuary.Client
                 }
             }
         }
+
+        #region Traps
+        private static IEnumerable<InventoryItem> GetTrapsInInventory(TrapTrigger trigger)
+        {
+            return PlayerController.Instance.Inventory.Uniques
+                .Where(i => i.Item is TrapItem)
+                .Where(i => ((TrapItem)i.Item).Trigger == trigger)
+                .OrderBy(i => ((TrapItem)i.Item).GetPriority());
+        }
+
+        private static void ApplyPoisonTrap()
+        {
+            var source = CombatController.Instance.Enemies.FirstOrDefault(m => !m.IsDead());
+            foreach (var monster in CombatController.Instance.PlayerMonsters)
+            {
+                monster.BuffManager.AddDebuff(source, BuffManager.DebuffType.Poison, null);
+            }
+        }
+
+        private static void ApplyShockTrap()
+        {
+            var source = CombatController.Instance.Enemies.FirstOrDefault(m => !m.IsDead());
+            foreach (var monster in CombatController.Instance.PlayerMonsters)
+            {
+                monster.BuffManager.AddDebuff(source, BuffManager.DebuffType.Shock, null);
+            }
+        }
+
+        private static void ApplyBurnTrap()
+        {
+            var source = CombatController.Instance.Enemies.FirstOrDefault(m => !m.IsDead());
+            foreach (var monster in CombatController.Instance.PlayerMonsters)
+            {
+                monster.BuffManager.AddDebuff(source, BuffManager.DebuffType.Burn, null);
+            }
+        }
+
+        private static void ApplyFreezeTrap()
+        {
+            var source = CombatController.Instance.Enemies.FirstOrDefault(m => !m.IsDead());
+            foreach (var monster in CombatController.Instance.PlayerMonsters)
+            {
+                monster.BuffManager.AddDebuff(source, BuffManager.DebuffType.Chill, null);
+            }
+        }
+
+        private static void ApplyBlindTrap()
+        {
+            var source = CombatController.Instance.Enemies.FirstOrDefault(m => !m.IsDead());
+            foreach (var monster in CombatController.Instance.PlayerMonsters)
+            {
+                monster.BuffManager.AddSpecialBuff(source, BuffManager.ESpecialBuff.Blind);
+                monster.BuffManager.AddSpecialBuff(source, BuffManager.ESpecialBuff.Blind);
+                monster.BuffManager.AddSpecialBuff(source, BuffManager.ESpecialBuff.Blind);
+                monster.BuffManager.AddSpecialBuff(source, BuffManager.ESpecialBuff.Blind);
+                monster.BuffManager.AddSpecialBuff(source, BuffManager.ESpecialBuff.Blind);
+            }
+        }
+
+        private static void ApplyAmbushTrap()
+        {
+            var source = CombatController.Instance.Enemies.FirstOrDefault(m => !m.IsDead());
+            foreach (var monster in CombatController.Instance.Enemies)
+            {
+                // Apply sidekick and a 30% shield to all enemies
+                monster.BuffManager.AddBuff(new BuffSourceChain(source), BuffManager.BuffType.Sidekick, true);
+                monster.AddShield(source, (int)(monster.MaxHealth * 0.3));
+            }
+        }
+
+        private static void ApplyDeathTrap()
+        {
+            var monsters = CombatController.Instance.PlayerMonsters.Where(m => !m.IsDead()).ToList();
+            if (!monsters.Any())
+                return;
+
+            System.Random r = new System.Random();
+            var monster = monsters[r.Next(monsters.Count())];
+
+            monster.ModifyHealth(-99999);
+            monster.CheckDeath();
+        }
+
+        private static void SendTrapUseNotification(string itemName)
+        {
+            ItemTransferNotification notification = new()
+            {
+                ItemName = itemName,
+                Action = ItemTransferType.TrapUsed,
+            };
+
+            Patcher.UI.AddItemToHistory(notification);
+        }
+
+        private static TrapItem _activeTrap;
+
+        [HarmonyPatch(typeof(CombatController), "StartPlayerTurn")]
+        private class CombatController_StartPlayerTurn
+        {
+            private static void Postfix()
+            {
+                var traps = GetTrapsInInventory(TrapTrigger.PlayerTurnStart);
+                if (traps.Count() == 0)
+                    return;
+
+                _activeTrap = traps.First().Item as TrapItem;
+
+                if (_activeTrap.Name == "Shock Trap")
+                    ApplyShockTrap();
+                else if (_activeTrap.Name == "Freeze Trap")
+                    ApplyFreezeTrap();
+                else if (_activeTrap.Name == "Burn Trap")
+                    ApplyBurnTrap();
+                else if (_activeTrap.Name == "Poison Trap")
+                    ApplyPoisonTrap();
+                else if (_activeTrap.Name == "Flash-Bang Trap")
+                    ApplyBlindTrap();
+                else if (_activeTrap.Name == "Death Trap")
+                    ApplyDeathTrap();
+
+                SendTrapUseNotification(_activeTrap.Name);
+
+                PlayerController.Instance.Inventory.RemoveItem(_activeTrap);
+                _activeTrap = null;
+            }
+        }
+
+        [HarmonyPatch(typeof(CombatController), "StartEnemyTurn")]
+        private class CombatController_StartEnemyTurn
+        {
+            private static void Postfix()
+            {
+                var traps = GetTrapsInInventory(TrapTrigger.EnemyTurnStart);
+                if (traps.Count() == 0)
+                    return;
+
+                // There are currently no traps that use the enemy turn trigger
+            }
+        }
+
+        [HarmonyPatch(typeof(CombatController), "StartFirstCombatTurn")]
+        private class CombatController_StartFirstCombatTurn
+        {
+            private static void Postfix()
+            {
+                var traps = GetTrapsInInventory(TrapTrigger.CombatStart);
+                if (traps.Count() == 0)
+                    return;
+
+                _activeTrap = traps.First().Item as TrapItem;
+
+                if (_activeTrap.Name == "Ambush Trap")
+                    ApplyAmbushTrap();
+
+                PlayerController.Instance.Inventory.RemoveItem(_activeTrap);
+                _activeTrap = null;
+            }
+        }
+
+        [HarmonyPatch(typeof(SkillManager), "CanApplyDebuffOrNegativeStack")]
+        private class SkillManager_CanApplyDebuffOrNegativeStack
+        {
+            private static bool Prefix(ref bool __result)
+            {
+                if (_activeTrap != null)
+                {
+                    __result = true;
+                    return false;
+                }
+                return true;
+            }
+        }
+
+        [HarmonyPatch(typeof(SkillManager), "OnApplyDebuffToEnemy")]
+        private class SkillManager_OnApplyDebuffToEnemy
+        {
+            private static bool Prefix(BuffManager __instance, BaseAction action)
+            {
+                if (action == null && _activeTrap != null)
+                {
+                    return false;
+                }
+
+                return true;
+            }
+        }
+
+        [HarmonyPatch(typeof(BuffManager), "HasDebuffMasterySlot")]
+        private class BuffManager_HasDebuffMasterySlot
+        {
+            private static bool Prefix(BuffManager __instance, ref bool __result, Type applyingSkill)
+            {
+                // Traps should always apply the debuff as if it's mastery
+                if (_activeTrap != null)
+                {
+                    __result = true;
+                    return false;
+                }
+                return true;
+            }
+        }
+        #endregion
     }
 }

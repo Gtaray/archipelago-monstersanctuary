@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using UnityEngine.Playables;
 using static MonoMod.Cil.RuntimeILReferenceBag.FastDelegateInvokers;
 using static System.Collections.Specialized.BitVector32;
 
@@ -26,13 +27,17 @@ namespace Archipelago.MonsterSanctuary.Client.AP
         /// <summary>
         /// This player found someone else's item
         /// </summary>
-        Sent = 2
+        Sent = 2,
+            
+        /// <summary>
+        /// Not a real item transfer type, but because this enum is used to display messages, this enum value is used to display when traps are activated and used
+        /// </summary>
+        TrapUsed = 3
     }
 
     // TODO: Trim this class to only include things that the notifications need
     public class ItemTransferNotification
     {
-        public long LocationID { get; set; }
         public string PlayerName { get; set; }
         public string ItemName { get; set; }
         public ItemTransferType Action { get; set; }
@@ -80,12 +85,15 @@ namespace Archipelago.MonsterSanctuary.Client.AP
             {
                 ItemName = itemName,
                 PlayerName = ApState.Session.Players.GetPlayerName(playerId),
-                LocationID = locationId,
                 Classification = classification,
                 Action = action
             };
 
             NotificationQueue.Enqueue(transfer);
+
+            // Item history should show up instantly.
+            // Pop up notifications will have to wait.
+            Patcher.UI.AddItemToHistory(transfer);
         }
 
         /// <summary>

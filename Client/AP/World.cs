@@ -35,6 +35,8 @@ namespace Archipelago.MonsterSanctuary.Client.AP
         /// <returns></returns>
         public static bool ShouldInteractableBeActivated(string flag) => ProgressionFlags.ShouldInteractableBeActivated(flag);
 
+        public static bool ShouldTediousDoorBeSkipped(string flag) => ProgressionFlags.ShouldTediousDoorBeSkipped(flag);
+
         /// <summary>
         /// A list of all locked doors that are considered 'minimal', meaning they will not be removed when the locked doors setting is set to minimal
         /// The values in this list are in the format {scene_name}_{actor_id}
@@ -207,6 +209,14 @@ namespace Archipelago.MonsterSanctuary.Client.AP
                 return true;
 
             return false;
+        }
+
+        public bool ShouldTediousDoorBeSkipped(string flag)
+        {
+            if (!ApState.IsConnected)
+                return false;
+
+            return TediousPuzzles.Contains(flag);
         }
 
         public bool ShouldInteractableBeActivated(string interactable)

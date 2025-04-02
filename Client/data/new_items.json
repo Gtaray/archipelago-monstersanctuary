@@ -1311,7 +1311,7 @@
   },
 
   {
-    "gameObject": "ProgressiveMobility",
+    "gameObjectName": "ProgressiveMobility",
     "name": "Progressive Mobility",
     "description": "Unlocks Flying -> Improved Flying -> Swimming -> Improved Swimming -> Dual Mobility",
     "icon": "icon_potion",
@@ -1319,7 +1319,7 @@
     "classification": 1
   },
   {
-    "gameObject": "ProgressiveTerrain",
+    "gameObjectName": "ProgressiveTerrain",
     "name": "Progressive Terrain",
     "description": "Unlocks Grapple -> Blob Form / Morph Ball -> Secret Vision",
     "icon": "icon_potion",
@@ -1327,7 +1327,7 @@
     "classification": 1
   },
   {
-    "gameObject": "ProgressiveMount",
+    "gameObjectName": "ProgressiveMount",
     "name": "Progressive Mount",
     "description": "Unlocks Mount -> Charging Mount / Tar Mount -> Lofty Mount",
     "icon": "icon_potion",
@@ -1335,7 +1335,7 @@
     "classification": 1
   },
   {
-    "gameObject": "ProgressiveWalls",
+    "gameObjectName": "ProgressiveWalls",
     "name": "Progressive Walls",
     "description": "Unlocks Claws / Slash / Heavy Punch / Tackle -> Crush / Light Crush -> Minnesang",
     "icon": "icon_potion",
@@ -1343,7 +1343,7 @@
     "classification": 1
   },
   {
-    "gameObject": "ProgressiveBoulders",
+    "gameObjectName": "ProgressiveBoulders",
     "name": "Progressive Boulders",
     "description": "Unlocks Summon Rock / Summon Mushroom -> Summon Big Rock -> Levitate",
     "icon": "icon_potion",
@@ -1351,7 +1351,7 @@
     "classification": 1
   },
   {
-    "gameObject": "ProgressiveFireOrbs",
+    "gameObjectName": "ProgressiveFireOrbs",
     "name": "Progressive Fire Orbs",
     "description": "Unlocks Ignite -> Fiery Shots",
     "icon": "icon_potion",
@@ -1359,7 +1359,7 @@
     "classification": 1
   },
   {
-    "gameObject": "ProgressiveWaterOrbs",
+    "gameObjectName": "ProgressiveWaterOrbs",
     "name": "Progressive Water Orbs",
     "description": "Unlocks Bubble Burst -> Corrosive Jabs",
     "icon": "icon_potion",
@@ -1367,7 +1367,7 @@
     "classification": 1
   },
   {
-    "gameObject": "ProgressiveLightningOrbs",
+    "gameObjectName": "ProgressiveLightningOrbs",
     "name": "Progressive Lightning Orbs",
     "description": "Unlocks Lightning Bolt -> Shock Freeze",
     "icon": "icon_potion",
@@ -1375,7 +1375,7 @@
     "classification": 1
   },
   {
-    "gameObject": "ProgressiveEarthOrbs",
+    "gameObjectName": "ProgressiveEarthOrbs",
     "name": "Progressive Earth Orbs",
     "description": "Unlocks Toxic Slam -> Slime Shot / Jewel Blast -> Toxic Freeze",
     "icon": "icon_potion",
@@ -1383,7 +1383,7 @@
     "classification": 1
   },
   {
-    "gameObject": "ProgressiveIceOrbs",
+    "gameObjectName": "ProgressiveIceOrbs",
     "name": "Progressive Ice Orbs",
     "description": "Unlocks Freeze -> Snowball Toss",
     "icon": "icon_potion",
@@ -1391,7 +1391,7 @@
     "classification": 1
   },
   {
-    "gameObject": "ProgressiveLight",
+    "gameObjectName": "ProgressiveLight",
     "name": "Progressive Light",
     "description": "Unlocks Light / Sonar -> Sonar Mount",
     "icon": "icon_potion",
@@ -1399,7 +1399,7 @@
     "classification": 1
   },
   {
-    "gameObject": "ProgressiveShroud",
+    "gameObjectName": "ProgressiveShroud",
     "name": "Progressive Shroud",
     "description": "Unlocks Ghost Form -> Spore Shroud",
     "icon": "icon_potion",
@@ -1408,7 +1408,7 @@
   },
 
   {
-    "gameObject": "ComboFlight",
+    "gameObjectName": "ComboFlight",
     "name": "Combo Flight",
     "description": "Unlocks Flying -> Improved Flying. Required to unlock Grapple, Lofty Mount, and Dual Mobility",
     "icon": "icon_potion",
@@ -1416,7 +1416,7 @@
     "classification": 1
   },
   {
-    "gameObject": "ComboSwimming",
+    "gameObjectName": "ComboSwimming",
     "name": "Combo Swimming",
     "description": "Unlocks Swimming -> Improved Swimming. Required to unlock Tar Mount and Dual Mobility",
     "icon": "icon_potion",
@@ -1424,7 +1424,7 @@
     "classification": 1
   },
   {
-    "gameObject": "ComboWalls",
+    "gameObjectName": "ComboWalls",
     "name": "Combo Walls",
     "description": "Unlocks Claws / Slash -> Crush -> Minnesang. Required to unlock Tackle, Corrosive Jabs, Toxic Slam, Charging Mount, and Light Crush",
     "icon": "icon_potion",
@@ -1432,7 +1432,7 @@
     "classification": 1
   },
   {
-    "gameObject": "ComboBoulders",
+    "gameObjectName": "ComboBoulders",
     "name": "Combo Boulders",
     "description": "Unlocks Summon Rock / Summon Mushroom -> Summon Big Rock. Requried to unlock Tackle and Levitate",
     "icon": "icon_potion",
@@ -1440,7 +1440,7 @@
     "classification": 1
   },
   {
-    "gameObject": "ComboMount",
+    "gameObjectName": "ComboMount",
     "name": "Combo Mount",
     "description": "Unlocks Mount. Required to unlock Sonar Mount, Tar Mount, Charging Mount, and Lofty Mount",
     "icon": "icon_potion",
@@ -1448,7 +1448,7 @@
     "classification": 1
   },
   {
-    "gameObject": "ComboLight",
+    "gameObjectName": "ComboLight",
     "name": "Combo Light",
     "description": "Unlocks Light / Sonar. Required to unlock Sonar Mount and Light Crush",
     "icon": "icon_potion",
@@ -1456,7 +1456,7 @@
     "classification": 1
   },
   {
-    "gameObject": "ComboOrbs",
+    "gameObjectName": "ComboOrbs",
     "name": "Combo Orbs",
     "description": "Unlocks Ignite / Bubble Burst / Lightning Bolt / Freeze -> Fiery Shots / Jewel Blast / Slime Shot / Snowball Toss -> Shock Freeze / Toxic Freeze. Required for Corrosive Jabs and Toxic Slam",
     "icon": "icon_potion",
@@ -1464,7 +1464,7 @@
     "classification": 1
   },
   {
-    "gameObject": "ComboShorud",
+    "gameObjectName": "ComboShorud",
     "name": "Combo Shroud",
     "description": "Unlocks Ghost Form -> Spore Shroud",
     "icon": "icon_potion",
@@ -1472,11 +1472,75 @@
     "classification": 1
   },
   {
-    "gameObject": "ComboMagic",
+    "gameObjectName": "ComboMagic",
     "name": "Combo Magic",
     "description": "Unlocks Blob Form / Morph Ball -> Secret Vision. Requried to unlock Levitate",
     "icon": "icon_potion",
     "type": "exploreitem",
     "classification": 1
+  },
+
+  {
+    "gameObjectName": "ShockTrap",
+    "name": "Shock Trap",
+    "description": "Shocks your monsters at the start of a combat round.",
+    "icon": "icon_initial_shock",
+    "type": "trap",
+    "classification": 4,
+    "trapTrigger": 1
+  },
+  {
+    "gameObjectName": "FreezeTrap",
+    "name": "Freeze Trap",
+    "description": "Chills your monsters at the start of a combat round.",
+    "icon": "icon_initial_chill",
+    "type": "trap",
+    "classification": 1,
+    "trapTrigger": 1
+  },
+  {
+    "gameObjectName": "BurnTrap",
+    "name": "Burn Trap",
+    "description": "Burns your monsters at the start of a combat round.",
+    "icon": "icon_initial_burn",
+    "type": "trap",
+    "classification": 1,
+    "trapTrigger": 1
+  },
+  {
+    "gameObjectName": "PoisonTrap",
+    "name": "Poison Trap",
+    "description": "Poisons your monsters at the start of a combat round.",
+    "icon": "icon_initial_poison",
+    "type": "trap",
+    "classification": 1,
+    "trapTrigger": 1
+  },
+  {
+    "gameObjectName": "FlashBangTrap",
+    "name": "Flash-Bang Trap",
+    "description": "Applies 5 stacks of Blind to your monsters at the start of a combat round.",
+    "icon": "icon_darken",
+    "type": "trap",
+    "classification": 1,
+    "trapTrigger": 1
+  },
+  {
+    "gameObjectName": "AmbushTrap",
+    "name": "Ambush Trap",
+    "description": "Applies Sidekick and a shield to all enemy monsters at the start of combat.",
+    "icon": "icon_exploit_party",
+    "type": "trap",
+    "classification": 1,
+    "trapTrigger": 0
+  },
+  {
+    "gameObjectName": "DeathTrap",
+    "name": "Death Trap",
+    "description": "Applies ",
+    "icon": "icon_initial_armor_break",
+    "type": "trap",
+    "classification": 1,
+    "trapTrigger": 1
   }
 ]

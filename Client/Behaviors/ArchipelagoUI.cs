@@ -17,13 +17,13 @@ namespace Archipelago.MonsterSanctuary.Client
 
     public class ArchipelagoUI : MonoBehaviour
     {
-        public int MaxItemHistory = 10;
+        public int MaxItemHistory = 20;
         public int FontSize = 20;
         public int X = 16;
-        public int Y = 50;
+        public int Y = 165;
         public int Width = 300;
         public int OutlineOffset = 1;
-        public bool DrawBox = false;
+        public bool DrawBox = true;
         public bool FadeOutEntries = true;
         public float FadeOutAfterSeconds = 8f;
         public float FadeOutTime = 2f;
@@ -122,6 +122,10 @@ namespace Archipelago.MonsterSanctuary.Client
             {
                 return $"<color=#{Colors.Self}ff>You</color> sent <color=#{itemColor}ff>{itemName}</color> to <color=#{Colors.OtherPlayer}ff>{playerName}</color>";
             }
+            else if (action == ItemTransferType.TrapUsed)
+            {
+                return $"Triggered <color=#{Colors.TrapItem}ff>{itemName}</color>";
+            }
 
             return "";
         }
@@ -155,28 +159,29 @@ namespace Archipelago.MonsterSanctuary.Client
 
         private void DisplayItemHistory(int y)
         {
-            //y = Screen.height - FontSize - (FontSize * MaxItemHistory);
+            y = Screen.height - Y - FontSize;
             _style.fontSize = FontSize;
-            int height = FontSize * MaxItemHistory;
 
-            if (DrawBox)
+            if (DrawBox && _itemHistory.Count() > 0)
             {
                 // The box will fade in and out with the most recent entry
+                var boxY = Screen.height - Y - (_itemHistory.Count() * FontSize);
+                var height = FontSize * _itemHistory.Count();
                 var alpha = _itemHistory.Max(i => i.Alpha);
                 GUI.color = new Color(GUI.color.r, GUI.color.g, GUI.color.b, alpha);
-                GUI.Box(new Rect(X - 3, y + Y - 3, Width + 6, height + 6), "");
+                GUI.Box(new Rect(X - 3, boxY - 3, Width + 6, height + 6), "");
             }
 
-            foreach (var entry in _itemHistory) 
+            foreach (var entry in _itemHistory)
             {
                 // Set the alpha of this entry
                 GUI.color = new Color(GUI.color.r, GUI.color.g, GUI.color.b, entry.Alpha);
                 _style.normal.textColor = new Color(GUI.color.r, GUI.color.g, GUI.color.b, entry.Alpha);
 
                 // Print this entry
-                DrawTextWithOutline(new Rect(X, y + Y, Width, height), entry.Text, _style, Color.black);
+                DrawTextWithOutline(new Rect(X, y, Width, FontSize), entry.Text, _style, Color.black);
 
-                y += FontSize;
+                y -= FontSize;
             }
         }
 

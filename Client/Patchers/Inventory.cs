@@ -27,7 +27,7 @@ namespace Archipelago.MonsterSanctuary.Client
         {
             private static T CreateNewApItem<T>(NewItem item, int id) where T : ArchipelagoItem
             {
-                var go = new GameObject($"AP {item.GameObjectName}");
+                var go = new GameObject($"AP_{item.GameObjectName}");
                 go.SetActive(false);
 
                 var itemComp = go.AddComponent<T>();
@@ -53,9 +53,18 @@ namespace Archipelago.MonsterSanctuary.Client
 
                     ArchipelagoItem component = null;
                     if (item.Type == "exploreitem")
+                    {
                         component = CreateNewApItem<ExploreAbilityItem>(item, id);
+                    }
+                    else if (item.Type == "trap")
+                    {
+                        component = CreateNewApItem<TrapItem>(item, id);
+                        ((TrapItem)component).Trigger = item.TrapTrigger;
+                    }
                     else
+                    {
                         component = CreateNewApItem<ArchipelagoItem>(item, id);
+                    }
 
                     __instance.Referenceables.Add(component);
                     idOffset += 1;

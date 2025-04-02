@@ -12,6 +12,7 @@ using Archipelago.MultiClient.Net.BounceFeatures.DeathLink;
 using Archipelago.MonsterSanctuary.Client.Persistence;
 using Archipelago.MonsterSanctuary.Client.Options;
 using System.Security.Cryptography;
+using Archipelago.MonsterSanctuary.Client.Behaviors;
 
 namespace Archipelago.MonsterSanctuary.Client.AP
 {
@@ -196,6 +197,20 @@ namespace Archipelago.MonsterSanctuary.Client.AP
         {
             if (!IsConnected)
                 return;
+
+            if (!SlotData.DeathLink)
+                return;
+
+            var notification = new ItemTransferNotification()
+            {
+                ItemName = "Death Link",
+                PlayerName = deathLinkMessage.Source,
+                Action = ItemTransferType.Received
+            };
+            Patcher.UI.AddItemToHistory(notification);
+
+            var newItem = Patcher.GetItemByName<TrapItem>("Death Trap");
+            Patcher.AddItemToPlayerInventory(ref newItem);
         }
 
         /// <summary>

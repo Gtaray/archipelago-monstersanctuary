@@ -28,7 +28,8 @@ namespace Archipelago.MonsterSanctuary.Client
                 var selector = (SurrogateSelector)__result.SurrogateSelector;
                 // selector.AddSurrogate(typeof(ApDataFile), new StreamingContext(StreamingContextStates.All), apSurrogate);
                 selector.AddSurrogate(typeof(ArchipelagoItem), new StreamingContext(StreamingContextStates.All), surrogate);
-                selector.AddSurrogate(typeof(ExploreAbilityItem), new StreamingContext (StreamingContextStates.All), surrogate);
+                selector.AddSurrogate(typeof(ExploreAbilityItem), new StreamingContext(StreamingContextStates.All), surrogate);
+                selector.AddSurrogate(typeof(TrapItem), new StreamingContext(StreamingContextStates.All), surrogate);
 
                 __result.SurrogateSelector = selector;
             }
