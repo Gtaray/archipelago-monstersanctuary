@@ -4,6 +4,7 @@ using Archipelago.MonsterSanctuary.Client.Persistence;
 using HarmonyLib;
 using JetBrains.Annotations;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 namespace Archipelago.MonsterSanctuary.Client
@@ -102,7 +103,7 @@ namespace Archipelago.MonsterSanctuary.Client
 
                 var items = new List<InventoryItem>();
 
-                if (SlotData.AlwaysGeCatalyst)
+                if (SlotData.AlwaysGetCatalyst)
                 {
                     foreach (Monster enemy in __instance.Enemies)
                     {
@@ -146,10 +147,7 @@ namespace Archipelago.MonsterSanctuary.Client
             [UsedImplicitly]
             private static bool Prefix(List<InventoryItem> items, BaseItem item, int quantity, int variation)
             {
-                if (item is Catalyst)
-                    return !items.Any(i => i.Item == item);
-
-                else if (item is Egg)
+                if (item is Catalyst || item is Egg)
                     return !items.Any(i => i.Item == item);
 
                 return true;
