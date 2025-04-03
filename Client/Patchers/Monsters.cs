@@ -51,6 +51,24 @@ namespace Archipelago.MonsterSanctuary.Client
                     monster.RewardsRare.Add(catalyst.gameObject);
                 }
             }
+
+            System.Random r = new System.Random();
+            var monsters = GameController.Instance.WorldData.Referenceables
+                .Where(go => go != null && go.gameObject != null && go.gameObject.HasComponent<Monster>())
+                .Select(go => go.GetComponent<Monster>());
+            var food = GameController.Instance.WorldData.Referenceables
+                .Where(go => go != null && go.gameObject != null && go.gameObject.HasComponent<Food>())
+                .Select(go => go.gameObject)
+                .ToArray();
+            var potion = GetItemByName("Small Potion");
+            foreach (var monster in monsters)
+            {
+                if (monster.RewardsCommon.Count() == 0)
+                {
+                    monster.RewardsCommon.Add(potion.gameObject);
+                    monster.RewardsCommon.Add(food[r.Next(food.Count())]);
+                }
+            }
         }
 
         #region Monsters and abilities to Data Storage

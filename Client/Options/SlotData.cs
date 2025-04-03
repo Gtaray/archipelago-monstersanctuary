@@ -102,7 +102,7 @@ namespace Archipelago.MonsterSanctuary.Client.Options
         public static OpenWorldSetting OpenAbandonedTower { get; set; } = OpenWorldSetting.Closed;
 
         public static bool AlwaysGetEgg { get; set; } = false;
-        public static bool AlwaysGeCatalyst { get; set; } = false;
+        public static bool AlwaysGetCatalyst { get; set; } = false;
         public static string TanukiMonster { get; set; }
         public static string BexMonster { get; set; }
 
@@ -178,8 +178,8 @@ namespace Archipelago.MonsterSanctuary.Client.Options
             AlwaysGetEgg = GetBoolData(options, "monsters_always_drop_egg", false);
             Patcher.Logger.LogInfo("Always Drop Egg: " + AlwaysGetEgg);
 
-            AlwaysGeCatalyst = GetBoolData(options, "monsters_always_drop_catalyst", false);
-            Patcher.Logger.LogInfo("Always Drop Egg: " + AlwaysGeCatalyst);
+            AlwaysGetCatalyst = GetBoolData(options, "monsters_always_drop_catalyst", false);
+            Patcher.Logger.LogInfo("Always Drop Catalyst: " + AlwaysGetCatalyst);
 
             MonsterShiftRule = GetEnumData(options, "monster_shift_rule", ShiftFlag.Normal);
             Patcher.Logger.LogInfo("Monster Shift Rule: " + Enum.GetName(typeof(ShiftFlag), MonsterShiftRule));
