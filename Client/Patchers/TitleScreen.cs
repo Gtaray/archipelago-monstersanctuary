@@ -435,7 +435,7 @@ namespace Archipelago.MonsterSanctuary.Client
             var inputfield = Traverse.Create(UIController.Instance.NameMenu.DirectKeyboardSupportHandler)
                 .Field("InputField")
                 .GetValue() as MSInputField;
-            inputfield.characterLimit = 20;
+            inputfield.characterLimit = 21;
 
             string url = string.IsNullOrEmpty(host_name) ? "archipelago.gg:" : host_name;
 
