@@ -431,11 +431,10 @@ namespace Archipelago.MonsterSanctuary.Client
 
         private static void PromptToEnterArchipelagoUrl<T>(T __instance, Action<T> postConnectAction = null, Action<T> failedConnectionAction = null) where T : MonoBehaviour
         {
-            // Set the text limit for the NameMenus that pop up when entering data
-            var inputfield = Traverse.Create(UIController.Instance.NameMenu.DirectKeyboardSupportHandler)
-                .Field("InputField")
-                .GetValue() as MSInputField;
-            inputfield.characterLimit = 21;
+            // Setting to 21 here is sufficient for pasting, but you can't type due to the text mesh width check
+            // in NameMenu line 330. So it's better to set this to something outrageous than to deal with that.
+            UIController.Instance.NameMenu.MaxCharacters = 800;
+            UIController.Instance.NameMenu.MaxNameLength = 800;
 
             string url = string.IsNullOrEmpty(host_name) ? "archipelago.gg:" : host_name;
 
@@ -456,7 +455,7 @@ namespace Archipelago.MonsterSanctuary.Client
                     if (failedConnectionAction != null)
                         failedConnectionAction.Invoke(__instance);
                 },
-                NameMenu.ENameType.MapMarker));
+                (NameMenu.ENameType)7)); 
         }
 
         private static void PromptToEnterArchipelagoSlotName<T>(T __instance, Action<T> postConnectAction = null, Action<T> failedConnectionAction = null) where T : MonoBehaviour
