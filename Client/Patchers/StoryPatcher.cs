@@ -4,8 +4,11 @@ using Archipelago.MonsterSanctuary.Client.Persistence;
 using Archipelago.MultiClient.Net.Models;
 using HarmonyLib;
 using JetBrains.Annotations;
+using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
+using Team17.Online;
 using UnityEngine.Experimental.UIElements;
 using UnityEngine.SceneManagement;
 
@@ -97,7 +100,7 @@ namespace Archipelago.MonsterSanctuary.Client
         {
             private static void Prefix(string name, bool value)
             {
-                Patcher.Logger.LogInfo($"ProgressManager.SetBool({name}): {value}");
+                // Patcher.Logger.LogInfo($"Set progress flag '{name}': {value}");
             }
         }
 
@@ -152,6 +155,19 @@ namespace Archipelago.MonsterSanctuary.Client
                     ProgressManager.Instance.SetBool(name, true);
                     __result = true;
                     return;
+                }
+            }
+        }
+
+        [HarmonyPatch(typeof(PositionByVariable), "UpdatePosition")]
+        private class PositionByVariable_UpdatePosition
+        {
+            private static void Prefix(PositionByVariable __instance)
+            {
+                var shouldSetFlag = World.ShouldSetProgressionFlag(__instance.VariableName);
+                if (shouldSetFlag)
+                {
+                    ProgressManager.Instance.SetInt(__instance.VariableName, 1);
                 }
             }
         }

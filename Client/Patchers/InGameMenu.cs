@@ -1,4 +1,5 @@
 ﻿using Archipelago.MonsterSanctuary.Client.AP;
+using Archipelago.MonsterSanctuary.Client.Persistence;
 using HarmonyLib;
 using System;
 using System.Collections.Generic;
@@ -140,6 +141,7 @@ namespace Archipelago.MonsterSanctuary.Client
         private static void Postfix()
         {
             ApState.InitiateDisconnect();
+            ApData.UnloadCurrentFile();
         }
     }
 }

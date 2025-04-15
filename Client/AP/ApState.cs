@@ -24,7 +24,7 @@ namespace Archipelago.MonsterSanctuary.Client.AP
             Connected
         }
 
-        public static int[] AP_VERSION = new int[] { 0, 5, 1 };
+        public static int[] AP_VERSION = new int[] { 0, 6, 2 };
         public static ConnectionState State = ConnectionState.Disconnected;
         public static bool IsConnected => State == ConnectionState.Connected;
 
@@ -80,6 +80,8 @@ namespace Archipelago.MonsterSanctuary.Client.AP
                     _deathLink.EnableDeathLink();
 
                 World.LoadMapPins();
+
+                Items.ResyncSentItems();
 
                 ScoutAllLocations();
             }
@@ -173,7 +175,6 @@ namespace Archipelago.MonsterSanctuary.Client.AP
             Authenticated = false;
             State = ConnectionState.Disconnected;
             Session = null;
-            ApData.UnloadCurrentFile();
         }
 
         public static void SendDeathLink()

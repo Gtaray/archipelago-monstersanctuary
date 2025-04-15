@@ -18,9 +18,11 @@ namespace Archipelago.MonsterSanctuary.Client
 {
     public partial class Patcher
     {
-        private const string host_name_debug = "localhost:38281";
+        private const string host_name_debug = "localhost";
+        private const string port_number_debug = "38281";
         private const string slot_name_debug = "Saagael";
         private static string host_name;
+        private static string port_number;
         private static string slot_name;
         private static string password;
 
@@ -218,7 +220,17 @@ namespace Archipelago.MonsterSanctuary.Client
 
                     // If we're not connected to AP, we simply pull the connection info from the data file and have the user confirm they want to connect.
                     // Prompt to connect using the info saved in the datafile
-                    host_name = ApData.CurrentFile.ConnectionInfo.HostName;
+                    var address_parts = ApData.CurrentFile.ConnectionInfo.HostName.Split(':');
+
+                    if (address_parts.Length != 2)
+                    {
+                        Patcher.Logger.LogError($"Could not parse the AP address URL '{ApData.CurrentFile.ConnectionInfo.HostName}'");
+                        PromptToEnterArchipelagoUrl<SaveGameMenu>(__instance, LoadGame, OnLoadCancelled);
+                        return false;
+                    }
+
+                    host_name = address_parts[0];
+                    port_number = address_parts[1];
                     slot_name = ApData.CurrentFile.ConnectionInfo.SlotName;
                     password = ApData.CurrentFile.ConnectionInfo.Password;
 
@@ -355,7 +367,7 @@ namespace Archipelago.MonsterSanctuary.Client
 
                 ApData.CreateFileForSaveSlot(___slotToBeLoaded);
                 ApData.LoadFileForSaveSlot(___slotToBeLoaded);
-                ApData.SetConnectionDataCurrentFile(host_name, slot_name, password);
+                ApData.SetConnectionDataCurrentFile($"{host_name}:{port_number}", slot_name, password);
             }
         }
         #endregion
@@ -437,10 +449,10 @@ namespace Archipelago.MonsterSanctuary.Client
                 .GetValue() as MSInputField;
             inputfield.characterLimit = 20;
 
-            string url = string.IsNullOrEmpty(host_name) ? "archipelago.gg:" : host_name;
+            string url = string.IsNullOrEmpty(host_name) ? "archipelago.gg" : host_name;
 
             Timer.StartTimer(__instance.gameObject, 0.25f, () => UIController.Instance.NameMenu.Open(
-                Utils.LOCA("Enter the host name"),
+                Utils.LOCA("Enter the host address"),
 #if DEBUG
                 host_name_debug,
 #else
@@ -449,6 +461,36 @@ namespace Archipelago.MonsterSanctuary.Client
                 (string url) =>
                 {
                     Patcher.host_name = url;
+                    PromptToEnterArchipelagoPort(__instance, postConnectAction, failedConnectionAction);
+                },
+                () =>
+                {
+                    if (failedConnectionAction != null)
+                        failedConnectionAction.Invoke(__instance);
+                },
+                NameMenu.ENameType.MapMarker));
+        }
+
+        private static void PromptToEnterArchipelagoPort<T>(T __instance, Action<T> postConnectAction = null, Action<T> failedConnectionAction = null) where T : MonoBehaviour
+        {
+            // Set the text limit for the NameMenus that pop up when entering data
+            var inputfield = Traverse.Create(UIController.Instance.NameMenu.DirectKeyboardSupportHandler)
+                .Field("InputField")
+                .GetValue() as MSInputField;
+            inputfield.characterLimit = 20;
+
+            string port = string.IsNullOrEmpty(port_number) ? "" : port_number;
+
+            Timer.StartTimer(__instance.gameObject, 0.25f, () => UIController.Instance.NameMenu.Open(
+                Utils.LOCA("Enter the host port number"),
+#if DEBUG
+                port_number_debug,
+#else
+                port_number,
+#endif
+                (string port) =>
+                {
+                    Patcher.port_number = port;
                     PromptToEnterArchipelagoSlotName(__instance, postConnectAction, failedConnectionAction);
                 },
                 () =>
@@ -499,22 +541,25 @@ namespace Archipelago.MonsterSanctuary.Client
             }
             Timer.StartTimer(__instance.gameObject, 0.25f, () => PopupController.Instance.ShowRequest(
                 "Confirm Connection Details",
-                $"Host name: {host_name}\nSlot name: {slot_name}\nPassword: {password}",
+                $"Host name: {host_name}:{port_number}\nSlot name: {slot_name}\nPassword: {password}",
                 () => ConnectToArchipelagoAndContinue(__instance, postConnectAction, failedConnectionAction),
                 () => cancelledAction.Invoke(__instance, postConnectAction, failedConnectionAction)));
         }
 
-        private static void ConnectToArchipelagoAndContinue<T>(T __instance, Action<T> postConnectAction = null, Action<T> failedConnectionAction = null) where T : MonoBehaviour
+        public static void ConnectToArchipelagoAndContinue<T>(T __instance, Action<T> postConnectAction = null, Action<T> failedConnectionAction = null) where T : MonoBehaviour
         {
-            Patcher.Logger.LogInfo("ConnectToArchipelagoAndContinue()");
-            if (ApState.Connect(host_name, slot_name, password))
+            string full_address = $"{host_name}:{port_number}";
+            if (ApState.Connect(full_address, slot_name, password))
             {
+                // If able to connect at all, save the entered connection information
+                ApData.SetConnectionDataCurrentFile($"{host_name}:{port_number}", slot_name, password);
+
                 if (SlotData.Version != Patcher.ClientVersion)
                 {
                     ShowVersionMismatchErrorAndDisconnect(__instance, failedConnectionAction);
                     return;
                 }
-                
+
                 if (postConnectAction != null)
                 {
                     postConnectAction.Invoke(__instance);

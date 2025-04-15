@@ -32,6 +32,12 @@ namespace Archipelago.MonsterSanctuary.Client
                 {
                     monster.RewardsRare.Add(egg.gameObject);
                 }
+
+                var filler = GetItemByName("Level Badge");
+                while (monster.RewardsRare.Count() < 3)
+                {
+                    monster.RewardsRare.Add(filler.gameObject);
+                }
             }
 
             var catalysts = GameController.Instance.WorldData.Referenceables
@@ -66,6 +72,10 @@ namespace Archipelago.MonsterSanctuary.Client
                 if (monster.RewardsCommon.Count() == 0)
                 {
                     monster.RewardsCommon.Add(potion.gameObject);
+                }
+
+                while (monster.RewardsCommon.Count() < 3)
+                {
                     monster.RewardsCommon.Add(food[r.Next(food.Count())]);
                 }
             }

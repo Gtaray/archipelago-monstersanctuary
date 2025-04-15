@@ -4,6 +4,7 @@ using System.Text.RegularExpressions;
 using Archipelago.MonsterSanctuary.Client.AP;
 using Archipelago.MonsterSanctuary.Client.Helpers;
 using Archipelago.MonsterSanctuary.Client.Options;
+using Archipelago.MonsterSanctuary.Client.Persistence;
 using UnityEngine;
 
 namespace Archipelago.MonsterSanctuary.Client
@@ -76,11 +77,50 @@ namespace Archipelago.MonsterSanctuary.Client
             // if we were connect to AP but become disconnected, show the message
             else if (_lastKnownConnectionToAp && !ApState.IsConnected && GameStateManager.Instance.IsExploring())
             {
-                PopupController.Instance.ShowMessage(
-                    "Disconnect",
-                    "Disconnected from Archipelago server. It is recommended to exit to the menu and reconnect.");
                 _lastKnownConnectionToAp = false;
+
+                if (ApData.HasApDataFile())
+                {
+                    ShowDisconnectedMessageWithPromptToReconnect();
+                }
+                else
+                {
+                    ShowDisconnectedMessage();
+                }
             }
+        }
+
+        private void ShowDisconnectedMessageWithPromptToReconnect()
+        {
+            PopupController.Instance.ShowRequest(
+                "Disconnected",
+                "Disconnected from Archipelago server. Attempt to reconnect?",
+                () =>
+                {
+                    ApState.Connect(
+                        ApData.CurrentFile.ConnectionInfo.HostName,
+                        ApData.CurrentFile.ConnectionInfo.SlotName,
+                        ApData.CurrentFile.ConnectionInfo.Password);
+
+                    if (!ApState.IsConnected)
+                    {
+                        Timer.StartTimer(this.gameObject, 0.25f, () => ShowFailedToReconnectMessage());
+                    }
+                });
+        }
+
+        private void ShowFailedToReconnectMessage()
+        {
+            PopupController.Instance.ShowMessage(
+                "Disconnect",
+                "Failed to reconnect to the Archipelago server.");
+        }
+
+        private void ShowDisconnectedMessage()
+        {
+            PopupController.Instance.ShowMessage(
+                "Disconnect",
+                "Disconnected from Archipelago server. It is recommended to exit to the menu and reconnect.");
         }
 
         private string FloatToHex(float f)
