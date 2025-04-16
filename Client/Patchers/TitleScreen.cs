@@ -452,7 +452,7 @@ namespace Archipelago.MonsterSanctuary.Client
             string url = string.IsNullOrEmpty(host_name) ? "archipelago.gg" : host_name;
 
             Timer.StartTimer(__instance.gameObject, 0.25f, () => UIController.Instance.NameMenu.Open(
-                Utils.LOCA("Enter the host address"),
+                Utils.LOCA("Enter the host address (NOT the port)"),
 #if DEBUG
                 host_name_debug,
 #else
@@ -486,7 +486,7 @@ namespace Archipelago.MonsterSanctuary.Client
 #if DEBUG
                 port_number_debug,
 #else
-                port_number,
+                port,
 #endif
                 (string port) =>
                 {

@@ -164,6 +164,9 @@ namespace Archipelago.MonsterSanctuary.Client
         {
             private static void Prefix(PositionByVariable __instance)
             {
+                if (!ApState.IsConnected)
+                    return;
+
                 var shouldSetFlag = World.ShouldSetProgressionFlag(__instance.VariableName);
                 if (shouldSetFlag)
                 {
@@ -177,6 +180,9 @@ namespace Archipelago.MonsterSanctuary.Client
         {
             private static void Prefix(ItemCondition __instance)
             {
+                if (!ApState.IsConnected)
+                    return;
+
                 // if checking how many sanctuary tokens we have, we modify the compare value to be 5
                 // This way the cut-scene will only trigger if all 5 sanctuary tokens are already gathered
                 if (__instance.ID == 29300015)
@@ -259,7 +265,6 @@ namespace Archipelago.MonsterSanctuary.Client
             {
                 if (!ApState.IsConnected)
                     return true;
-
                 
                 // Lowers sun palace water by the first stage
                 if (__instance.BoolSwitchName == "SunPalaceWaterSwitch1")
