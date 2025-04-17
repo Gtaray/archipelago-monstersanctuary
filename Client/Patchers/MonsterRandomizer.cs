@@ -178,56 +178,51 @@ namespace Archipelago.MonsterSanctuary.Client
                     num2++;
                 }
 
-                list[0].Shift = EShift.Dark;
-                list[1].Shift = EShift.Dark;
-                list[2].Shift = EShift.Dark;
-
                 if (list.Count() == 0)
                 {
                     Patcher.Logger.LogWarning($"Ended up with an encounter that has zero monsters. Scene: {GameController.Instance.CurrentSceneName}, ID: {encounter.ID}");
                     return true;
                 }
 
-                // Eventually want this to include rando settings so things can be shifted any time
-                //if (SlotData.MonsterShiftRule != ShiftFlag.Never && (ProgressManager.Instance.GetBool("SanctuaryShifted") || SlotData.MonsterShiftRule == ShiftFlag.Any))
-                //{
-                //    if (!isChampion && encounter.IsNormalEncounter)
-                //    {
-                //        if (ProgressManager.Instance.GetRecentEncounter(GameController.Instance.CurrentSceneName, encounter.ID, out EncounterShiftData encounterShiftData))
-                //        {
-                //            if (list.Count > 0)
-                //            {
-                //                list[0].SetShift((EShift)encounterShiftData.Monster1Shift);
-                //            }
-                //            if (list.Count > 1)
-                //            {
-                //                list[1].SetShift((EShift)encounterShiftData.Monster2Shift);
-                //            }
-                //            if (list.Count > 2)
-                //            {
-                //                list[2].SetShift((EShift)encounterShiftData.Monster3Shift);
-                //            }
-                //        }
-                //        else
-                //        {
-                //            if (UnityEngine.Random.Range(0f, 1f) < 0.25f)
-                //            {
-                //                int index = UnityEngine.Random.Range(0, list.Count);
-                //                bool @bool = ProgressManager.Instance.GetBool("LastMonsterShifted");
-                //                EShift shift = EShift.Light + Convert.ToInt32(@bool);
-                //                list[index].SetShift(shift);
-                //                ProgressManager.Instance.SetBool("LastMonsterShifted", !@bool, true);
-                //            }
+                if (SlotData.MonsterShiftRule != ShiftFlag.Never && (ProgressManager.Instance.GetBool("SanctuaryShifted") || SlotData.MonsterShiftRule == ShiftFlag.Any))
+                {
+                    if (!isChampion && encounter.IsNormalEncounter)
+                    {
+                        if (ProgressManager.Instance.GetRecentEncounter(GameController.Instance.CurrentSceneName, encounter.ID, out EncounterShiftData encounterShiftData))
+                        {
+                            if (list.Count > 0)
+                            {
+                                list[0].SetShift((EShift)encounterShiftData.Monster1Shift);
+                            }
+                            if (list.Count > 1)
+                            {
+                                list[1].SetShift((EShift)encounterShiftData.Monster2Shift);
+                            }
+                            if (list.Count > 2)
+                            {
+                                list[2].SetShift((EShift)encounterShiftData.Monster3Shift);
+                            }
+                        }
+                        else
+                        {
+                            if (UnityEngine.Random.Range(0f, 1f) < 0.25f)
+                            {
+                                int index = UnityEngine.Random.Range(0, list.Count);
+                                bool @bool = ProgressManager.Instance.GetBool("LastMonsterShifted");
+                                EShift shift = EShift.Light + Convert.ToInt32(@bool);
+                                list[index].SetShift(shift);
+                                ProgressManager.Instance.SetBool("LastMonsterShifted", !@bool, true);
+                            }
 
-                //            ProgressManager.Instance.AddRecentEncounter(
-                //                GameController.Instance.CurrentSceneName,
-                //                encounter.ID,
-                //                (list.Count > 0) ? list[0].Shift : EShift.Normal,
-                //                (list.Count > 1) ? list[1].Shift : EShift.Normal,
-                //                (list.Count > 2) ? list[2].Shift : EShift.Normal);
-                //        }
-                //    }
-                //}
+                            ProgressManager.Instance.AddRecentEncounter(
+                                GameController.Instance.CurrentSceneName,
+                                encounter.ID,
+                                (list.Count > 0) ? list[0].Shift : EShift.Normal,
+                                (list.Count > 1) ? list[1].Shift : EShift.Normal,
+                                (list.Count > 2) ? list[2].Shift : EShift.Normal);
+                        }
+                    }
+                }
                 __result = list;
                 return false;
             }
