@@ -1,7 +1,7 @@
 ﻿using Archipelago.MonsterSanctuary.Client.AP;
 using HarmonyLib;
 
-namespace Archipelago.MonsterSanctuary.Client.Patchers
+namespace Archipelago.MonsterSanctuary.Client
 {
     public partial class Patcher
     {

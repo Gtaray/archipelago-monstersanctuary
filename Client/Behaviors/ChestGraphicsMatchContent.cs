@@ -58,7 +58,7 @@ namespace Archipelago.MonsterSanctuary.Client.Behaviors
 
         private bool EnableChestGraphicsMatchContent()
         {
-            return PlayerController.Instance.Inventory.Uniques.Any(i => i.GetName() == "Looter's Handbook");
+            return PlayerController.Instance.Inventory.Uniques.Any(i => i.Item.BaseName == "Looter's Handbook");
         }
     }
 }

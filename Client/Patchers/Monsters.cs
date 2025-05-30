@@ -20,6 +20,8 @@ namespace Archipelago.MonsterSanctuary.Client
                 .Where(go => go != null && go.gameObject != null && go.gameObject.HasComponent<Egg>())
                 .Select(go => go.GetComponent<Egg>());
 
+            var filler = GetItemByName("Level Badge");
+
             foreach (var egg in eggs)
             {
                 var monster = egg.Monster.GetComponent<Monster>();
@@ -33,7 +35,6 @@ namespace Archipelago.MonsterSanctuary.Client
                     monster.RewardsRare.Add(egg.gameObject);
                 }
 
-                var filler = GetItemByName("Level Badge");
                 while (monster.RewardsRare.Count() < 3)
                 {
                     monster.RewardsRare.Add(filler.gameObject);

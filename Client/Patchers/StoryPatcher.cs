@@ -114,7 +114,7 @@ namespace Archipelago.MonsterSanctuary.Client
 
                 if (name == "KeyOfPowerGained")
                 {
-                    __result = PlayerController.Instance.Inventory.Uniques.Any(i => i.GetName() == "Key of Power")
+                    __result = PlayerController.Instance.Inventory.Uniques.Any(i => i.Item.BaseName == "Key of Power")
                         || SlotData.OpenAbandonedTower == OpenWorldSetting.Entrances
                         || SlotData.OpenAbandonedTower == OpenWorldSetting.Full;
                     ProgressManager.Instance.SetBool(name, __result);

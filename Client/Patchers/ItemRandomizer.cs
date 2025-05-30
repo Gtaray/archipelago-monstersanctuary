@@ -549,10 +549,17 @@ namespace Archipelago.MonsterSanctuary.Client
 
         static BaseItem GetItemByName<T>(string name) where T : BaseItem
         {
-            return GameController.Instance.WorldData.Referenceables
+            // All of AP is built on the english names for items, so we need to make sure we override the language to english when searching for these items.
+            SetForcedEnglishLanguage(true);
+
+            var item = GameController.Instance.WorldData.Referenceables
                 .Where(x => x?.gameObject.GetComponent<T>() != null)
                 .Select(x => x.gameObject.GetComponent<T>())
                 .SingleOrDefault(i => string.Equals(i.GetName(), name, StringComparison.OrdinalIgnoreCase));
+            
+            SetForcedEnglishLanguage(false);
+
+            return item;
         }
     }
 }
